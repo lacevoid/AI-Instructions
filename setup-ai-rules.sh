@@ -28,6 +28,15 @@
 #   - Cline                    → .clinerules/<framework>-directives.md
 #   - Aider                    → .aider.conf.yml
 #   - Continue.dev             → .continuerules
+#
+# Workflow custom (menambahkan instruksi custom):
+#   1. Jalankan script ini → dibuat master instruction yang bisa di-custom:
+#        ai-instructions/master/ai-instructions.md   ← instruksi utama (EDIT DI SINI)
+#        ai-instructions/master/ai-instructions/     ← modul instruksi (opsional, EDIT DI SINI)
+#   2. Edit file master sesuai kebutuhan Anda.
+#   3. Jalankan ulang script ini → versi custom didistribusikan ke semua file.
+#   DILARANG mengedit file hasil distribusi (AGENTS.md, CLAUDE.md, ai-instructions/*.md, dll)
+#   langsung, karena akan ditimpa setiap kali script dijalankan.
 # ============================================================================
 
 set -euo pipefail
@@ -145,14 +154,42 @@ distribute_module_dir() {
     # Buat direktori target jika belum ada
     mkdir -p "$target_dir"
 
-    # Hapus isi target yang lama agar tidak menyisakan modul usang
-    rm -rf "${target_dir:?}"/*
+    # Hapus isi target yang lama (file modul) TANPA menghapus folder master/
+    find "$target_dir" -mindepth 1 -maxdepth 1 ! -name "master" -exec rm -rf {} +
 
     # Copy seluruh isi (termasuk subdirektori 12-project-specific/)
     cp -r "$source_dir"/. "$target_dir"/
 
     echo -e "  ${GREEN}✅${NC} ${label} → ${target_dir}"
     count=$((count + 1))
+}
+
+# ============================================================================
+# Fungsi: Sinkronkan Master Instruction (bisa di-custom)
+# - Jika master belum ada, salin dari template framework.
+# - Jika master sudah ada, JANGAN ditimpa (user berhak mengeditnya).
+# ============================================================================
+sync_master() {
+    local framework_dir="$1"
+    local master_dir="$2"
+
+    mkdir -p "$master_dir"
+
+    # Master konstitusi utama
+    if [ -f "${master_dir}/ai-instructions.md" ]; then
+        echo -e "  ${YELLOW}📝${NC} Master utama sudah ada, tidak ditimpa: ${master_dir}/ai-instructions.md"
+    else
+        cp "${framework_dir}/ai-instructions.md" "${master_dir}/ai-instructions.md"
+        echo -e "  ${BLUE}🆕${NC} Master utama dibuat dari template: ${master_dir}/ai-instructions.md"
+    fi
+
+    # Master folder modul
+    if [ -d "${master_dir}/ai-instructions" ]; then
+        echo -e "  ${YELLOW}📝${NC} Master modul sudah ada, tidak ditimpa: ${master_dir}/ai-instructions/"
+    elif [ -d "${framework_dir}/ai-instructions" ]; then
+        cp -r "${framework_dir}/ai-instructions" "${master_dir}/ai-instructions"
+        echo -e "  ${BLUE}🆕${NC} Master modul dibuat dari template: ${master_dir}/ai-instructions/"
+    fi
 }
 
 # ============================================================================
@@ -251,68 +288,80 @@ if [ ! -f "$SOURCE_FILE" ]; then
 fi
 
 echo -e "${YELLOW}📦 Framework: ${FRAMEWORK_NAME}${NC}"
-echo -e "${YELLOW}📄 Sumber: ${SOURCE_FILE}${NC}"
+echo -e "${YELLOW}📄 Template: ${SOURCE_FILE}${NC}"
 echo -e "${YELLOW}🎯 Target: ${TARGET_DIR}${NC}"
 echo ""
 
 # Counter
 count=0
 
+# Master instruction (dapat di-custom) — dibuat dari template jika belum ada
+MASTER_DIR="${TARGET_DIR}/ai-instructions/master"
+MASTER_FILE="${MASTER_DIR}/ai-instructions.md"
+MASTER_MODULE_DIR="${MASTER_DIR}/ai-instructions"
+
+# ===========================================================================
+# 0. Sinkronisasi Master Instruction
+# ===========================================================================
+echo -e "${BLUE}[0] Sinkronisasi Master Instruction${NC}"
+sync_master "${FRAMEWORK_DIR}" "${MASTER_DIR}"
+echo ""
+
 # ===========================================================================
 # 1. Claude / Anthropic → AGENTS.md
 # ===========================================================================
 echo -e "${BLUE}[1/9] Claude / Anthropic${NC}"
-distribute "$SOURCE_FILE" "${TARGET_DIR}/AGENTS.md" "AGENTS.md"
-distribute "$SOURCE_FILE" "${TARGET_DIR}/CLAUDE.md" "CLAUDE.md"
+distribute "$MASTER_FILE" "${TARGET_DIR}/AGENTS.md" "AGENTS.md"
+distribute "$MASTER_FILE" "${TARGET_DIR}/CLAUDE.md" "CLAUDE.md"
 
 # ===========================================================================
 # 2. Google Gemini → GEMINI.md
 # ===========================================================================
 echo -e "${BLUE}[2/9] Google Gemini${NC}"
-distribute "$SOURCE_FILE" "${TARGET_DIR}/GEMINI.md" "GEMINI.md"
+distribute "$MASTER_FILE" "${TARGET_DIR}/GEMINI.md" "GEMINI.md"
 
 # ===========================================================================
 # 3. GitHub Copilot → .github/copilot-instructions.md
 # ===========================================================================
 echo -e "${BLUE}[3/9] GitHub Copilot${NC}"
-distribute "$SOURCE_FILE" "${TARGET_DIR}/.github/copilot-instructions.md" "Copilot Instructions"
+distribute "$MASTER_FILE" "${TARGET_DIR}/.github/copilot-instructions.md" "Copilot Instructions"
 
 # ===========================================================================
 # 4. Cursor → .cursorrules + .cursor/rules/<framework>-directives.mdc
 # ===========================================================================
 echo -e "${BLUE}[4/9] Cursor${NC}"
-distribute "$SOURCE_FILE" "${TARGET_DIR}/.cursorrules" ".cursorrules"
-distribute_cursor_mdc "$SOURCE_FILE" "${TARGET_DIR}/.cursor/rules/${FRAMEWORK_NAME}-directives.mdc" "$FRAMEWORK_NAME"
+distribute "$MASTER_FILE" "${TARGET_DIR}/.cursorrules" ".cursorrules"
+distribute_cursor_mdc "$MASTER_FILE" "${TARGET_DIR}/.cursor/rules/${FRAMEWORK_NAME}-directives.mdc" "$FRAMEWORK_NAME"
 
 # ===========================================================================
 # 5. Windsurf → .windsurfrules
 # ===========================================================================
 echo -e "${BLUE}[5/9] Windsurf${NC}"
-distribute "$SOURCE_FILE" "${TARGET_DIR}/.windsurfrules" ".windsurfrules"
+distribute "$MASTER_FILE" "${TARGET_DIR}/.windsurfrules" ".windsurfrules"
 
 # ===========================================================================
 # 6. Cline → .clinerules/<framework>-directives.md
 # ===========================================================================
 echo -e "${BLUE}[6/9] Cline${NC}"
-distribute "$SOURCE_FILE" "${TARGET_DIR}/.clinerules/${FRAMEWORK_NAME}-directives.md" "Cline Rules"
+distribute "$MASTER_FILE" "${TARGET_DIR}/.clinerules/${FRAMEWORK_NAME}-directives.md" "Cline Rules"
 
 # ===========================================================================
 # 7. Continue.dev → .continuerules
 # ===========================================================================
 echo -e "${BLUE}[7/9] Continue.dev${NC}"
-distribute "$SOURCE_FILE" "${TARGET_DIR}/.continuerules" ".continuerules"
+distribute "$MASTER_FILE" "${TARGET_DIR}/.continuerules" ".continuerules"
 
 # ===========================================================================
 # 8. Aider → .aider.conf.yml
 # ===========================================================================
 echo -e "${BLUE}[8/9] Aider${NC}"
-create_aider_config "${TARGET_DIR}/.aider.conf.yml" "${FRAMEWORK_DIR}/ai-instructions/"
+create_aider_config "${TARGET_DIR}/.aider.conf.yml" "${MASTER_MODULE_DIR}/"
 
 # ===========================================================================
 # 9. Modul ai-instructions/ (01-11 + 12-project-specific)
 # ===========================================================================
 echo -e "${BLUE}[9/9] Modul Instruksi${NC}"
-distribute_module_dir "${FRAMEWORK_DIR}/ai-instructions" "${TARGET_DIR}/ai-instructions" "Modul Instruksi"
+distribute_module_dir "${MASTER_MODULE_DIR}" "${TARGET_DIR}/ai-instructions" "Modul Instruksi"
 
 # ===========================================================================
 # Selesai
@@ -323,6 +372,8 @@ echo -e "${GREEN}✅ Selesai! ${count} file berhasil didistribusikan.${NC}"
 echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
 echo ""
 echo -e "${YELLOW}📋 File yang di-generate:${NC}"
+echo "   ├── ai-instructions/master/ai-instructions.md  (MASTER — edit di sini!)"
+echo "   ├── ai-instructions/master/ai-instructions/    (Modul master — edit di sini, opsional)"
 echo "   ├── AGENTS.md                                    (Claude/Anthropic)"
 echo "   ├── CLAUDE.md                                    (Claude)"
 echo "   ├── GEMINI.md                                    (Google Gemini)"
@@ -332,8 +383,13 @@ echo "   ├── .cursor/rules/${FRAMEWORK_NAME}-directives.mdc     (Cursor - 
 echo "   ├── .windsurfrules                               (Windsurf)"
 echo "   ├── .clinerules/${FRAMEWORK_NAME}-directives.md        (Cline)"
 echo "   ├── .continuerules                               (Continue.dev)"
-echo "   ├── ai-instructions/                            (Modul 01-11 + project-specific)
-   └── .aider.conf.yml                              (Aider)"
+echo "   ├── ai-instructions/                             (Modul 01-11 + project-specific)"
+echo "   └── .aider.conf.yml                              (Aider)"
+echo ""
+echo -e "${YELLOW}💡 Tambah instruksi custom:${NC}"
+echo "   1. Edit ai-instructions/master/ai-instructions.md (dan/atau ai-instructions/master/ai-instructions/)"
+echo "   2. Jalankan ulang script untuk mendistribusikan ulang custom-nya:"
+echo "      ./setup-ai-rules.sh ${FRAMEWORK_NAME}"
 echo ""
 echo -e "${YELLOW}💡 Tip:${NC} Untuk mengganti framework, jalankan:"
 echo "   ./setup-ai-rules.sh <framework>"
