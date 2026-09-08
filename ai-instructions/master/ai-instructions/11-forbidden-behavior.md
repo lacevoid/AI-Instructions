@@ -6,6 +6,8 @@ The following behaviors are explicitly forbidden. These are absolute rules unles
 
 ## Architecture Violations
 
+- ❌ Writing any code before reading the build specification (root `MASTER_BUILD_SPECIFICATION.md`), or before creating it via detailed operator Q&A when it does not exist.
+- ❌ Guessing project specifications (feature names, columns, relations, conventions) that belong in `MASTER_BUILD_SPECIFICATION.md` instead of discussing with the operator.
 - ❌ Putting business logic in Controllers.
 - ❌ Accessing Eloquent directly from Actions or Controllers (must go through Repository).
 - ❌ Creating Service classes (LingSID has no Service layer) or DTOs — pass arrays/Models.

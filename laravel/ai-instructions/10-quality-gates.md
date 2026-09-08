@@ -18,6 +18,7 @@ All the following conditions MUST be met before any task is considered complete.
 10. [ ] No speculative changes were made.
 11. [ ] No `dd()`, `dump()`, or `ray()` in committed code.
 12. [ ] File organization respects the feature's context.
+13. [ ] `MASTER_BUILD_SPECIFICATION.md` was read before writing code — or, if it was missing, it was created (complete, detailed, precise) via operator Q&A and confirmed before any code.
 
 ---
 
@@ -25,6 +26,8 @@ All the following conditions MUST be met before any task is considered complete.
 
 ```
 Have I finished a coding task?
+├── Did I read the build specification (MASTER_BUILD_SPECIFICATION.md), or create it via operator Q&A?
+│   └── NO → Read/create it. Do not finalize.
 ├── Did I run static analysis?
 │   └── NO → Run it now. Do not finalize.
 ├── Did I test what I changed (if requested)?
@@ -45,7 +48,8 @@ Have I finished a coding task?
 3. Static analysis passes.
 4. No speculative changes were made.
 5. Scope is limited to the requested feature.
-6. Self-audit against the Master Self-Audit Checklist (root `ai-instructions.md`, section 10).
+6. `MASTER_BUILD_SPECIFICATION.md` existed (or was created and confirmed) before coding — no assumptions contradict it.
+7. Self-audit against the Master Self-Audit Checklist (root `ai-instructions.md`, section 10).
 
 ---
 

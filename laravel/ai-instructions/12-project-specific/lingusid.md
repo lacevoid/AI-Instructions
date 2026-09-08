@@ -27,6 +27,7 @@ This module applies ONLY when the repository is the **LingSID** project (Sistem 
 8. **System constants via `App\Enums\System\GroupEnum`** (string-backed, SCREAMING_SNAKE_CASE cases). Do not hardcode group slugs/classes outside the enum; do not mutate or delete system groups (throw `SystemGroupImmutableException` / guard circular membership via `CircularMembershipException`).
 9. **Feature stops at the Action layer** unless the user explicitly asks for Controllers, routes, or frontend pages.
 10. **Copy canonical snippets verbatim** from `12-project-specific/canonical-snippets.md` (Action/controller/repository/model/test/frontend forms with source anchors). Never paraphrase signatures; never reproduce the `// BAD` anti-patterns (no `execute()`, no dual-arg `handle()`, no scalar payload to RuledActions).
+11. **Build specification first.** If `MASTER_BUILD_SPECIFICATION.md` exists at the LingSID repo root, read it before any code (it overrides module conventions where they conflict). If it does not exist, create it via detailed operator Q&A before coding, per root `ai-instructions.md` section 12.
 
 ---
 

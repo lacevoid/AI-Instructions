@@ -17,6 +17,12 @@ When conflicts arise between instructions, resolve by this priority (highest fir
 7. **Generic best practices** — only when project is silent
 8. **AI default behavior** — last resort
 
+**Build specification:** `MASTER_BUILD_SPECIFICATION.md` at the project root is the authoritative
+project definition (LEVEL 2 — project-specific mandatory). It overrides all framework, global,
+and best-practice rules below it, and can itself only be overridden by an explicit user
+instruction (LEVEL 1). If the file does not exist, create it via detailed operator Q&A before
+any code (see root `ai-instructions.md`, section 12).
+
 ---
 
 ## Rule Scope Determination
@@ -29,6 +35,7 @@ Apply to every project and every task. Examples:
 - Preserve existing behavior
 - Minimize unrelated changes
 - Never guess when evidence is available
+- Never write code before reading the build specification (`MASTER_BUILD_SPECIFICATION.md`); create it via operator Q&A if missing
 
 ### UNIVERSAL Rules
 Apply to all projects using this instruction system. Examples:

@@ -37,6 +37,15 @@ The system separates **universal rules** (apply to every project) from **project
 2. Read `01-governance.md` and `02-agent-workflow.md`.
 3. Apply the relevant topical modules (`03`–`11`) for the task.
 4. Load matching modules from `12-project-specific/` when they apply.
+5. **Read `MASTER_BUILD_SPECIFICATION.md` at the project root** (or create it via detailed operator Q&A if missing) — never write code without it.
+
+## Authoring Instruction Sets
+
+When creating or updating instruction sets in this repository, treat the **`laravel/` set as the
+reference template**: mirror its constitution layout, module split (`01`–`11`,
+`12-project-specific/`), precision, and source-anchored verbatim snippets
+(`canonical-snippets.md`). Always re-run `./setup-ai-rules.sh <framework>` (after removing the
+stale `ai-instructions/master`) so template, master, and distributed copies stay identical.
 
 ## Adding a New Project
 

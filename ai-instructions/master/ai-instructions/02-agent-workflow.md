@@ -7,6 +7,8 @@ Every code change MUST follow this workflow. Do not skip steps. Do not reorder s
 ## Workflow Steps
 
 ```
+READ BUILD SPECIFICATION
+    ↓
 UNDERSTAND
     ↓
 INSPECT
@@ -30,10 +32,27 @@ FINALIZE
 
 ---
 
+## Step 0: READ BUILD SPECIFICATION
+
+Before anything else (even UNDERSTAND), the project's build specification MUST be available:
+
+1. Read `MASTER_BUILD_SPECIFICATION.md` at the project root (see root `ai-instructions.md`, section 12).
+   Treat it as the authoritative, precise project definition: names, features, database design, conventions, dependencies, business flows.
+2. **If the file does not exist: STOP.** Do not guess. Ask the operator/programmer detailed questions
+   (features, entities, DB design, conventions), then create `MASTER_BUILD_SPECIFICATION.md` completely,
+   in detail, and precisely. Confirm it with the operator before considering it valid.
+3. Only proceed to UNDERSTAND once the specification is read (or created and confirmed).
+
+**Violation equals total failure** — never write code without the build specification.
+
+---
+
 ## Step 1: UNDERSTAND
 
 Before writing any code:
 
+0. `MASTER_BUILD_SPECIFICATION.md` at the project root has been read (or created via detailed
+   operator Q&A) — Step 0. Never skip it.
 1. Read the user's request completely. Do not assume intent.
 2. Identify the domain context (if applicable: SID, Web, System, or project-specific context).
 3. Identify which layers are involved (Controller, Action, Repository, Model, Frontend).
@@ -42,6 +61,11 @@ Before writing any code:
 **Decision tree:**
 
 ```
+Is MASTER_BUILD_SPECIFICATION.md present at the project root?
+├── NO → STOP. Ask the operator detailed questions, create the file
+│        (complete, detailed, precise), get confirmation, then continue.
+└── YES (or created) → Proceed.
+
 Is this a new feature or modification?
 ├── New feature
 │   ├── Does the project have an existing analogue for this feature type?
