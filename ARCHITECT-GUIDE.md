@@ -198,6 +198,45 @@ Kumpulkan bukti dan putuskan untuk setiap topik berikut:
 
 ## 6. FORMAT OUTPUT SET INSTRUKSI (WAJIB MENGIKUTI)
 
+### KLAUSA WAJIB — SET INSTRUKSI HASIL GENERASI (MANDATORY CLAUSES)
+
+Setiap set instruksi yang Anda hasilkan MUST memenuhi dan MUST memuat SEMUA klausa berikut,
+ditulis dengan bahasa imperatif yang jelas (MUST / MUST NOT) agar tidak ambigu bagi AI:
+
+```
+KLAUSA 1 — KHUSUS PROYEK BARU, TANPA HUBUNGAN DENGAN REPOSITORY CONTOH
+- Set instruksi hasil generasi adalah instruksi khusus, spesifik, dan presisi HANYA untuk
+  proyek baru (repository target) yang diminta.
+- Set instruksi hasil generasi TIDAK BOLEH memiliki hubungan apa pun dengan repository
+  contoh/template yang diberikan.
+- DILARANG KERAS (MUST NOT) menyebut, membahas, menyalin, atau merujuk repository contoh
+  — baik nama, path, pola, evidence anchor, contoh kode, maupun struktur konstitusinya —
+  di BAGIAN MANAPUN dari set instruksi yang Anda hasilkan.
+- Semua evidence anchor, contoh, dan analog WAJIB berasal dari repository target.
+  Jika repository target tidak punya bukti untuk suatu aturan, TULISKAN batas
+  ketidakpastiannya; JANGAN mengisi dengan materi dari repository contoh.
+
+KLAUSA 2 — DILARANG KERJA LANGSUNG DI BRANCH MAIN
+- Set instruksi hasil generasi MUST memuat larangan keras: agent masa depan DILARANG
+  bekerja, mengedit, atau commit langsung di branch `main` (atau branch stabil).
+- Sebelum mengerjakan apa pun, agent masa depan WAJIB membuat branch baru sesuai standar
+  penamaan branch proyek (definisikan standar ini di modul git/08-git.md hasil generasi).
+
+KLAUSA 3 — COMMIT MESSAGE RINGKAS (SUMMARY)
+- Set instruksi hasil generasi MUST memuat kewajiban: commit message harus ringkas
+  (summary), jelas, dan mengikuti format standar commit proyek (definisikan format &
+  tipe yang diizinkan di modul 08-git.md hasil generasi).
+
+KLAUSA 4 — INISIASI GIT WAJIB (PROYEK WAJIB GIT SEKARANG)
+- Set instruksi hasil generasi MUST memuat kewajiban: bila proyek baru belum merupakan
+  repository git, agent masa depan WAJIB menginisiasi git (git init) pada langkah pertama
+  sebelum pekerjaan, branching, atau commit dimulai.
+```
+
+Klausa 2–4 wajib dituangkan secara eksplisit di konstitusi (`ai-instructions.md`) dan modul
+`08-git.md` hasil generasi. Klausa 1 adalah aturan perilaku Anda saat menulis; pelanggarannya
+= kegagalan total. Verifikasi kepatuhan klausa ini ada di bagian 9.
+
 Buat folder baru dengan nama **nama teknologi/framework repository target** (mis. `laravel/`), berisi:
 
 ### A. `ai-instructions.md` — Konstitusi (entry point)
@@ -217,9 +256,17 @@ Ikuti struktur konstitusi yang ada di `laravel/ai-instructions.md` sebagai templ
 - Final verification.
 - Referensi cepat.
 
-**Adaptasi**: isi prinsip engineering, priority, gates, dan modul sesuai BUkti nyata dari
+**Adaptasi**: isi prinsip engineering, priority, gates, dan modul sesuai bukti nyata dari
 repository target — bukan menyalin buta dari laravel. Konstitusi harus menjadi sumber
 kebenaran tunggal bagi agent masa depan pada repository tersebut.
+
+> [!CRITICAL]
+> **LARANGAN REFERENSI REPOSITORY CONTOH.** Semua materi — termasuk kata "template",
+> "contoh", "misal dari …", path, evidence anchor, dan contoh kode — pada output Anda
+> WAJIB berasal dari repository target. Anda DILARANG KERAS (MUST NOT) menggunakan atau
+> menyebut repository contoh (dalam hal ini folder `laravel/` atau repository asal lainnya)
+> di bagian manapun dari konstitusi/modul hasil generasi. Hanya kerangka struktur yang boleh
+> ditiru; isi dan seluruh rujukan WAJIB milik repository target.
 
 ### B. Folder `ai-instructions/` berisi modul bernomor
 
@@ -307,6 +354,10 @@ Sebelum menyelesaikan, pastikan jawaban berikut semuanya YA:
 - **Konsistensi**: Akankah instruksi membuat agent menghasilkan kode yang terlihat seperti repository?
 - **Presisi**: Semua rekomendasi samar diganti aturan actionable?
 - **Keamanan**: Pola legacy dibedakan dari pola kanonik?
+- **Kebebasan dari repository contoh**: Tidak ada satu pun nama/path/pola/evidence dari
+  repository contoh yang muncul di bagian manapun dari set instruksi hasil generasi?
+- **Klausa wajib**: Klausa 1–4 (per bagian 6) tertulis eksplisit dan output sudah
+  diverifikasi terhadapnya? (klausa non-main, summary commit, git init)
 
 Jika ada yang TIDAK → lanjutkan analisis sebelum menghasilkan output.
 
@@ -343,6 +394,11 @@ Setelah set instruksi selesai, WAJIB:
 - **JANGAN** menciptakan konvensi yang tak terdokumentasi.
 - **JANGAN** menganggap default framework sebagai konvensi repository.
 - **JANGAN** memperlakukan setiap implementasi sebagai kanonik (bisa jadi legacy/incidental).
+- **DILARANG KERAS menyebut atau merujuk repository contoh** (nama, path, pola, evidence,
+  contoh kode) di bagian manapun dari set instruksi hasil generasi. Set instruksi hasil
+  generasi adalah milik repository target saja.
+- **DILARANG KERAS** menganggap set instruksi hasil generasi berlaku untuk repository lain.
+  Set instruksi yang Anda hasilkan hanya untuk satu proyek baru yang ditunjuk.
 - **PREFER** pola berulang & bukti struktural untuk identifikasi pola.
 - **PREFER** implementasi tetangga sebagai contoh utama.
 - **TARGET**: agent masa depan harus menghabiskan kecerdasannya untuk memecahkan masalah
@@ -367,4 +423,7 @@ Saat user berkata sekitar seperti: *"buat set instruksi untuk repo <X> ini"* ata
 > **PERINGATAN TERAKHIR**: Set instruksi yang generik = gagal. Set instruksi yang
 > menyalin buta dari folder lain tanpa bukti repository target = gagal kecuali pola
 > universal yang memang didukung bukti. Setiap klaim arsitektur WAJIB memiliki anchor
-> bukti nyata. Kepatuhan penuh pada playbook ini adalah SYARAT ABSOLUT.
+> bukti nyata. Set instruksi yang menyebut/membahas repository contoh di bagian manapun
+> = KEGAGALAN TOTAL (Klausa 1). Set instruksi yang tidak memuat Klausa 2–4 (dilarang kerja
+> di main, commit message ringkas, inisiasi git) = KEGAGALAN TOTAL. Kepatuhan penuh pada
+> playbook ini adalah SYARAT ABSOLUT.
