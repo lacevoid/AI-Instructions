@@ -150,6 +150,51 @@ Untuk setiap aturan penting, klasifikasikan:
 Jangan ubah weak inference / uncertainty menjadi instruksi absolut. Bila perlu, tulis:
 > «Evidence insufficient — inspect neighboring implementations before introducing a new pattern.»
 
+### Phase 7 — Koleksi Snippet & Signature Kanonik (WAJIB)
+
+Kumpulkan **potongan kode nyata (snippet)** yang menjadi "DNA" repository. Tujuannya:
+agent masa depan harus mampu meniru **struktur, signature, dan gaya syntax secara
+IDENTIK** — bukan sekadar mengikuti deskripsi aturan. Snippet adalah sumber kebenaran
+tertinggi untuk format kode (mengalahkan deskripsi teks bila konflik).
+
+Untuk SETIAP pola/pattern penting, salin **verbatim** (MUST NOT paraphrase) potongan
+kode representatif beserta path sumbernya (evidence anchor). Wajib kumpulkan:
+
+1. **Abstraksi dasar** — definisi lengkap (signature + body yang menentukan kontrak):
+   - Base/abstract class (contoh: Action, Repository, Model base, Trait).
+   - Interface/Contract (nama, method signature, parameter style, return type).
+   - Abstract method vs concrete method; mana yang wajib di-override.
+2. **Signature & gaya deklarasi**:
+   - Konstruktor: property promotion vs manual; `readonly` vs plain; urutan parameter.
+   - Return type: dideklarasikan penuh vs tidak; nullable `?T` vs `T|null`; union;
+     `void`; array shape; koleksi (Collection vs array).
+   - Visibility & urutan modifier; static vs instance; method chaining style.
+   - Named arguments vs positional; default values.
+3. **Idiom berulang** (1–2 contoh terbaik per idiom):
+   - Cara Action/Repository diakses dari Controller/Action/layer lain (DI vs factory).
+   - Guard clause / early return / null-handling yang khas.
+   - Format validasi: `rules()` array, aturan `Rule::unique`/`exists`, kondisi, pesan.
+   - Query builder chaining: scope, eager load, `select()`, `paginate()`, filter.
+   - Format enum, exception domain, policy, migration, factory, seeder, test.
+4. **Ciri khas syntactic yang mudah salah ditiru**:
+   - Import ordering, blank line, brace/chaining style, panjang baris.
+   - Petik string, heredoc, `sprintf()` vs `Str::`, array bentuk pendek.
+   - Gaya functional (arrow fn, `collect()`, pipeline) vs imperatif.
+   - Penamaan lokal, struktur if/else/ternary/coalesce.
+5. **Frontend / bahasa lain** (bila ada): struktur komponen, `defineProps`/`defineEmits`,
+   `useForm`, typing props/emits/slots, composable signature, style util (`cn`/`cva`),
+   import alias, konvensi CSS.
+
+ATURAN:
+- Snippet WAJIB verbatim — salin apa adanya, jangan "diperbaiki" atau ditebak jika kabur.
+- Setiap snippet WAJIB mencantumkan **evidence anchor** (path, atau `path:line` bila perlu).
+- Jika ada bagian yang disingkat, tandai eksplisit dengan `…` / `// …` dan sebutkan bahwa
+  itu dipotong. Jangan menyingkat lalu membiarkannya tampak lengkap.
+- Jika contoh inkonsisten (2 variasi di repo), sertakan keduanya dan tandai mana kanonik
+  (berdasar kelaziman/prevalensi); dokumentasikan keputusan di `01-governance.md`.
+- **DILARANG KERAS** menyalin snippet dari repository contoh/template mana pun — semua
+  snippet WAJIB milik repository target (Klausa 1).
+
 ---
 
 ## 4. ANALISIS YANG WAJIB DILAKUKAN SEBELUM MENYUSUN INSTRUKSI
@@ -183,6 +228,8 @@ Kumpulkan bukti dan putuskan untuk setiap topik berikut:
 13. **Configuration & environment** — env vars, config files, defaults, secrets, feature flags, env-specific behavior, build-time vs runtime, cara memperkenalkan nilai config baru.
 
 14. **Anti-patterns** — apa yang TIDAK diinginkan repository. Cari pola penghindaran berulang. Hanya klasifikasikan sebagai anti-pattern bila ada bukti.
+
+15. **Snippet kanonik** — kurasi potongan kode verbatim yang menjadi acuan gaya & signature (detail di Phase 7, bagian 3). Untuk setiap topik di atas, putuskan snippet mana yang layak dijadikan "template DNA" bagi agent masa depan, dan di mana ia ditempatkan di set instruksi (inline di modul terkait dan/atau bank snippet terpusat).
 
 ---
 
@@ -292,6 +339,38 @@ lalu **tulis ulang isi setiap modul** berdasarkan bukti repository target:
 **SYARAT**: Setiap modul harus berisi aturan yang **actionable, spesifik, testable,
 repository-grounded, unambiguous**, dengan **evidence anchor** (path file contoh).
 
+### C. Snippet Kanonik (wajib dikumpulkan & ditempatkan)
+
+Set set instruksi Anda MUST memuat snippet kanonik dari repository target. Dua penempatan
+yang saling melengkapi (lakukan keduanya):
+
+1. **Inline di modul terkait** — untuk aturan penting, sertakan blok
+   `Canonical snippet:` berisi kode verbatim + evidence anchor. Contoh:
+   ```
+   Canonical snippet (verbatim — tiru persis): app/Actions/Web/Article/CreateWebArticleAction.php
+   class CreateWebArticleAction extends Action implements RuledActionContract
+   {
+       public function __construct(private WebArticleRepository $articleRepository) {}
+
+       public function rules(array $payload): array { /* … */ }
+   }
+   ```
+   Rujuk snippet ini secara eksplisit dari aturan yang bersangkutan
+   («Tiru persis snippet di 03-architecture.md»).
+2. **Bank snippet terpusat (opsional)** — untuk proyek dengan banyak idiom khas, buat file
+   konsolidasi `12-project-specific/canonical-snippets.md` yang mengelompokkan snippet
+   per kategorinya (signature, idiom, frontend, test, dll.) dan di-referensikan dari modul.
+   Pastikan referensi silang antar-modul menunjuk ke sana.
+
+**Aturan penulisan snippet hasil generasi:**
+- Salin **verbatim** dari repository target; jangan memparafrase atau "memperbaiki".
+- Selalu sertakan evidence anchor (path, dan `path:line` bila perlu).
+- Potongan yang disingkat ditandai `…` / `// …` + keterangan eksplisit.
+- Snippet mengalahkan deskripsi teks bila keduanya konflik (snippet = bukti terkuat).
+- **DILARANG KERAS** menggunakan snippet dari repository contoh/template mana pun (Klausa 1).
+- Bila ada 2 variasi, tampilkan keduanya, tandai kanonik, dan catat keputusan di
+  `01-governance.md`.
+
 ---
 
 ## 7. STRUKTUR DOKUMEN INSTRUKSI AKHIR (ARTIFACT B)
@@ -349,6 +428,9 @@ Sebelum menyelesaikan, pastikan jawaban berikut semuanya YA:
 - **Arsitektur**: Bisakah agent lain menentukan di mana kode baru berada? Arah dependensi? Batasan arsitektur?
 - **Pola**: Berbasis bukti? Tanggung jawab jelas? Anti-pattern teridentifikasi?
 - **Coding style**: Konvensi naming & struktur eksplisit?
+- **Snippet**: Snippet kanonik terverifikasi verbatim, punya evidence anchor, dan cukup
+  bagi agent masa depan untuk meniru signature & style secara IDENTIK? Potongan yang
+  disingkat ditandai eksplisit?
 - **Pengembangan fitur**: Bisakah agent mengimplementasikan fitur baru tanpa menciptakan arsitektur sendiri?
 - **Testing**: Bisakah agent menentukan apa & di mana menguji?
 - **Konsistensi**: Akankah instruksi membuat agent menghasilkan kode yang terlihat seperti repository?
@@ -369,7 +451,7 @@ Setelah set instruksi selesai, WAJIB:
 
 1. **Buat dua artifact**:
    - **ARTIFACT A — Repository Architecture Model**: penjelasan ringkas tapi dalam tentang yang Anda temukan (untuk manusia pengelola sistem). Simpan sebagai bagian README atau ringkasan dalam folder baru.
-   - **ARTIFACT B — Final Coding Agent Instructions**: dokumen standalone (`ai-instructions.md` + modul) yang dapat disalin ke agent lain. JANGAN mencampur analisis ke dalam Artifact B.
+   - **ARTIFACT B — Final Coding Agent Instructions**: dokumen standalone (`ai-instructions.md` + modul, termasuk snippet kanonik) yang dapat disalin ke agent lain. JANGAN mencampur analisis ke dalam Artifact B.
 
 2. **Jalankan distribusi otomatis** dari root:
    ```bash
@@ -401,6 +483,7 @@ Setelah set instruksi selesai, WAJIB:
   Set instruksi yang Anda hasilkan hanya untuk satu proyek baru yang ditunjuk.
 - **PREFER** pola berulang & bukti struktural untuk identifikasi pola.
 - **PREFER** implementasi tetangga sebagai contoh utama.
+- **JANGAN** memparafrase snippet kanonik — salin verbatim dan sertakan evidence anchor.
 - **TARGET**: agent masa depan harus menghabiskan kecerdasannya untuk memecahkan masalah
   bisnis/teknis yang diminta, bukan memutuskan bagaimana repository ini harus distruktur.
 
@@ -412,10 +495,10 @@ Saat user berkata sekitar seperti: *"buat set instruksi untuk repo <X> ini"* ata
 *"generate instruction set untuk folder <path>"*, lakukan:
 
 1. Load playbook ini.
-2. Eksplorasi repository target (bagian 3 — Protocol Eksplorasi).
+2. Eksplorasi repository target (bagian 3 — Protocol Eksplorasi, termasuk Phase 7: koleksi snippet & signature kanonik).
 3. Lakukan analisis (bagian 4).
 4. Buat folder baru `<Framework>/` dengan struktur bagian 6.
-5. Tulis konstitusi + modul dengan evidence anchors nyata.
+5. Tulis konstitusi + modul dengan evidence anchors dan snippet kanonik nyata.
 6. Verifikasi diri (bagian 9).
 7. Jalankan `./setup-ai-rules.sh <Framework>`.
 8. Laporkan ke user dengan ringkasan Artifact A + B.
