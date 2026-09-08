@@ -92,6 +92,36 @@ as Actions**, and MAY be introduced whenever it is genuinely warranted.
 
 ---
 
+## File Structure (Action / Repository / Service)
+
+All application layers follow **context-based organization** — mirror domain context, not
+technical type-first:
+
+```
+app/
+├── Actions/{Context}/…          ← use-case orchestration (default for single-concern logic)
+├── Services/{Context}/…         ← cross-cutting / shared domain logic (opt-in)
+├── Repositories/{Context}/…     ← Eloquent data access (the ONLY layer that queries Eloquent)
+├── Models/{Context}/…           ← Eloquent models (structure only — no business logic)
+├── Http/Controllers/{Context}/… ← thin HTTP handlers (delegate, respond)
+└── Http/Requests/{Context}/…    ← FormRequests (only Auth/ and Settings/ flows)
+```
+
+Real contexts: `Sid` (village data), `Web` (public content), `Dashboard`, `Settings`,
+`Auth`, `System`. Examples: `app/Actions/Web/Article/CreateWebArticleAction.php`,
+`app/Repositories/Sid/SidResidentRepository.php`; a Service would follow the same shape
+(`app/Services/Sid/ResidentReportService.php`).
+
+**Composition rules:**
+- A Service MAY call Repositories, other Services, and Actions — it typically composes
+  several services/actions/repositories for one cohesive workflow.
+- An Action stays single-concern (one use case) and calls Repositories (and other Actions).
+- A Repository is always the bottom application layer for data — Services and Actions both
+  delegate Eloquent to Repositories.
+- Controllers delegate to either an Action or a Service (never to a Repository directly).
+
+---
+
 ## Supporting Layers
 
 | Layer | Location | Purpose |
@@ -110,14 +140,16 @@ as Actions**, and MAY be introduced whenever it is genuinely warranted.
 ```
 Controller → Action → Repository → Model
 Controller → Action → Action (orchestration)
+Controller → Service → Repository / Action / Service
 Action → Repository
+Service → Repository, Service → Action, Service → Service
 ```
 
 **FORBIDDEN:**
 - Model → Repository
 - Repository → Action
 - Action → Controller
-- Controller → Repository (must go through an Action)
+- Controller → Repository (must go through an Action or Service)
 - Controller/Model → Eloquent directly
 - Any circular dependencies
 
