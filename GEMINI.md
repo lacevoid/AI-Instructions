@@ -46,7 +46,7 @@ Jangan hanya membaca README. Jangan menyimpulkan dari nama file. Baca seluruh mo
 | `ai-instructions/09-tools.md` | Linter, formatter, runtime, static analysis | UNIVERSAL + PROJECT |
 | `ai-instructions/10-quality-gates.md` | Quality gates, verifikasi akhir | GLOBAL |
 | `ai-instructions/11-forbidden-behavior.md` | Larangan eksplisit | GLOBAL |
-| `ai-instructions/12-project-specific/nadi.md` | Aturan invarian NADI | PROJECT-SPECIFIC |
+| `ai-instructions/12-project-specific/lingusid.md` | Aturan invarian LingSID | PROJECT-SPECIFIC |
 | `ai-instructions/README.md` | Laporan analisis & deliverable | DOKUMENTASI |
 
 ---
@@ -64,7 +64,7 @@ Prinsip-prinsip berikut berlaku universal:
 7. **Preserve intent, minimalkan perubahan terkait.** Jangan perbaiki bug yang tidak berhubungan.
 8. **Audit & jejak.** Mutasi data yang penting tercatat. Jangan menghapus jejak history.
 9. **Keamanan dasar.** Tidak ada password plaintext, tidak ada rahasia di git, tidak ada `dd()/dump()` pada kode tercommit.
-10. **Disiplin git.** Jangan commit langsung di `main`. Satu fitur satu branch. Commit message terstandar.
+10. **Disiplin git.** Jangan commit langsung di `develop`/`main`. Satu fitur satu branch (dari `develop`). Commit message mengikuti conventional commits.
 11. **Quality gates.** Static analysis lalu test yang relevan sebelum pekerjaan dianggap selesai.
 
 ---
@@ -150,7 +150,7 @@ Saat bekerja di proyek baru, agent WAJIB:
 1. Load konstitusi ini + `01-governance.md` + `02-agent-workflow.md`.
 2. Inspect repository saat ini (`routes`, `app/`, `resources/js/pages/`, `composer.json`, `package.json`, `phpunit.xml`, `phpstan.neon`, `.editorconfig`).
 3. Deteksi teknologi proyek (Laravel/Blade vs Laravel/Inertia/Vue; SQLite/MySQL; bun/npm).
-4. Deteksi konvensi project-specific di repository (pola direktori, pola penamaan, pola action/service).
+4. Deteksi konvensi project-specific di repository (pola direktori, pola penamaan, pola action/repository).
 5. Terapkan global rules.
 6. Terapkan aturan framework/language yang berlaku (Laravel, PHP, Vue, TypeScript).
 7. Terapkan aturan repository-specific (termasuk `12-project-specific/` jika cocok).
