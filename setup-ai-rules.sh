@@ -130,6 +130,32 @@ distribute() {
 }
 
 # ============================================================================
+# Fungsi: Distribute folder modul ai-instructions (01-11, 12-project-specific)
+# ============================================================================
+distribute_module_dir() {
+    local source_dir="$1"
+    local target_dir="$2"
+    local label="$3"
+
+    if [ ! -d "$source_dir" ]; then
+        echo -e "  ${YELLOW}⚠️  ${label} tidak ditemukan, dilewati${NC}"
+        return 0
+    fi
+
+    # Buat direktori target jika belum ada
+    mkdir -p "$target_dir"
+
+    # Hapus isi target yang lama agar tidak menyisakan modul usang
+    rm -rf "${target_dir:?}"/*
+
+    # Copy seluruh isi (termasuk subdirektori 12-project-specific/)
+    cp -r "$source_dir"/. "$target_dir"/
+
+    echo -e "  ${GREEN}✅${NC} ${label} → ${target_dir}"
+    count=$((count + 1))
+}
+
+# ============================================================================
 # Fungsi: Buat file Cursor .mdc dengan frontmatter
 # ============================================================================
 distribute_cursor_mdc() {
@@ -235,52 +261,58 @@ count=0
 # ===========================================================================
 # 1. Claude / Anthropic → AGENTS.md
 # ===========================================================================
-echo -e "${BLUE}[1/8] Claude / Anthropic${NC}"
+echo -e "${BLUE}[1/9] Claude / Anthropic${NC}"
 distribute "$SOURCE_FILE" "${TARGET_DIR}/AGENTS.md" "AGENTS.md"
 distribute "$SOURCE_FILE" "${TARGET_DIR}/CLAUDE.md" "CLAUDE.md"
 
 # ===========================================================================
 # 2. Google Gemini → GEMINI.md
 # ===========================================================================
-echo -e "${BLUE}[2/8] Google Gemini${NC}"
+echo -e "${BLUE}[2/9] Google Gemini${NC}"
 distribute "$SOURCE_FILE" "${TARGET_DIR}/GEMINI.md" "GEMINI.md"
 
 # ===========================================================================
 # 3. GitHub Copilot → .github/copilot-instructions.md
 # ===========================================================================
-echo -e "${BLUE}[3/8] GitHub Copilot${NC}"
+echo -e "${BLUE}[3/9] GitHub Copilot${NC}"
 distribute "$SOURCE_FILE" "${TARGET_DIR}/.github/copilot-instructions.md" "Copilot Instructions"
 
 # ===========================================================================
 # 4. Cursor → .cursorrules + .cursor/rules/<framework>-directives.mdc
 # ===========================================================================
-echo -e "${BLUE}[4/8] Cursor${NC}"
+echo -e "${BLUE}[4/9] Cursor${NC}"
 distribute "$SOURCE_FILE" "${TARGET_DIR}/.cursorrules" ".cursorrules"
 distribute_cursor_mdc "$SOURCE_FILE" "${TARGET_DIR}/.cursor/rules/${FRAMEWORK_NAME}-directives.mdc" "$FRAMEWORK_NAME"
 
 # ===========================================================================
 # 5. Windsurf → .windsurfrules
 # ===========================================================================
-echo -e "${BLUE}[5/8] Windsurf${NC}"
+echo -e "${BLUE}[5/9] Windsurf${NC}"
 distribute "$SOURCE_FILE" "${TARGET_DIR}/.windsurfrules" ".windsurfrules"
 
 # ===========================================================================
 # 6. Cline → .clinerules/<framework>-directives.md
 # ===========================================================================
-echo -e "${BLUE}[6/8] Cline${NC}"
+echo -e "${BLUE}[6/9] Cline${NC}"
 distribute "$SOURCE_FILE" "${TARGET_DIR}/.clinerules/${FRAMEWORK_NAME}-directives.md" "Cline Rules"
 
 # ===========================================================================
 # 7. Continue.dev → .continuerules
 # ===========================================================================
-echo -e "${BLUE}[7/8] Continue.dev${NC}"
+echo -e "${BLUE}[7/9] Continue.dev${NC}"
 distribute "$SOURCE_FILE" "${TARGET_DIR}/.continuerules" ".continuerules"
 
 # ===========================================================================
 # 8. Aider → .aider.conf.yml
 # ===========================================================================
-echo -e "${BLUE}[8/8] Aider${NC}"
+echo -e "${BLUE}[8/9] Aider${NC}"
 create_aider_config "${TARGET_DIR}/.aider.conf.yml" "${FRAMEWORK_DIR}/ai-instructions/"
+
+# ===========================================================================
+# 9. Modul ai-instructions/ (01-11 + 12-project-specific)
+# ===========================================================================
+echo -e "${BLUE}[9/9] Modul Instruksi${NC}"
+distribute_module_dir "${FRAMEWORK_DIR}/ai-instructions" "${TARGET_DIR}/ai-instructions" "Modul Instruksi"
 
 # ===========================================================================
 # Selesai
@@ -300,7 +332,8 @@ echo "   ├── .cursor/rules/${FRAMEWORK_NAME}-directives.mdc     (Cursor - 
 echo "   ├── .windsurfrules                               (Windsurf)"
 echo "   ├── .clinerules/${FRAMEWORK_NAME}-directives.md        (Cline)"
 echo "   ├── .continuerules                               (Continue.dev)"
-echo "   └── .aider.conf.yml                              (Aider)"
+echo "   ├── ai-instructions/                            (Modul 01-11 + project-specific)
+   └── .aider.conf.yml                              (Aider)"
 echo ""
 echo -e "${YELLOW}💡 Tip:${NC} Untuk mengganti framework, jalankan:"
 echo "   ./setup-ai-rules.sh <framework>"
