@@ -17,7 +17,7 @@ This module applies ONLY when the repository is the **LingSID** project (Sistem 
 
 ## Architecture Invariants
 
-1. **No Service layer. No DTOs.** Business logic lives in Actions; data is passed as arrays/Models.
+1. **Actions are the business-logic default; Service layer is allowed — not yet adopted.** LingSID currently has NO Service layer and NO DTOs: business logic lives in Actions and data passes as arrays/Models. This is the **current state**, NOT a prohibition — the Service layer is a legitimate Laravel layer, equally important as Actions, and MAY be introduced when genuinely warranted (cross-cutting/reused logic spanning multiple Actions/aggregates). Services MUST be domain-named (`ArticleService`, `ResidentService`), constructor-injected, thin, and Repository-only for Eloquent (per `03-architecture.md`). Never create generic `Service.php`/`Helper.php`/`Utils.php`.
 2. **Repository-only Eloquent access.** Controllers/Actions must not query Eloquent directly.
 3. **Validation in RuledActions** (`rules(array $payload): array`). FormRequests are used ONLY for `Auth/` and `Settings/` flows.
 4. **Thin Controllers.** Controllers resolve Actions via constructor injection and delegate.

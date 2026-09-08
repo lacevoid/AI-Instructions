@@ -175,5 +175,5 @@ enum GroupEnum: string
 
 Do NOT use:
 - Technical names for domain concepts: `TypeService`, `DataHandler`, `Manager`.
-- Generic names: `Helper.php`, `Utils.php`, `Service.php`.
-- Correct: `CreateWebArticleAction`, `GetSidResidentsAction`, `SidResidentRepository`, `HasGroups.php`.
+- Generic names: `Helper.php`, `Utils.php`, `Service.php` — **generic** names are prohibited; a **domain-named** Service (`ArticleService`, `ResidentService`) is a valid, welcome layer pattern (see `03-architecture.md`).
+- Correct: `CreateWebArticleAction`, `GetSidResidentsAction`, `SidResidentRepository`, `HasGroups.php`, `ArticleService`.

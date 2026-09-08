@@ -10,7 +10,7 @@ The following behaviors are explicitly forbidden. These are absolute rules unles
 - ❌ Guessing project specifications (feature names, columns, relations, conventions) that belong in `MASTER_BUILD_SPECIFICATION.md` instead of discussing with the operator.
 - ❌ Putting business logic in Controllers.
 - ❌ Accessing Eloquent directly from Actions or Controllers (must go through Repository).
-- ❌ Creating Service classes (LingSID has no Service layer) or DTOs — pass arrays/Models.
+- ❌ Creating generic catch-all `Service`/`Helper`/`Utils` classes or empty DTOs without a clear need (a domain-named **Service** layer is legitimate and allowed when warranted — see `03-architecture.md`; it is not forbidden, only gratuitous services are).
 - ❌ Creating unnecessary abstractions (only create contracts when multiple implementations or clear need exists).
 - ❌ Creating files outside the feature's context.
 - ❌ Modifying routes outside the contextual naming convention.

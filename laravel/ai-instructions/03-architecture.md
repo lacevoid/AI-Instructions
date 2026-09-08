@@ -18,6 +18,10 @@ Repository (data access — Eloquent ORM)
 Model (Eloquent relationships, casts, fillable)
 ```
 
+A **Service layer is equally legitimate and equally important as Actions** — it is simply not yet
+implemented in the reference codebase. See the **Service Layer** section below; introducing one
+is allowed whenever it is genuinely warranted.
+
 ### Controller Layer
 
 - **Responsibility:** Handle HTTP requests, delegate to Actions, return responses.
@@ -64,14 +68,27 @@ Model (Eloquent relationships, casts, fillable)
 
 ---
 
-## No Service Layer
+## Service Layer (optional — equally valid as Actions)
 
-**This project has NO Service layer and no DTOs.** Do not create them.
+**The reference codebase has NOT yet introduced a Service layer.** This is its **current
+state**, not a prohibition: a Service layer is a first-class Laravel layer, **as important
+as Actions**, and MAY be introduced whenever it is genuinely warranted.
 
-- Business logic belongs in Actions.
-- Data access belongs in Repositories.
-- Data is passed as plain arrays or Models.
-- This is an invariant of the project (`12-project-specific/lingusid.md`).
+- **When to use:** business logic that spans multiple Actions/aggregates, is shared across
+  contexts, coordinates transactions spanning several repositories, or integrates external
+  systems. Single-concern use-case logic stays in Actions (the current default).
+- **Naming & placement:** name it for its domain (`ArticleService`, `ResidentService`), put
+  it in the matching context directory (`app/Services/{Context}/…`). NEVER create a generic
+  `Service.php` / `Helper.php` / `Utils.php`.
+- **Rules (same as Actions):** constructor injection; thin — no Eloquent directly (delegate
+  to Repositories); no business logic in Controllers; never call Eloquent from the
+  presentation layer.
+- **Dependency direction:** a Service MAY call Repositories, other Services, and Actions.
+  Controllers MAY delegate to Services instead of Actions — Services and Actions are peer
+  layers.
+- **Data passing:** arrays/Models by default; DTOs MAY be introduced when they add clarity
+  for Service payloads.
+- This is a deliberate allowance: introduce Services only with a clear need, never gratuitously.
 
 ---
 
@@ -224,6 +241,9 @@ Follow the bank's `// BAD` vs canonical replacement table rather than inventing 
 
 **DO:**
 - Use the existing base `Action` / `IndexAction` classes for business logic.
+- Use a domain **Service** layer when a use case spans multiple Actions/aggregates or is
+  shared across contexts — it is equally valid as Actions and is simply not yet present in
+  the reference codebase (see Service Layer above).
 - Copy canonical snippets verbatim from `12-project-specific/canonical-snippets.md`, changing only identifiers/values.
 - Use the existing `ModelRepository` base for data access.
 - Use `RuledActionContract` when the action needs to validate input.
@@ -233,8 +253,9 @@ Follow the bank's `// BAD` vs canonical replacement table rather than inventing 
 - Prefer auto-resolution over manual container bindings.
 
 **DON'T:**
-- Create Service classes or DTOs (invariant).
-- Create `Helper` / `Utils` catch-all classes.
+- Create generic catch-all classes (`Service.php`, `Helper.php`, `Utils.php`) — a Service
+  MUST be domain-named and serve a concrete reused concern.
+- Introduce Services or DTOs gratuitously (without a cross-cutting/reused need).
 - Add unnecessary layers of abstraction.
 - Create abstractions for one-off operations.
 - Use manual container bindings unless required.
@@ -245,9 +266,9 @@ Follow the bank's `// BAD` vs canonical replacement table rather than inventing 
 
 Key binding decisions for LingSID:
 
-1. **Action Pattern as Primary Business Logic Layer** — All business logic lives in Actions, not Controllers or Services.
+1. **Action Pattern as Primary Business Logic Layer** — In LingSID, business logic lives in Actions. Action is not the only legitimate layer: the Service layer is equally important and MAY be added where warranted (cross-cutting/reused logic).
 2. **Repository for All Eloquent Access** — Only the Repository layer interacts with Eloquent ORM.
-3. **No Service Layer, No DTOs** — Data passes as arrays/Models; business logic in Actions.
+3. **Services/DTOs allowed when warranted** — LingSID currently passes data as arrays/Models and has not yet introduced Services; a domain Service layer (and DTOs when they add clarity) is legitimate and permitted.
 4. **Validation in Actions** — RuledActions validate via `rules(array $payload)`; FormRequests only for Auth/Settings.
 5. **Context-Based Directory Organization** — Code organized by domain context (`Sid`, `Web`, `Dashboard`, `Settings`, `Auth`, `System`).
 6. **Feature Stops at Action Layer** — Unless explicitly asked, do not create Controllers or Frontend components.
