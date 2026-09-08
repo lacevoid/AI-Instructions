@@ -1,0 +1,12 @@
+# Artefak hasil distribusi setup-ai-rules.sh — hanya untuk proyek konsumen,
+# DILARANG di-commit ke repository authoring ini.
+ai-instructions/
+CLAUDE.md
+GEMINI.md
+.cursorrules
+.windsurfrules
+.continuerules
+.clinerules/
+.cursor/
+.github/
+.aider.conf.yml

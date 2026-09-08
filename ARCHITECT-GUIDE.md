@@ -5,6 +5,12 @@
 > (opencode / AI coding agent) meng-generate **set instruksi baru** untuk sebuah repository
 > yang sudah jadi.
 >
+> Repository AI-Instructions ini adalah **bengkel authoring**, BUKAN proyek konsumen.
+> DILARANG KERAS menjalankan `./setup-ai-rules.sh` di root repository ini — script hanya
+> untuk root proyek konsumen; menjalankannya di sini menimpa AGENTS.md (self-instruction)
+> dan memunculkan artefak distribusi di root dengan isi hasil generate = **KEGAGALAN TOTAL**
+> (selengkapnya di bagian 10 & 11).
+>
 > Baca file ini secara lengkap SEBELUM memulai tugas generate. Jangan pernah melewati
 > langkah eksplorasi. Jangan pernah menulis set instruksi tanpa memahami repository.
 >
@@ -35,6 +41,12 @@ Ukuran sukses akhir: **agent AI lain, diberi (1) repository asli dan (2) instruk
 dapat mengimplementasikan fitur yang belum pernah ada sehingga kodenya tampak ditulis oleh
 tim engineering yang sama yang membuat repository.**
 
+**REFERENCE BAR**: tingkat kompleksitas, kedetilan, dan kelengkapan set hasil generasi
+WAJIB setara atau lebih tinggi dari set acuan `laravel/` (konstitusi lengkap, seluruh modul
+terisi actionable + evidence anchor, invariants project-specific, bank snippet kanonik,
+quality gates + gates proyek, referensi cepat). Set yang lebih tipis / lebih generik dari
+acuan = BELUM selesai. Detail penilaiannya di bagian 6D.
+
 ---
 
 ## 2. MODEL MENTAL REPOSITORY ROOT
@@ -43,8 +55,10 @@ Anda bekerja di dalam folder root system instruksi AI:
 
 ```
 /home/ubuntu/Project/WahFix/AI-Instructions/
+├── AGENTS.md                   ← Self-instruction Anda (pointer ke playbook + larangan)
 ├── ARCHITECT-GUIDE.md          ← File ini (playbook Anda)
-├── setup-ai-rules.sh           ← Script distribusi ke AGENTS.md/CLAUDE.md/dll
+├── setup-ai-rules.sh           ← Script distribusi (HANYA untuk root proyek konsumen — DILARANG dijalankan di repo ini)
+├── .gitignore                  ← Mencegah artefak distribusi ter-commit
 └── <Framework>/                ← Satu folder per repository/framework yang telah dianalisis
     ├── ai-instructions.md      ← Konstitusi (entry point)
     └── ai-instructions/
@@ -65,6 +79,13 @@ Anda bekerja di dalam folder root system instruksi AI:
 
 Setiap repository target dipetakan ke **satu folder baru** (contoh: `laravel/`, `React/`,
 `Spring/`).
+
+Folder **`laravel/`** adalah **exemplar acuan** — standar struktur & kualitas minimum untuk
+set berikutnya. Saat authoring, pelajari seluruh modul `laravel/ai-instructions/*`
+(termasuk `12-project-specific/*` dan `canonical-snippets.md`) sebagai bahan referensi
+tingkat presisi, gaya bahasa, dan pola bukti (detail di bagian 6D). Repo ini BUKAN proyek
+konsumen: tidak ada artefak distribusi (`AGENTS.md` isi hasil-generate, `CLAUDE.md`,
+`GEMINI.md`, `.cursorrules`, `ai-instructions/`, dll.) yang boleh tertinggal di root.
 
 ---
 
@@ -278,11 +299,29 @@ KLAUSA 4 — INISIASI GIT WAJIB (PROYEK WAJIB GIT SEKARANG)
 - Set instruksi hasil generasi MUST memuat kewajiban: bila proyek baru belum merupakan
   repository git, agent masa depan WAJIB menginisiasi git (git init) pada langkah pertama
   sebelum pekerjaan, branching, atau commit dimulai.
+
+KLAUSA 5 — PROTOKOL MASTER_BUILD_SPECIFICATION (WAJIB BACA SEBELUM KODE)
+- Set instruksi hasil generasi MUST memuat protokol CRITICAL: agent masa depan DILARANG
+  menulis kode apa pun sebelum membaca `MASTER_BUILD_SPECIFICATION.md` di root proyek.
+- Bila file tersebut tidak ada, agent masa depan WAJIB BERHENTI menebak konvensi, bertanya
+  secara MENDETIL ke operator/programmer (fitur, entitas, database design, konvensi,
+  dependensi, alur bisnis), lalu membuat file tersebut secara LENGKAP, DETIL, dan PRESISI
+  SEBELUM menulis kode apa pun.
+- MASTER_BUILD_SPECIFICATION.md minimal memuat: nama proyek, domain & tujuan, stack (bahasa,
+  framework, runtime, database, tooling), daftar fitur per modul, database design (entitas,
+  relasi, tabel), model/entitas kunci, alur bisnis utama, dependensi, konvensi
+  project-specific, dan batasan. File ini WAJIB dipelihara sinkron seiring perubahan spesifikasi.
+- Prioritas: protokol ini LEVEL 2 — kalah hanya dari instruksi eksplisit pengguna (LEVEL 1);
+  mengalahkan asumsi, best practice generik, dan tebakan. Pelanggaran protokol ini
+  = KEGAGALAN TOTAL.
 ```
 
 Klausa 2–4 wajib dituangkan secara eksplisit di konstitusi (`ai-instructions.md`) dan modul
-`08-git.md` hasil generasi. Klausa 1 adalah aturan perilaku Anda saat menulis; pelanggarannya
-= kegagalan total. Verifikasi kepatuhan klausa ini ada di bagian 9.
+`08-git.md` hasil generasi. Klausa 5 wajib dituangkan secara eksplisit di konstitusi,
+`01-governance.md` (urutan/LEVEL prioritas), `02-agent-workflow.md` (langkah 0:
+baca spec sebelum kode), `10-quality-gates.md`, `11-forbidden-behavior.md`, dan referensi
+cepat. Klausa 1 adalah aturan perilaku Anda saat menulis; pelanggarannya = kegagalan total.
+Verifikasi kepatuhan klausa ini ada di bagian 9.
 
 Buat folder baru dengan nama **nama teknologi/framework repository target** (mis. `laravel/`), berisi:
 
@@ -298,7 +337,8 @@ Ikuti struktur konstitusi yang ada di `laravel/ai-instructions.md` sebagai templ
 - Semantic strength (MUST/SHOULD/PREFER/MAY).
 - Resolusi konflik.
 - Workflow wajib (ringkasan).
-- Onboarding proyek baru.
+- Onboarding proyek baru (termasuk langkah 0 baca `MASTER_BUILD_SPECIFICATION.md`).
+- Protokol Master Build Specification (KLAUSA 5, bagian 6).
 - Quality gates.
 - Final verification.
 - Referensi cepat.
@@ -357,10 +397,34 @@ yang saling melengkapi (lakukan keduanya):
    ```
    Rujuk snippet ini secara eksplisit dari aturan yang bersangkutan
    («Tiru persis snippet di 03-architecture.md»).
-2. **Bank snippet terpusat (opsional)** — untuk proyek dengan banyak idiom khas, buat file
-   konsolidasi `12-project-specific/canonical-snippets.md` yang mengelompokkan snippet
-   per kategorinya (signature, idiom, frontend, test, dll.) dan di-referensikan dari modul.
-   Pastikan referensi silang antar-modul menunjuk ke sana.
+2. **Bank snippet terpusat (WAJIB untuk semua set)** — buat file konsolidasi
+   `12-project-specific/canonical-snippets.md` yang mengelompokkan snippet per kategorinya
+   (abstraksi dasar, signature, idiom, frontend, test, dll.) dan di-referensikan dari modul.
+   Pastikan referensi silang antar-modul menunjuk ke sana. Bank terpusat ini bagian dari
+   REFERENCE BAR (bagian 6D) — set tanpa bank = belum selesai.
+
+**Cakupan minimum bank snippet terpusat:**
+- Abstraksi dasar & kontrak — base/abstract class + interface/contract, lengkap verbatim
+  dengan signature (nama method, parameter style, return type) dan body penentu kontrak.
+- Dua gaya nyata bila keduanya ada di repository (mis. rules pipe-string `'required|...'`
+  vs array `Rule::`) — sertakan keduanya dan tandai mana kanonik.
+- Dua gaya injeksi dependensi bila keduanya ada (mis. constructor vs method injection).
+- Shell repository/service/controller + cara dipanggil dari layer lain.
+- Model/trait/enum/exception domain (contoh representatif 1–2 per jenis).
+- Unit test + feature/route test (contoh utuh tiap pola test yang khas).
+- Halaman/komponen frontend (bila ada) — struktur, typing, util style.
+- Setiap snippet: verbatim + evidence anchor (`path` atau `path:line`).
+
+**Praktik penandaan defect/legacy (`// BAD`):**
+- Bila eksplorasi menemukan pola yang dipanggil tapi rusak/legacy dan JANGAN ditiru agent
+  masa depan (mis. method yang tidak pernah didefinisikan dipanggil dari test,
+  `handle()` dua argumen, payload scalar diteruskan ke Action ber-rule array,
+  `update()`-returning-bool diberi assignment ke variabel Model), tulis di
+  `11-forbidden-behavior.md` dan tandai di bank snippet dengan blok:
+  ```
+  // BAD — jangan tiru (ditemukan di <path>:line). Canonical: <kode yang benar>.
+  ```
+- Beda eksplisit antara **kanonik** (yang WAJIB ditiru) dan **defect/legacy** (yang DILARANG).
 
 **Aturan penulisan snippet hasil generasi:**
 - Salin **verbatim** dari repository target; jangan memparafrase atau "memperbaiki".
@@ -370,6 +434,29 @@ yang saling melengkapi (lakukan keduanya):
 - **DILARANG KERAS** menggunakan snippet dari repository contoh/template mana pun (Klausa 1).
 - Bila ada 2 variasi, tampilkan keduanya, tandai kanonik, dan catat keputusan di
   `01-governance.md`.
+
+### D. REFERENCE BAR — STANDAR MINIMUM KELENGKAPAN SET
+
+Saat authoring, tambahkan set `laravel/` sebagai **bahan referensi** ke dalam instruksi
+Anda sendiri: belajar/baca seluruh modul `laravel/ai-instructions/*` (01–11), README,
+`12-project-specific/lingusid.md`, dan `12-project-specific/canonical-snippets.md` sebagai
+standar tingkat presisi, gaya bahasa, struktur tabel, dan pola bukti yang harus dicapai.
+
+Set hasil generasi DIVERIFIKASI terhadap checklist kelengkapan berikut (semua WAJIB ada):
+
+- **Konstitusi** `ai-instructions.md` lengkap (header, blok CRITICAL baca-sebelum-menulis,
+  file map, prinsip, priority system, rule scope, semantic strength, resolusi konflik,
+  workflow wajib, onboarding, KLAUSA 5 protocol, quality gates, final verification,
+  referensi cepat).
+- **Seluruh modul 01–11 terisi** isi actionable, spesifik, dan grounded — bukan stensilan.
+- **Modul `12-project-specific/`** dengan invariants proyek bila ada keunikan.
+- **Bank snippet terpusat** `canonical-snippets.md` (diwajibkan di 6C) + snippet inline.
+- **Invarian & gates proyek** diuji dari bukti nyata repository, plus klausa wajib.
+- **Evidence anchors** di setiap aturan penting; tidak ada `path` yang dipalsukan.
+- **Distribusi yang benar** — ke proyek konsumen saja, bukan repo authoring ini (lihat 10 & 11).
+
+Set yang setelah diverifikasi masih "lebih tipis/generik" daripada acuan `laravel/` dianggap
+BELUM SELESAI dan wajib diperkaya sebelum dianggap selesai.
 
 ---
 
@@ -438,8 +525,17 @@ Sebelum menyelesaikan, pastikan jawaban berikut semuanya YA:
 - **Keamanan**: Pola legacy dibedakan dari pola kanonik?
 - **Kebebasan dari repository contoh**: Tidak ada satu pun nama/path/pola/evidence dari
   repository contoh yang muncul di bagian manapun dari set instruksi hasil generasi?
-- **Klausa wajib**: Klausa 1–4 (per bagian 6) tertulis eksplisit dan output sudah
-  diverifikasi terhadapnya? (klausa non-main, summary commit, git init)
+- **Klausa wajib**: Klausa 1–5 (per bagian 6) tertulis eksplisit dan output sudah
+  diverifikasi terhadapnya? (klausa non-main, summary commit, git init, protokol
+  MASTER_BUILD_SPECIFICATION wajib-baca/cipta-before-code).
+- **Protokol spec**: Klausa 5 tertulis eksplisit di konstitusi + modul 01/02/10/11 +
+  referensi cepat? Alur "file spec tidak ada → STOP + tanya operator mendetil → buat file
+  lengkap → baru kode" terdokumentasi jelas?
+- **Reference bar**: Set setara/lebih tinggi dari `laravel/`? Bank snippet terpusat ada
+  dan berisi cakupan minimum (6C)? Set tidak lebih tipis/generik dari acuan?
+- **Repo authoring bersih**: Tidak ada artefak distribusi (AGENTS.md isi hasil-generate,
+  CLAUDE.md, GEMINI.md, .cursorrules, ai-instructions/, dll.) yang ter-commit di repo
+  AI-Instructions ini?
 
 Jika ada yang TIDAK → lanjutkan analisis sebelum menghasilkan output.
 
@@ -453,16 +549,38 @@ Setelah set instruksi selesai, WAJIB:
    - **ARTIFACT A — Repository Architecture Model**: penjelasan ringkas tapi dalam tentang yang Anda temukan (untuk manusia pengelola sistem). Simpan sebagai bagian README atau ringkasan dalam folder baru.
    - **ARTIFACT B — Final Coding Agent Instructions**: dokumen standalone (`ai-instructions.md` + modul, termasuk snippet kanonik) yang dapat disalin ke agent lain. JANGAN mencampur analisis ke dalam Artifact B.
 
-2. **Jalankan distribusi otomatis** dari root:
+2. **Jalankan distribusi otomatis** dari root **PROYEK KONSUMEN** (mis.
+   `/home/ubuntu/Project/WahyuLingu/lingusid`), BUKAN dari root repo AI-Instructions ini:
    ```bash
    ./setup-ai-rules.sh <nama-folder>
    ```
    Contoh: `./setup-ai-rules.sh laravel`.
    Ini mendistribusikan `ai-instructions.md` ke `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
    `.github/copilot-instructions.md`, `.cursorrules`, `.cursor/rules/...`, `.windsurfrules`,
-   `.clinerules/...`, `.continuerules`, `.aider.conf.yml`.
+   `.clinerules/...`, `.continuerules`, `.aider.conf.yml` — semua di **proyek konsumen**.
+
+   > [!CRITICAL]
+   > **DILARANG KERAS menjalankan `./setup-ai-rules.sh` di root repository AI-Instructions
+   > ini.** Script dengan target root repo authoring menimpa instruksi khusus AI repositori ini
+   > (AGENTS.md, dan memunculkan artefak distribusi di root) dengan isi hasil generate
+   > = **KESALAHAN KRITIS, KEGAGALAN TOTAL**. Script ini hanya untuk root **proyek
+   > konsumen** tempat toolboxes AI memang dituju.
 
 3. **Laporkan hasil** ke user: folder yang dibuat, struktur file, dan langkah distribusi.
+
+4. **Perbarui set yang sudah ada** (bukan generate baru):
+   - Template di `<Framework>/ai-instructions*` adalah **sumber kebenaran** untuk editing.
+   - Script TIDAK menimpa `ai-instructions/master/` bila sudah ada — hapus/master dulu
+     agar master disinkronkan ulang:
+     ```bash
+     rm -rf ai-instructions/master
+     ./setup-ai-rules.sh <nama-folder>
+     ```
+   - Verifikasi konsistensi: template ↔ master ↔ hasil distribusi harus **byte-identical**
+     (`diff -q`), lalu lampirkan hasil perbandingan.
+   - Sweep referensi stale sebelum commit (mis. `rg` nama proyek/route lama yang masih
+     muncul, pastikan tidak ada jalur tak dikenal).
+   - Jangan pernah men-commit artefak distribusi ke repo authoring (lihat bagian 11).
 
 ---
 
@@ -484,6 +602,18 @@ Setelah set instruksi selesai, WAJIB:
 - **PREFER** pola berulang & bukti struktural untuk identifikasi pola.
 - **PREFER** implementasi tetangga sebagai contoh utama.
 - **JANGAN** memparafrase snippet kanonik — salin verbatim dan sertakan evidence anchor.
+- **DILARANG KERAS menjalankan `./setup-ai-rules.sh` di root repository AI-Instructions ini**
+  (bengkel authoring). Menjalankannya di sini menimpa self-instruction repo (AGENTS.md) dan
+  memunculkan `CLAUDE.md`, `GEMINI.md`, `.cursorrules`, `.windsurfrules`, `.continuerules`,
+  `.clinerules/`, `.cursor/rules/`, `.github/`, `.aider.conf.yml`, `ai-instructions/` di root
+  dengan isi hasil generate = **KEGAGALAN TOTAL**. Script hanya dijalankan di root proyek
+  konsumen.
+- **DILARANG KERAS men-commit artefak distribusi** (`AGENTS.md` berisi isi hasil-generate,
+  `CLAUDE.md`, `GEMINI.md`, `.cursorrules`, `.windsurfrules`, `.continuerules`,
+  `.clinerules/`, `.cursor/rules/`, `.github/copilot-instructions.md`, `.aider.conf.yml`,
+  `ai-instructions/`) ke repository AI-Instructions ini. Artefak itu milik proyek konsumen.
+  Bila menemukan artefak di root repo authoring → hapus, jangan di-commit.
+- **PREFER** rujuk set `laravel/` sebagai bahan referensi saat authoring set baru (bagian 6D).
 - **TARGET**: agent masa depan harus menghabiskan kecerdasannya untuk memecahkan masalah
   bisnis/teknis yang diminta, bukan memutuskan bagaimana repository ini harus distruktur.
 
@@ -497,16 +627,21 @@ Saat user berkata sekitar seperti: *"buat set instruksi untuk repo <X> ini"* ata
 1. Load playbook ini.
 2. Eksplorasi repository target (bagian 3 — Protocol Eksplorasi, termasuk Phase 7: koleksi snippet & signature kanonik).
 3. Lakukan analisis (bagian 4).
-4. Buat folder baru `<Framework>/` dengan struktur bagian 6.
-5. Tulis konstitusi + modul dengan evidence anchors dan snippet kanonik nyata.
-6. Verifikasi diri (bagian 9).
-7. Jalankan `./setup-ai-rules.sh <Framework>`.
-8. Laporkan ke user dengan ringkasan Artifact A + B.
+4. Pelajari set `laravel/` sebagai bahan referensi kelengkapan & presisi (bagian 6D).
+5. Buat folder baru `<Framework>/` dengan struktur bagian 6.
+6. Tulis konstitusi + modul dengan evidence anchors dan snippet kanonik nyata.
+7. Verifikasi diri (bagian 9).
+8. Jalankan `./setup-ai-rules.sh <Framework>` dari **root proyek konsumen** (bukan repo
+   authoring ini — lihat bagian 10 & 11).
+9. Laporkan ke user dengan ringkasan Artifact A + B.
 
 > **PERINGATAN TERAKHIR**: Set instruksi yang generik = gagal. Set instruksi yang
 > menyalin buta dari folder lain tanpa bukti repository target = gagal kecuali pola
 > universal yang memang didukung bukti. Setiap klaim arsitektur WAJIB memiliki anchor
 > bukti nyata. Set instruksi yang menyebut/membahas repository contoh di bagian manapun
-> = KEGAGALAN TOTAL (Klausa 1). Set instruksi yang tidak memuat Klausa 2–4 (dilarang kerja
-> di main, commit message ringkas, inisiasi git) = KEGAGALAN TOTAL. Kepatuhan penuh pada
+> = KEGAGALAN TOTAL (Klausa 1). Set instruksi yang tidak memuat Klausa 2–5 (dilarang kerja
+> di main, commit message ringkas, inisiasi git, protokol MASTER_BUILD_SPECIFICATION)
+> = KEGAGALAN TOTAL. Set yang tidak memenuhi REFERENCE BAR bagian 6D (termasuk bank snippet
+> terpusat) = BELUM SELESAI. Menjalankan `./setup-ai-rules.sh` di root repo authoring ini
+> atau men-commit artefak distribusinya ke repo ini = KEGAGALAN TOTAL. Kepatuhan penuh pada
 > playbook ini adalah SYARAT ABSOLUT.
