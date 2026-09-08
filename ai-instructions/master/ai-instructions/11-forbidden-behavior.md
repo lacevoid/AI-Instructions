@@ -26,7 +26,7 @@ The following behaviors are explicitly forbidden. These are absolute rules unles
 
 ## Style Violations
 
-- ❌ Using BDD test naming (`it_should_...`).
+- ❌ Using PHPDoc `@test` annotations or omitting the `#[Test]` attribute on test methods (`it_…`/`user_can_…` names are fine **with** the attribute).
 - ❌ Adding comments unless asked.
 - ❌ Using `declare(strict_types=1)` (project convention).
 - ❌ Using tabs for indentation (use 4 spaces).
@@ -49,6 +49,10 @@ The following behaviors are explicitly forbidden. These are absolute rules unles
 - ❌ Running the full test suite unless explicitly asked.
 - ❌ Mocking in Feature tests.
 - ❌ Calling an instance Action `handle()` statically (`XxxAction::handle(...)`) — resolve and call via the container on an instance.
+- ❌ Calling `$action->execute(...)` — no such method exists on the Action abstraction (`handle()` is the only invocation API).
+- ❌ Passing a second argument to `handle()` (`$action->handle($id, $request->all())`) — the extra argument is ignored and the call breaks the array-payload protocol.
+- ❌ Passing a scalar payload to a **RuledAction** (`→handle($id)`) — ruled actions require an array payload or they throw `InvalidArgumentException('Payload must be an array.')`; put `'id'`/a Model inside the array instead (`→handle(['id' => $id])`).
+- ❌ Reproducing any `// BAD` pattern from `12-project-specific/canonical-snippets.md` §11.
 - ❌ Referencing classes/methods that do not exist (broken imports, undefined variables, unknown repository methods). Always verify the target class/method exists in the codebase before using it.
 - ❌ Passing payload keys to Actions that do not match the repository/model columns or the RuledAction validation rules.
 

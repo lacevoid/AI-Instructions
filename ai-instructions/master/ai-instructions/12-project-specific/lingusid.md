@@ -26,6 +26,19 @@ This module applies ONLY when the repository is the **LingSID** project (Sistem 
 7. **Base classes:** extend `App\Abstractions\Actions\Action` (or `IndexAction`) and `App\Abstractions\Repository\ModelRepository`. Use shared model traits `App\Abstractions\Traits\Model\HasGroups` and `App\Abstractions\Traits\Model\HasMetadata` instead of re-implementing poly-morphic behavior.
 8. **System constants via `App\Enums\System\GroupEnum`** (string-backed, SCREAMING_SNAKE_CASE cases). Do not hardcode group slugs/classes outside the enum; do not mutate or delete system groups (throw `SystemGroupImmutableException` / guard circular membership via `CircularMembershipException`).
 9. **Feature stops at the Action layer** unless the user explicitly asks for Controllers, routes, or frontend pages.
+10. **Copy canonical snippets verbatim** from `12-project-specific/canonical-snippets.md` (Action/controller/repository/model/test/frontend forms with source anchors). Never paraphrase signatures; never reproduce the `// BAD` anti-patterns (no `execute()`, no dual-arg `handle()`, no scalar payload to RuledActions).
+
+---
+
+## Canonical Snippets
+
+`12-project-specific/canonical-snippets.md` holds the verbatim, source-anchored snippet bank for this project. Consult it before writing any class:
+
+- Base classes & contracts (`Action`, `IndexAction`, `RuledActionContract`, `InvokeableActionContract`).
+- Ruled actions (create/update/delete) in both rule styles (pipe-string predominant; `Rule::` where chaining/`$payload` is needed).
+- Plain actions (collection, paginated, model-payload delete, cross-action orchestration).
+- Controllers (constructor vs method injection), repository shells + scoped queries.
+- Models, traits, enums, domain exceptions, unit/feature tests, frontend pages.
 
 ---
 

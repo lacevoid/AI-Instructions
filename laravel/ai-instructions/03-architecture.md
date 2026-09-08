@@ -27,8 +27,9 @@ Model (Eloquent relationships, casts, fillable)
   - Controllers MUST NOT validate business data inline — validation lives in RuledActions (FormRequests only for `Auth/` and `Settings/` flows).
   - Controllers MUST NOT access Eloquent directly.
   - Controllers MUST NOT call Repositories directly (only via Actions).
-  - Use constructor injection for the Actions a controller needs.
-  - Example `app/Http/Controllers/Sid/SidResidentController.php`, `app/Http/Controllers/Web/WebArticleController.php`.
+  - Use constructor injection for the Actions a controller needs (canonical for controllers using several actions); method injection is acceptable for one-off actions. Match the style of the controller file being edited.
+  - Controllers pass the whole user input to Actions as a **single array payload**: `$action->handle($request->all())` (or `'key' => $model + $request->all()` for model-aware updates). Never pass a second argument.
+  - Example `app/Http/Controllers/Sid/SidResidentController.php` (constructor injection), `app/Http/Controllers/Web/WebArticleController.php` (method injection).
 
 ### Action Layer
 
@@ -40,6 +41,7 @@ Model (Eloquent relationships, casts, fillable)
   - Actions return Models, collections, or primitives — never responses.
   - Actions inject Repositories via constructor.
   - Actions live under `app/Actions/{Context}/…` and extend `App\Abstractions\Actions\Action` (or `IndexAction` for list actions).
+  - Ruled actions receive validated data as the second `handler($payload, $validatedPayload)` argument; plain actions receive only `$payload`.
   - Canonical examples: `App\Actions\Web\Article\CreateWebArticleAction`, `App\Actions\Sid\Resident\UpdateSidResidentAction`, `App\Actions\Group\EnsureSystemGroupExistsAction`, `App\Actions\Web\Dashboard\Sidebar\GetAllSidebarMenuAction`.
 
 ### Repository Layer
@@ -78,7 +80,7 @@ Model (Eloquent relationships, casts, fillable)
 | Layer | Location | Purpose |
 |-------|----------|---------|
 | Abstractions | `app/Abstractions/` | Base `Action`, `IndexAction`, `ModelRepository`, reusable model traits (`HasGroups`, `HasMetadata`) |
-| Contracts | `app/Contracts/` | `Action/InvokeableActionContract`, `Action/RuledActionContract`, `Repository/RepositoryContract`, `Repository/ModelRepositoryContract`, `Model/Has*Contract` interfaces |
+| Contracts | `app/Contracts/` | `Action/RuledActionContract` (`rules(array $payload): array`), `Action/InvokeableActionContract` (`__invoke(array $payload)` — unused), `Repository/RepositoryContract`, `Repository/ModelRepositoryContract`, `Model/Has*Contract` interfaces |
 | Enums | `app/Enums/System/` | String-backed PHP enums for system constants (`GroupEnum`) |
 | Exceptions | `app/Exceptions/Model/Group/` | Domain exceptions (`CircularMembershipException`, `SystemGroupImmutableException`) |
 | Middleware | `app/Http/Middleware/` | `HandleAppearance`, `HandleInertiaRequests`, `ShareDashboardData`, `ShareWebData` |
@@ -202,10 +204,27 @@ Do not hardcode group behavior in controllers/actions; use `GroupEnum` cases and
 
 ---
 
+## Canonical Snippets & Invocation Protocol
+
+**`12-project-specific/canonical-snippets.md` is the authoritative verbatim snippet bank** (Action base, ruled/plain actions, controllers, repositories, models, traits, enums, exceptions, tests, frontend pages). Snippets are copied unchanged from the LingSID codebase and carry source anchors (`lingusid app/…:line`).
+
+**Invocation protocol (MUST):**
+- `$action->handle($request->all())` — ruled action: single array payload, validated inside the action.
+- `$action->handle(['id' => $id])` — delete/update by id inside the payload array.
+- `$action->handle(['resident' => $resident] + $request->all())` — model-aware rules (e.g. `Rule::unique(...)->ignore($payload['resident']->id)`).
+- `$action->handle()` — non-ruled list/dashboard actions.
+- `$action->handle($model)` — only a **non-ruled** action may receive a Model payload.
+- **Never** pass a second argument to `handle()` (it is ignored) and **never** call `execute()` (no such method exists).
+
+Follow the bank's `// BAD` vs canonical replacement table rather than inventing invocation styles.
+
+---
+
 ## Abstraction Philosophy
 
 **DO:**
 - Use the existing base `Action` / `IndexAction` classes for business logic.
+- Copy canonical snippets verbatim from `12-project-specific/canonical-snippets.md`, changing only identifiers/values.
 - Use the existing `ModelRepository` base for data access.
 - Use `RuledActionContract` when the action needs to validate input.
 - Use existing reusable traits (`HasGroups`, `HasMetadata`) for model behaviors.

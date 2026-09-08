@@ -51,33 +51,36 @@ App\{Layer}\{Context}\{ClassName}
 |--------|---------|----------|
 | `handle()` | Public entry point — triggers the Action | `Action` base class |
 | `handler()` | Protected — contains actual business logic | Action subclasses |
-| `execute()` | Instance-based invocation (alternative to `handle()`) | `InvokeableActionContract` |
 | `rules()` | Returns validation rules array | `RuledActionContract` |
+| `__invoke()` | Declared by `InvokeableActionContract` — **currently unused**; the working invocation API is `handle()` | `InvokeableActionContract` |
 | `query()` | Build Eloquent query builder | `ModelRepository` |
 | `store()` | Create and persist entity | `ModelRepository` |
 | `findOrFail()` | Find or throw exception | `ModelRepository` |
 | `findBySlug()` | Find by slug field | `ModelRepository` |
 
 **Never directly call `handler()`** — it is protected and intended for internal use.
+**`execute()` does not exist** anywhere in the action abstraction — do not call it (covered in `11-forbidden-behavior.md`).
 
 ---
 
 ## Calling Actions
 
-Actions are container-resolved and invoked on instances:
+Actions are container-resolved and invoked on instances. Verbatim forms are in `12-project-specific/canonical-snippets.md`; the protocol:
 
 ```php
-// Canonical: constructor injection into a Controller/another Action
-public function __construct(private CreateWebArticleAction $createWebArticleAction) {}
+// Constructor injection into a Controller/another Action (canonical)
+public function __construct(protected CreateWebArticleAction $createWebArticleAction) {}
 
-$article = $this->createWebArticleAction->handle($payload);
+$article = $this->createWebArticleAction->handle($request->all());
 
-// Method-injected in phpstan-friendly contexts
-$article = $createWebArticleAction->handle($payload);
+// Method injection — acceptable in phpstan-friendly contexts
+$article = $createWebArticleAction->handle($request->all());
 ```
 
-- `$action->handle($payload)` — public entry point on the instance.
-- `$action->execute($payload)` — only where `InvokeableActionContract` is implemented.
+- `$action->handle($payload)` — public entry point on the instance; `$payload` is a **single array** for ruled actions (whole input, optionally with `'id'` or a Model key merged in).
+- `$action->handle()` — no-arg for non-ruled list actions.
+- `$action->handle($model)` — only a non-ruled action may take a Model payload.
+- `$action->execute(...)` — does NOT exist; never call it.
 
 **NEVER call `handle()` statically** (`XxxAction::handle(...)`). `handle()` is an instance method; the bare `handle(array)` signature is NOT static in this project (existing static invocations in the codebase are known defects). Always resolve the action and call it on an instance.
 

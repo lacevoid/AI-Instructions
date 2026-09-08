@@ -47,6 +47,7 @@ Jangan hanya membaca README. Jangan menyimpulkan dari nama file. Baca seluruh mo
 | `ai-instructions/10-quality-gates.md` | Quality gates, verifikasi akhir | GLOBAL |
 | `ai-instructions/11-forbidden-behavior.md` | Larangan eksplisit | GLOBAL |
 | `ai-instructions/12-project-specific/lingusid.md` | Aturan invarian LingSID | PROJECT-SPECIFIC |
+| `ai-instructions/12-project-specific/canonical-snippets.md` | Bank snippet kanonik verbatim LingSID (signature, abstraksi, gaya) | PROJECT-SPECIFIC |
 | `ai-instructions/README.md` | Laporan analisis & deliverable | DOKUMENTASI |
 
 ---

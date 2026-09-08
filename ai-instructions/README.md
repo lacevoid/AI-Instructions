@@ -29,7 +29,7 @@ The system separates **universal rules** (apply to every project) from **project
 | `09-tools.md` | Terminal, paths, parallelism, linting (PHPStan/Pint), JS runtime (bun), tests, external tools. |
 | `10-quality-gates.md` | Universal quality gates, verification decision tree, final checklist, project-specific gates pointer. |
 | `11-forbidden-behavior.md` | Explicit prohibitions (architecture, style, implementation, security, scope). |
-| `12-project-specific/` | Project-specific modules — LingSID invariants in `lingusid.md`. Add a file here per project. |
+| `12-project-specific/` | Project-specific modules — LingSID invariants in `lingusid.md`, verbatim canonical snippet bank in `canonical-snippets.md`. Add a file here per project. |
 
 ## How to Use
 

@@ -82,6 +82,93 @@ use App\Models\Group;
 use App\Repositories\GroupRepository;
 ```
 
+### Canonical Class Skeletons
+
+Copy these skeletons from the verbatim bank `12-project-specific/canonical-snippets.md` — never paraphrase signatures. Skeleton shapes:
+
+```php
+// Ruled Create action (pipe-string rules are predominant)
+class CreateXAction extends Action implements RuledActionContract
+{
+    public function __construct(protected XRepository $repository) {}
+
+    protected function handler($payload = null, array $validatedPayload = []): X
+    {
+        return $this->repository->store($validatedPayload);
+    }
+
+    public function rules(array $payload): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            // ...
+        ];
+    }
+}
+```
+
+```php
+// Plain (non-ruled) action
+class GetXsAction extends Action
+{
+    public function __construct(protected XRepository $repository) {}
+
+    protected function handler($payload = null, array $validatedPayload = []): Collection
+    {
+        return $this->repository->with([...])->get();
+    }
+}
+```
+
+```php
+// Thin controller — constructor injection (SID style)
+class XController extends Controller
+{
+    public function __construct(
+        protected CreateXAction $createXAction,
+        protected UpdateXAction $updateXAction,
+        protected DeleteXAction $deleteXAction
+    ) {}
+
+    public function store(Request $request)
+    {
+        $this->createXAction->handle($request->all());
+
+        return redirect()->route('dashboard.sid.population.x.index');
+    }
+}
+```
+
+```php
+// Repository — empty shell; model auto-resolved from the class name
+/**
+ * @extends ModelRepository<X>
+ */
+class XRepository extends ModelRepository
+{
+    //
+}
+```
+
+```php
+// Model — table, fillable, casts, relationships
+class X extends Model
+{
+    use HasFactory;
+
+    protected $table = 'xs';
+
+    protected $fillable = ['name'];
+
+    protected $casts = ['published_at' => 'datetime'];
+
+    public function author()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'author_id');
+    }
+}
+```
+
 ---
 
 ## TypeScript/Vue Style

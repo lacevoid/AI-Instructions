@@ -14,7 +14,7 @@ This file defines testing conventions for PHPUnit/Laravel-based projects. Apply 
 
 ## Test Attribute Convention
 
-Always use `#[Test]` attribute (NOT `it_` prefixes):
+Use the `#[Test]` attribute on every test method:
 
 ```php
 use PHPUnit\Framework\Attributes\Test;
@@ -22,40 +22,42 @@ use PHPUnit\Framework\Attributes\Test;
 class SomeTest extends TestCase
 {
     #[Test]
-    public function test_user_can_create_article(): void
+    public function user_can_create_article(): void
     {
         // ...
     }
 }
 ```
 
-**DO NOT use BDD style:**
-```php
-// WRONG — BDD style
-public function it_creates_a_group_with_valid_data(): void
+Method names are descriptive snake_case. All of these occur in the codebase — pick the pattern used by the neighbouring test file:
 
-// CORRECT — descriptive with test_ prefix
-public function test_creates_a_group_with_valid_data(): void
+```php
+#[Test]
+public function user_can_view_articles_index(): void       // feature endpoints
+#[Test]
+public function it_creates_a_group_with_valid_data(): void // unit behavior
+#[Test]
+public function test_throws_validation_exception_for_invalid_data(): void // unit behavior
 ```
 
-**Canonical form:** `#[Test]` (PascalCase) is the canonical attribute.
+**Do not use PHPDoc `@test` annotations and do not rely on the bare `test_` prefix alone** — `#[Test]` (PascalCase attribute class) is the canonical marker. Never write a test method that claims `it_` intent while skipping the attribute.
 
 ---
 
 ## Test Naming Convention
 
-- Test methods: `test_{behavior_description}` with underscores.
+- Test methods: descriptive snake_case (`user_can_…`, `it_…`, `test_…`) marked with `#[Test]`.
 - Test classes: `{Entity}Test` for Unit, `{Feature}Test` for Feature.
 - Method names describe the behavior being tested.
 
 ```php
 // Good
-public function test_can_create_a_group()
-public function test_cannot_add_circular_membership()
 public function user_can_view_articles_index()
+public function it_creates_a_group_with_valid_data()
+public function test_throws_validation_exception_for_invalid_data()
 
 // Avoid
-public function testCreateGroup()
+public function createGroup()
 public function testGroupCreation()
 ```
 
@@ -192,8 +194,16 @@ class CreateGroupActionTest extends TestCase
     }
 
     #[Test]
-    public function test_creates_a_group_with_valid_data(): void
+    public function it_creates_a_group_with_valid_data(): void
     {
+        $data = [
+            'name' => 'Test Group',
+            'description' => 'Ea est dolor consequatur cum rerum.',
+            'type' => 'test_type',
+            'url' => 'http://example.com',
+            'icon' => 'test_icon',
+        ];
+
         $this->mock(GroupRepository::class, function ($mock) use ($data) {
             $mock->shouldReceive('store')
                 ->once()
@@ -201,12 +211,15 @@ class CreateGroupActionTest extends TestCase
         });
 
         $action = new CreateGroupAction($this->app->make(GroupRepository::class));
-        $group = $action->execute($data);
+        $group = $action->handle($data);
 
         $this->assertInstanceOf(Group::class, $group);
+        $this->assertEquals('Test Group', $group->name);
     }
 }
 ```
+
+> Actions are invoked with `->handle($payload)`. The legacy `$action->execute($data)` form is a **broken reference to a non-existent method** — never use it (see `12-project-specific/canonical-snippets.md` §9).
 
 ---
 
