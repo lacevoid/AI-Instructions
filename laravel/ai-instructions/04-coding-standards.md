@@ -245,7 +245,22 @@ const submit = () => {
 
 ## Code Documentation
 
-Do not add explanatory comments or documentation blocks unless explicitly asked. The code should be self-documenting through clear naming and structure.
+**MUST — self-explanatory code.** Every line of code MUST be self-explanatory: it should read the way a human explains what the code does, without needing a comment. Achieve this through:
+
+- Expressive, intent-revealing names (see `05-naming.md`).
+- Small functions with a single responsibility and short parameter lists.
+- Linear flow with early returns / guard clauses.
+- Extracting conditions and side effects into named predicates/variables.
+- Named constants instead of magic numbers.
+- No clever one-liners; state things plainly.
+
+A line that needs a comment to be understood FAILS this rule — fix the code (rename / extract / simplify), do not add the comment.
+
+When a comment is genuinely unavoidable, it may only explain a reason a human cannot read from the code itself: a non-obvious business invariant, framework/performance constraint, or a `why` decision. NEVER re-state what the code does (`// increment total`).
+
+Permitted docblocks (tooling, not prose): PHPDoc `@var` on model properties, `@param` / `@return` type annotations, occasional `@see`.
+
+Do not add explanatory comments or documentation blocks unless explicitly asked.
 
 ---
 

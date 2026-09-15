@@ -37,6 +37,8 @@ The following behaviors are explicitly forbidden. These are absolute rules unles
 
 - ❌ Using PHPDoc `@test` annotations or omitting the `#[Test]` attribute on test methods (`it_…`/`user_can_…` names are fine **with** the attribute).
 - ❌ Adding comments unless asked.
+- ❌ Writing code that is not self-explanatory — a line that needs a comment to be understood; fix the code (rename/extract/simplify), do not comment it.
+- ❌ Adding comments that re-state what the code does (chit-chat, e.g. `// increment total`).
 - ❌ Using `declare(strict_types=1)` (project convention).
 - ❌ Using tabs for indentation (use 4 spaces).
 - ❌ Using Options API in Vue (always Composition API).
