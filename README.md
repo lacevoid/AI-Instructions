@@ -1,26 +1,15 @@
 # AI-Instructions
 
 <p align="center">
-  <img src="assets/logo.svg" alt="AI Instructions — lambda monogram" width="240">
+  <img src="assets/logo.svg" alt="AI-INSTRUCTIONS — Instruction Architecture" width="340">
 </p>
-
-```
-          _____
-    /\   |_   _|
-   /  \    | |
-  / /\ \   | |
- / ____ \ _| |_
-/_/    \_\_____|
-```
 
 **Repository Instruction Architect — bengkel authoring set instruksi AI.**
 
-> **Filosofi logo.** λ (lambda) adalah satu-satunya simbol primitif dalam
-> *lambda calculus* — model universal komputasi yang dibangun dari instruksi.
-> Persis seperti logo Composer (satu not musik → orkestra paket), λ yang
-> tersusun dari ubin-ubin modul ini berarti: **AI dibangun dari instruksi**.
-> Figlet banner "AI" bawahnya adalah bentuk tekstual yang sama — karakter
-> yang di-generate, bukan digambar.
+Repositori ini BUKAN proyek konsumen teknologi apa pun. Ini adalah bengkel untuk
+**menganalisis set pembuatan instruksi**: repo ini menghasilkan, memperbarui, dan
+mendistribusikan **set instruksi AI** yang presisi untuk digunakan oleh AI coding agent
+di **proyek konsumen** (mis. LingSID).
 
 Repositori ini BUKAN proyek konsumen teknologi apa pun. Ini adalah bengkel untuk
 **menganalisis set pembuatan instruksi**: repo ini menghasilkan, memperbarui, dan
