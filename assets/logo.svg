@@ -1,0 +1,39 @@
+<svg width="300" height="300" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AI Instructions — Repository Instruction Architect">
+  <defs>
+    <linearGradient id="grad" x1="24" y1="24" x2="232" y2="232" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22d3ee"/>
+      <stop offset="0.5" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="gradSoft" x1="64" y1="160" x2="208" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22d3ee"/>
+      <stop offset="0.5" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop stop-color="#a855f7" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#0b1220" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="1.5" fill="#1e293b"/>
+    </pattern>
+  </defs>
+
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#glow)"/>
+  <rect x="16" y="16" width="224" height="224" rx="48" fill="#0b1220" stroke="url(#grad)" stroke-width="3"/>
+  <rect x="16" y="16" width="224" height="224" rx="48" fill="url(#grid)"/>
+
+  <g opacity="0.5">
+    <circle cx="200" cy="150" r="2.5" fill="#22d3ee"/>
+    <circle cx="48" cy="128" r="2.5" fill="#a855f7"/>
+    <circle cx="140" cy="208" r="2" fill="#6366f1"/>
+  </g>
+
+  <rect x="64" y="160" width="68" height="18" rx="9" fill="#22d3ee"/>
+  <rect x="106" y="130" width="68" height="18" rx="9" fill="url(#gradSoft)" fill-opacity="0.95"/>
+  <rect x="148" y="100" width="68" height="18" rx="9" fill="#a855f7"/>
+
+  <path d="M196 56l5.5 12.5 12.5 5.5-12.5 5.5L196 92l-5.5-12.5L178 74l12.5-5.5z" fill="url(#grad)"/>
+
+  <path d="M64 214h128" stroke="url(#grad)" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+</svg>

@@ -1,5 +1,9 @@
 # AI-Instructions
 
+<p align="center">
+  <img src="assets/logo.svg" alt="AI Instructions — Repository Instruction Architect" width="220">
+</p>
+
 **Repository Instruction Architect — bengkel authoring set instruksi AI.**
 
 Repositori ini BUKAN proyek konsumen teknologi apa pun. Ini adalah bengkel untuk
