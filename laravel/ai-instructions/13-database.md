@@ -297,6 +297,57 @@ class GroupSeeder extends Seeder
 
 ---
 
+## Performance-Conscious Coding
+
+Every feature that touches data gets a performance lens — applied during implementation, not as
+an afterthought. The customer-facing symptom is a slow page; the reproducible causes are below.
+
+### Per Query — no N+1, no over-fetch
+
+- Eager load relations traversed in loops (`->with('relation')`); if a loop accesses
+  `$item->relation`, `with()` is mandatory (see `05-naming.md`/patterns above).
+- Select only the columns the feature needs for large reads (`->select()` / `->pluck()` /
+  `->pluck(... 'keyBy')`).
+- Prefer aggregate queries over read-then-loop: `groupBy`, `withCount`, `min`/`max` — never
+  `count($model->items)` inside a loop.
+- Avoid per-row queries: replace `find()` inside a loop with `whereIn()`; map results once.
+- Batch mutations: `insert()`/`upsert()` for bulk, chunked processing for large sets
+  (`->chunkById()` / cursor) — never load a big table into memory.
+
+### Per Migration — make the index part of the schema
+
+- Index every column used in WHERE/JOIN/ORDER beyond the primary key; composite index for
+  multi-column filters (ordering: first high-selectivity, then filter order).
+- `->foreignId()` must pair with `->constrained()` — referential integrity is also an
+  index/perf guarantee.
+- Add the index **in the migration that creates the column** — not as a later patch.
+
+### Per List/Collection — paginate, always
+
+- Paginate or cursor-paginate every listing (`->paginate()` / `->cursorPaginate()`); never emit
+  an unbounded table.
+- Cursor pagination for streaming/ordered-by-time lists; cap `per_page` server-side.
+- The page size that "worked in dev" is not a reason to skip pagination in prod.
+
+### Verification
+
+- Confirm with the query log (Debugbar/Telescope — `09-tools.md`) that a page issues the
+  expected number of queries; if the number grows with row count, that is N+1 and it is a bug.
+- Frontend: verify lists/selects are not re-fetched per render (`14-frontend.md`) and heavy
+  computed values are memoized.
+
+### Common Smell → Fix
+
+| Smell | Fix |
+|-------|-----|
+| `foreach ($items as $i) { $i->relation }` | eager load `->with('relation')` |
+| `count($model->items)` in a loop | `->withCount('items')` |
+| per-row `->find()` inside the loop | `whereIn()` + one map |
+| WHERE column with no index | add index in the creating migration |
+| unbounded `Model::all()` select | paginate + `->select()` needed columns |
+
+---
+
 ## Database Naming (Cross-Reference)
 
 See `05-naming.md` for full naming conventions. Quick reference:
