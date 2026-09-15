@@ -5,9 +5,13 @@
 # Verifies the AI-Instructions authoring repository stays consistent:
 #   1. Every path token used in backticks across .md files resolves to an
 #      existing file (no broken cross-references / "phantom" modules).
-#   2. Every instruction module under laravel/ai-instructions/ is git-tracked
-#      (a tracked file is not affected by .gitignore ignores and reaches PRs).
+#   2. Every instruction file under every <Framework>/ directory is
+#      git-tracked (a tracked file is not affected by .gitignore ignores and
+#      reaches PRs).
 #   3. No generated distribution artifacts are present in the repo root.
+#
+# Frameworks are auto-discovered: any non-hidden top-level directory that
+# contains an ai-instructions.md marker file (mirrors setup-ai-rules.sh).
 #
 # Usage: scripts/health-check.sh [--quiet]
 # Exit code 0 = all checks pass; non-zero = violations found.
@@ -43,10 +47,32 @@ SKIP_OR_EXTERNAL='^(app/|resources/|routes/|database/|config/|tests/|vendor/|pub
 
 cd "$ROOT" || exit 1
 
+# Discover framework directories (any non-hidden top-level dir with an ai-instructions.md).
+mapfile -t framework_dirs < <(
+  while IFS= read -r d; do
+    d="${d#./}"
+    [[ -d "$d" && -f "$d/ai-instructions.md" ]] && printf '%s\n' "$d"
+  done < <(find . -mindepth 1 -maxdepth 1 -type d -not -name '.*')
+)
+
+if [[ ${#framework_dirs[@]} -eq 0 ]]; then
+  printf 'health-check: tidak ada framework dir yang ditemukan (butuh <Framework>/ai-instructions.md).\n' >&2
+  exit 1
+fi
+
+say "== Framework terdeteksi: ${framework_dirs[*]} =="
+say ""
+
 say "== Referensi silang antar file instruksi =="
 
-# Collect every backtick-coded path token from repo-root and laravel/ markdown files.
-mapfile -t md_files < <(find . -maxdepth 1 -name '*.md'; find laravel -name '*.md')
+# Collect every backtick-coded path token from repo-root and framework markdown files.
+mapfile -t md_files < <(find . -maxdepth 1 -name '*.md')
+for f in "${framework_dirs[@]}"; do
+  while IFS= read -r m; do
+    md_files+=("$m")
+  done < <(find "$f" -name '*.md')
+done
+
 TOKENS_TMP="$(mktemp)"
 for f in "${md_files[@]}"; do
   # shellcheck disable=SC2016
@@ -65,31 +91,33 @@ for token in "${refs[@]}"; do
   [[ "$token" == 'MASTER_BUILD_SPECIFICATION.md' ]] && continue
   [[ $token =~ $SKIP_OR_EXTERNAL ]] && continue
 
-  # The constitution lives at laravel/ai-instructions.md but is referenced as a
-  # bare filename from root-level docs.
+  resolved=""
+
+  # The constitution is referenced as a bare filename; resolve to any framework.
   if [[ "$token" == 'ai-instructions.md' ]]; then
-    ok "\`$token\` -> laravel/ai-instructions.md"
-    continue
+    for f in "${framework_dirs[@]}"; do
+      if [[ -n "$resolved" ]]; then break; fi
+      [[ -f "$f/ai-instructions.md" ]] && resolved="$f/ai-instructions.md"
+    done
   fi
 
-  resolved=""
-  # ai-instructions/... tokens resolve relative to laravel/.
-  if [[ "$token" == ai-instructions/* || "$token" == *'/ai-instructions/'* ]]; then
-    if [[ -f "laravel/$token" ]]; then
-      resolved="laravel/$token"
+  # Framework-relative candidates: F/$token, F/ai-instructions/$token.
+  for f in "${framework_dirs[@]}"; do
+    if [[ -n "$resolved" ]]; then break; fi
+    [[ -f "$f/$token" ]] && resolved="$f/$token"
+    if [[ -z "$resolved" && -f "$f/ai-instructions/$token" ]]; then
+      resolved="$f/ai-instructions/$token"
     fi
-  fi
-  # Resolve relative to the laravel instruction directory as fallback.
-  if [[ -z "$resolved" && -f "laravel/ai-instructions/$token" ]]; then
-    resolved="laravel/ai-instructions/$token"
-  fi
-  # Resolve relative to repo root as fallback (setup-ai-rules.sh, etc.).
+  done
+
+  # Repo-root fallback (setup-ai-rules.sh, etc.).
   if [[ -z "$resolved" && -f "$token" ]]; then
     resolved="$token"
   fi
-  # Basename fallback: bare filename that lives somewhere in laravel/ai-instructions/.
+
+  # Basename fallback: bare filename that lives somewhere in any framework dir.
   if [[ -z "$resolved" ]]; then
-    basename_match="$(find laravel/ai-instructions -type f -name "$token" 2>/dev/null | head -1)"
+    basename_match="$(find "${framework_dirs[@]}" -type f -name "$token" 2>/dev/null | head -1)"
     if [[ -n "$basename_match" ]]; then
       resolved="$basename_match"
     fi
@@ -103,15 +131,17 @@ for token in "${refs[@]}"; do
 done
 
 say ""
-say "== Modul instruksi ter-track (bukan phantom) =="
+say "== File instruksi ter-track (bukan phantom) =="
 
-while IFS= read -r file; do
-  if git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
-    ok "tracked $file"
-  else
-    fail "TIDAK tracked (di-ignore .gitignore): $file"
-  fi
-done < <(find laravel/ai-instructions \( -name '*.md' -o -name '*.json' \) | sort)
+for f in "${framework_dirs[@]}"; do
+  while IFS= read -r file; do
+    if git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
+      ok "tracked $file"
+    else
+      fail "TIDAK tracked (di-ignore .gitignore): $file"
+    fi
+  done < <(find "$f" \( -name '*.md' -o -name '*.json' \) | sort)
+done
 
 say ""
 say "== Artefak distribusi tidak boleh ada di root =="

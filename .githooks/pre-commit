@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# pre-commit hook — integrity + markdown lint before every commit.
+# Runs from the repo root ({core.hooksPath} is scoped to the working tree).
+
+set -uo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT" || exit 1
+
+# 1) Health-check always runs (self-contained, no external deps).
+if ! scripts/health-check.sh --quiet; then
+  printf 'pre-commit: health-check GAGAL — perbaiki lalu commit ulang.\n' >&2
+  exit 1
+fi
+
+# 2) Markdown lint on staged .md files when markdownlint-cli2 is available.
+if command -v markdownlint-cli2 >/dev/null 2>&1; then
+  mapfile -t changed < <(git diff --cached --name-only --diff-filter=ACMR -- '*.md')
+  if [[ ${#changed[@]} -gt 0 ]]; then
+    if ! markdownlint-cli2 "${changed[@]}"; then
+      printf 'pre-commit: markdown lint GAGAL — perbaiki lalu commit ulang.\n' >&2
+      exit 1
+    fi
+  fi
+else
+  printf 'pre-commit: [skip] markdownlint-cli2 tidak terpasang — lint markdown dilewati.\n' >&2
+fi
+
+exit 0
