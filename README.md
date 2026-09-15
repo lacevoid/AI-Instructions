@@ -89,10 +89,13 @@ Setiap set WAJIB memuat KLAUSA 1–5 (detail penuh di `ARCHITECT-GUIDE.md` bagia
 - **DILARANG** men-commit artefak distribusi (AGENTS.md isi hasil-generate, CLAUDE.md,
   GEMINI.md, .cursorrules, .windsurfrules, .continuerules, .clinerules/, .cursor/rules/,
   .github/, .aider.conf.yml, ai-instructions/) ke repo ini.
-- **DILARANG** bekerja di luar branch `master` tanpa instruksi eksplisit.
+- **DILARANG** bekerja, commit, push, atau merge langsung di branch `main` (protected).
+  Semua perubahan masuk `main` hanya via PR yang disetujui operator.
 
 ## Git Conventions
 
+- **Proteksi `main`**: tidak ada push/commit/merge langsung ke `main`; kerja di branch
+  pendek (`feat/…`, `fix/…`, `docs/…`, `chore/…`) dari `main`, lalu PR ke `main`.
 - Commit ringkas dalam bahasa Inggris, verb-prefixed (mis. `Add canonical snippet bank`).
 - Perubahan besar ditawarkan dulu ke operator ("commit + push?") dan menunggu persetujuan.
 - Sebelum commit: cek `git status`, `git diff`, `git log --oneline -10`.
