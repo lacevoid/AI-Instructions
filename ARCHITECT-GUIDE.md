@@ -73,6 +73,7 @@ Anda bekerja di dalam folder root system instruksi AI:
         ├── 09-tools.md
         ├── 10-quality-gates.md
         ├── 11-forbidden-behavior.md
+        ├── 13-database.md … 21-state-delivery-environment.md   ← Skill kualitas (13–21)
         ├── 12-project-specific/   ← Modul per proyek (opsional)
         └── README.md
 ```
@@ -365,8 +366,8 @@ kebenaran tunggal bagi agent masa depan pada repository tersebut.
 
 ### B. Folder `ai-instructions/` berisi modul bernomor
 
-Salin kerangka 11 modul + README dari `laravel/ai-instructions/` sebagai struktur awal,
-lalu **tulis ulang isi setiap modul** berdasarkan bukti repository target:
+Salin kerangka modul 01–11 + skill kualitas 13–21 + README dari `laravel/ai-instructions/`
+sebagai struktur awal, lalu **tulis ulang isi setiap modul** berdasarkan bukti repository target:
 
 | File | Isi |
 |------|-----|
@@ -453,7 +454,7 @@ yang saling melengkapi (lakukan keduanya):
 ### D. REFERENCE BAR — STANDAR MINIMUM KELENGKAPAN SET
 
 Saat authoring, tambahkan set `laravel/` sebagai **bahan referensi** ke dalam instruksi
-Anda sendiri: belajar/baca seluruh modul `laravel/ai-instructions/*` (01–11), README,
+Anda sendiri: belajar/baca seluruh modul `laravel/ai-instructions/*` (01–11 dan 13–21), README,
 `12-project-specific/lingusid.md`, dan `12-project-specific/canonical-snippets.md` sebagai
 standar tingkat presisi, gaya bahasa, struktur tabel, dan pola bukti yang harus dicapai.
 

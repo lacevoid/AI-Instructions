@@ -62,3 +62,56 @@ distribusi di root repo ini, hapus, jangan di-commit.
   PR before merging (0 approval untuk operator tunggal; operator meninjau lalu me-merge PR-nya
   sendiri), do not allow bypassing (enforce admins), no force pushes, no deletions. Status
   checks dikosongkan sampai ada CI; begitu workflow `tests`/`lint` ada, wajib dipasang.
+
+## 5. ATURAN KUALITAS AUTHORING (DIADOPSI DARI SET `laravel/`)
+
+Modul `laravel/ai-instructions/` berisi aturan universal yang berlaku untuk kerja AI pada
+umumnya — termasuk kerja authoring di repo ini. Adopsi aturan berikut (diadaptasi untuk
+pekerjaan dokumentasi instruksi; rincian penuh ada di modul yang dirujuk):
+
+1. **Evidence-anchored authoring (hallucination guard)** — sebelum menulis/mengubah instruksi,
+   verifikasi setiap token yang dirujuk (nomor modul, nama file, path, anchor) benar-benar ada.
+   DILARANG menciptakan nomor modul/nama file yang tidak ada (konstitusi, README, dan modul
+   saling merujuk; referensi silang yang salah biasanya lolos mata tapi tidak lolos
+   `health-check`). Rujukan: `laravel/ai-instructions/12-project-specific/canonical-snippets.md`
+   — usage rule 6 (evidence-anchored programming).
+2. **Quality gates sebelum "selesai"** — sebuah tugas authoring dianggap selesai hanya bila
+   semua check yang dijalankan CI lulus secara lokal (local parity): `bash scripts/health-check.sh`,
+   `npx --yes markdownlint-cli2 --config .markdownlint-cli2.yaml '**/*.md'`, dan `bash -n` untuk
+   script. Senior self-review: baca diff sebagai reviewer, bukan sebagai penulis; setiap klaim
+   "sudah diverifikasi" disertai bukti command yang dijalankan. Rujukan:
+   `laravel/ai-instructions/10-quality-gates.md` — Senior Self-Review Rubric.
+3. **Edge probes authoring** — sebelum PR, probe daftar ini: (a) setiap backtick `*.md`/`*.sh`
+   yang dirujuk resolve ke file yang ada; (b) file instruksi baru ter-track (`.gitignore`
+   mengabaikan `ai-instructions/` di kedalaman mana pun — file baru WAJIB `git add -f`); (c)
+   tidak ada artefak distribusi di root; (d) tidak ada drift lint; (e) modul yang dihapus/
+   di-rename masih dirujuk file lain. Rujukan: `laravel/ai-instructions/15-edge-cases.md`
+   (diadaptasi untuk output authoring).
+4. **Perubahan aman untuk dokumentasi** — rename/restruktur modul = change impact analysis:
+   temukan semua referensi ke modul itu (grep backtick token di seluruh repo, termasuk
+   konstitusi, README, modul lain, dan `ARCHITECT-GUIDE.md`), perbarui dalam perubahan yang sama.
+   Perubahan besar dipecah menjadi fase berurutan, setiap fase diverifikasi sebelum lanjut.
+   Rujukan: `laravel/ai-instructions/18-planning-and-safe-change.md`.
+5. **Debugging disipliner** — bila CI/`health-check` gagal: reproduce → isolate → hipotesis →
+   fix minimal → verify ulang seluruh check. Dilarang "memperbaiki" dengan menebak atau menutupi
+   check. Rujukan: `laravel/ai-instructions/16-debugging.md`.
+6. **Agent discipline** — (a) feedback absorption: setiap koreksi ke CI/PR dipindai ke seluruh
+   diff untuk pola yang sama, bukan hanya titik yang dilaporkan; (b) decision log untuk asumsi
+   authoring (mis. keputusan scope universal vs project-specific, mengapa probe ditiadakan);
+   (c) honesty tentang verifikasi: nyatakan apa yang TIDAK dijalankan, bukan hanya apa yang
+   lulus; (d) scope-stop: jangan memperbaiki modul di luar tugas walau "hampir sama".
+   Rujukan: `laravel/ai-instructions/17-agent-discipline.md`.
+7. **Reproduce-everywhere** — hasil authoring harus lolos persis check yang sama dengan CI
+   (health-check, markdownlint, shellcheck, distribution smoke test) sebelum push; hasil yang
+   hanya "tampak" beres di lokal tidak dianggap lulus. Rujukan:
+   `laravel/ai-instructions/21-state-delivery-environment.md`.
+
+### Enforcement (di repo ini)
+
+- Pre-commit hook `.githooks/pre-commit` menjalankan `scripts/health-check.sh --quiet` (lint
+  markdown di-skip anggun bila `markdownlint-cli2` tidak terpasang); aktif via
+  `bash scripts/install-hooks.sh`.
+- CI `lint` (markdownlint + shellcheck) dan `tests` (Instruction integrity + Distribution smoke
+  test) adalah status checks wajib pada branch protection `main`.
+- Health-check umumnya bertambah jumlahnya tiap adopsi; aturan ini tidak mengharuskan angka
+  tetap, tapi mengharuskan 0 kegagalan.
