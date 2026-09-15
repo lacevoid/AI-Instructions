@@ -23,7 +23,9 @@
   `CLAUDE.md`, `GEMINI.md`, `.cursorrules`, `.windsurfrules`, `.continuerules`,
   `.clinerules/`, `.cursor/rules/`, `.github/copilot-instructions.md`, `.aider.conf.yml`,
   `ai-instructions/`) ke repository ini. Artefak tersebut hanya boleh berada di proyek konsumen.
-- DILARANG bekerja langsung di selain branch `master` pada repo ini tanpa instruksi eksplisit.
+- DILARANG bekerja, commit, push, atau merge langsung di branch `main` (protected) pada repo
+  ini. Semua perubahan masuk `main` hanya via PR yang disetujui operator (lihat ATURAN GIT di
+  bagian 4).
 
 ## 3. LAYOUT REPOSITORY (INTENDED)
 
@@ -40,8 +42,21 @@ Template set instruksi hidup di `<Framework>/ai-instructions*`, dan distribusi
 dilakukan ke proyek konsumen — bukan ke repo ini. Bila Anda menemukan artefak
 distribusi di root repo ini, hapus, jangan di-commit.
 
-## 4. ATURAN GIT
+## 4. ATURAN GIT (PROTEKSI BRANCH `main`)
 
+- **`main` adalah branch default yang DIPROTEKSI** (di-rename dari `master`). DILARANG keras:
+  commit langsung, push langsung (`git push origin main`), atau merge langsung ke `main`.
+- Semua perubahan masuk `main` **hanya via PR** yang disetujui operator (target base `main`),
+  dengan revisi yang dibutuhkan operator dan status check CI hijau bila ada. Jangan pernah
+  push ke `main` meski kondisi lokal terasa "aman".
+- Alur kerja:
+  1. `git checkout main` → `git pull origin main`
+  2. `git checkout -b <type>/<deskripsi>` — type: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `style`
+  3. Kerjakan + commit ringkas di branch tersebut
+  4. `git push origin <branch>` lalu buka PR ke `main` (mis. `gh pr create`)
+  5. Operator menyetujui dan me-merge ke `main`
 - Commit singkat, bahasa Inggris, verb-prefixed (mis. `Remove generated artifacts`).
 - Jangan commit langsung tanpa konfirmasi operator bila menyangkut perubahan besar;
   tawarkan "commit + push?" dan tunggu persetujuan.
+- Enforcement: pastikan GitHub branch protection pada `main` aktif (require a PR before
+  merging + 1 approval, require status checks, no force pushes, no deletions, restrict pushers).
