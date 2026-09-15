@@ -67,6 +67,8 @@ The following behaviors are explicitly forbidden. These are absolute rules unles
 - ❌ Reproducing any `// BAD` pattern from `12-project-specific/canonical-snippets.md` §11.
 - ❌ Referencing classes/methods that do not exist (broken imports, undefined variables, unknown repository methods). Always verify the target class/method exists in the codebase before using it.
 - ❌ Passing payload keys to Actions that do not match the repository/model columns or the RuledAction validation rules.
+- ❌ Inventing classes, methods, signatures, or API behavior from memory without opening the real file in the codebase (`canonical-snippets.md` — evidence-anchored programming). "It probably has `update()`" is a violation; verify first.
+- ❌ Marking work complete without the Senior Self-Review Rubric (`10-quality-gates.md`) and the edge-case probes (`15-edge-cases.md`) applied to the touched code paths — the honest estimate of "done" includes the boundaries tested. See `16-debugging.md` for the loop a live bug must follow (reproduce → isolate → hypothesize → minimal fix → verify), not shotgun edits.
 
 ---
 

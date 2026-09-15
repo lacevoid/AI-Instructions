@@ -27,24 +27,26 @@ The system separates **universal rules** (apply to every project) from **project
 | `07-security.md` | Auth, authz (Spatie Permission), validation, rate limiting, sensitive data (NIK/PII), audit trails, media uploads, CSRF, key security rules. |
 | `08-git.md` | Branching from `develop`, conventional commits, prohibited operations, CI workflows. |
 | `09-tools.md` | Terminal, paths, parallelism, linting (PHPStan/Pint), JS runtime (bun), tests, external tools. |
-| `10-quality-gates.md` | Universal quality gates, verification decision tree, final checklist, CI pipeline, when human review is required, project-specific gates pointer. |
+| `10-quality-gates.md` | Universal quality gates, senior self-review rubric, verification decision tree, final checklist, CI pipeline, when human review is required, project-specific gates pointer. |
 | `11-forbidden-behavior.md` | Explicit prohibitions (architecture, style, implementation, security, scope). **Single source of truth** — other modules cross-reference it. |
-| `13-database.md` | Database rules: migration conventions, FK/indexing, relationships, model conventions, query patterns (N+1, eager load), transactions, factories, seeders, soft deletes. |
+| `13-database.md` | Database rules: migration conventions, FK/indexing, relationships, model conventions, query patterns (N+1, eager load), transactions, factories, seeders, soft deletes, performance lens (N+1/over-fetch/pagination/index). |
 | `14-frontend.md` | Frontend rules: Vue 3/TypeScript/Inertia/Tailwind stack, directory org, component structure, typing, form handling (`useForm`), routing (ziggy), styling (`cn()`), composables, frontend testing. |
+| `15-edge-cases.md` | Edge-case & boundary probes (input/type, state/lifecycle, permission/ownership, integration/scale) that MUST run before any feature is considered complete. |
+| `16-debugging.md` | Systematic debugging loop: reproduce → isolate → hypothesize → minimal fix → verify; root-cause classes to check first in Laravel, when to escalate. |
 | `12-project-specific/` | Project-specific modules — LingSID invariants in `lingusid.md`, verbatim canonical snippet bank in `canonical-snippets.md`. Add a file here per project. |
 
 ## How to Use
 
 1. Read root `ai-instructions.md` as the entry point.
 2. Read `01-governance.md` and `02-agent-workflow.md`.
-3. Apply the relevant topical modules (`03`–`11`, `13`, `14`) for the task — `13-database.md` when touching schema/data, `14-frontend.md` when touching the Inertia/Vue layer.
+3. Apply the relevant topical modules (`03`–`11`, `13`–`16`) for the task — `13-database.md` when touching schema/data, `14-frontend.md` when touching the Inertia/Vue layer, `15-edge-cases.md` before declaring anything done, `16-debugging.md` when tracing a bug.
 4. Load matching modules from `12-project-specific/` when they apply.
 5. **Read `MASTER_BUILD_SPECIFICATION.md` at the project root** (or create it via detailed operator Q&A if missing) — never write code without it.
 
 ## Authoring Instruction Sets
 
 When creating or updating instruction sets in this repository, treat the **`laravel/` set as the
-reference template**: mirror its constitution layout, module split (`01`–`11`, `13`, `14`,
+reference template**: mirror its constitution layout, module split (`01`–`11`, `13`–`16`,
 `12-project-specific/`), precision, and source-anchored verbatim snippets
 (`canonical-snippets.md`). Always re-run `./setup-ai-rules.sh <framework>` (after removing the
 stale `ai-instructions/master`) so template, master, and distributed copies stay identical.
@@ -53,4 +55,4 @@ stale `ai-instructions/master`) so template, master, and distributed copies stay
 
 1. Each project's unique invariants go into `12-project-specific/{project}.md`.
 2. Never generalize project-specific rules into universal rules, and vice versa.
-3. Keep the universal modules (`01`–`11`, `13`, `14`) free of project-specific references so they stay reusable.
+3. Keep the universal modules (`01`–`11`, `13`–`16`) free of project-specific references so they stay reusable.

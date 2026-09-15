@@ -9,6 +9,8 @@ This module is the **authoritative, verbatim snippet bank** for the LingSID proj
 3. **Two styles may exist.** Where the codebase shows two valid forms (e.g. pipe-string vs `Rule::` array rules), the section marks which is canonical for which context. Copy the one matching your context.
 4. **Never copy legacy/broken forms.** `// BAD` blocks show defects that exist in old code; do not reproduce them.
 5. When a snippet references a class method you have not seen in the bank, check the base class in the real repo (`app/Abstractions/…`) — do not invent signatures.
+6. **Evidence-anchored code (hallucination guard).** Before writing any code, enumerate the classes/methods/arguments you plan to use, and verify **each one against the actual codebase** — open the file at its anchor and read the real signature (return type, parameter list, defaults). A symbol you merely *believe* exists ("it probably has `update()`", "the method returns a Model") is not evidence. If verification fails, do not invent — find a real analogue in the bank or the repo, or stop and ask the operator. Memory is a guess; the repo is the source of truth.
+7. After **fixing** a snippet's BAD form, re-verify the arising code compiles **and** the adjacent contracts still match the anchors (return types, rule shapes, array-payload protocol) — a visually-correct copy that breaks a signature is still a bug.
 
 ---
 

@@ -19,6 +19,34 @@ All the following conditions MUST be met before any task is considered complete.
 11. [ ] No `dd()`, `dump()`, or `ray()` in committed code (see `11-forbidden-behavior.md` — single source of truth).
 12. [ ] File organization respects the feature's context.
 13. [ ] `MASTER_BUILD_SPECIFICATION.md` was read before writing code — or, if it was missing, it was created (complete, detailed, precise) via operator Q&A and confirmed before any code.
+14. [ ] Senior self-review done (rubric below) — every condition traced on both branches, diff read as a reviewer, not as its author.
+15. [ ] Edge-case probes applied to every touched code path (see `15-edge-cases.md`) — boundaries tested or explicitly designed for.
+
+---
+
+## Senior Self-Review Rubric
+
+Before considering any task complete, read your own diff **as a senior reviewer**, not as its
+author. Answer each dimension with **PASS / FAIL + evidence**. Any FAIL blocks finalize:
+
+- **Correctness** — trace every condition through both branches mentally; verify each error path
+  surfaces (not swallowed), each return is the right type, and no statement is dead.
+- **Boundaries** — the probes from `15-edge-cases.md` were actually run (null/empty, collisions,
+  soft-deleted, permissions, large data, concurrency).
+- **Minimalism & scope** — the diff is the smallest possible change; no unrelated files, no
+  speculative edits (see `11-forbidden-behavior.md`).
+- **Readability & naming** — a stranger reading only the diff can reconstruct the intent; any
+  line needing a comment is rewritten instead (self-explanatory rule — `04-coding-standards.md`).
+- **Security requirements held** — no new trust of input without validation, authorization still
+  decided server-side (`07-security.md`).
+- **Data held** — migrations keep constraints/indexes, queries avoid N+1, performance lens from
+  `13-database.md` applied.
+- **Verifiable claim** — you can state what you changed, why, and how you know it is right
+  (static analysis + the tests/probes you actually ran).
+
+A self-review that cannot produce evidence for a dimension is itself a FAIL — investigate, do
+not rationalize. This rubric complements (does not replace) the gate checklist above and the
+human-review triggers below.
 
 ---
 
