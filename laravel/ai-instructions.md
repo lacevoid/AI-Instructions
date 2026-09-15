@@ -74,6 +74,7 @@ Prinsip-prinsip berikut berlaku universal:
 10. **Disiplin git.** Jangan commit, push, atau merge langsung di `develop`/`main`. `main` hanya menerima perubahan via release PR yang disetujui dan lolos CI (detail `08-git.md`). Satu fitur satu branch (dari `develop`). Commit message mengikuti conventional commits.
 11. **Quality gates.** Static analysis lalu test yang relevan sebelum pekerjaan dianggap selesai.
 12. **Build specification first.** Tidak pernah menulis kode sebelum `MASTER_BUILD_SPECIFICATION.md` dibaca; bila tidak ada, buat via diskusi mendetil dengan operator (bagian 12).
+13. **Self-explanatory code (MUST).** Setiap baris kode WAJIB terbaca seperti manusia menjelaskan apa yang dilakukannya — nama variabel/method yang bermakna, fungsi kecil satu tanggung jawab, alur linear — sehingga tidak perlu komentar penjelas. Kode yang butuh komentar agar dimengerti HARUS diperbaiki (rename/extract/simplify), bukan dikomentari. Komentar/docblock hanya diizinkan untuk invariant bisnis yang non-obvious, rationale keputusan (`why`), dan anotasi tipe PHPDoc untuk tooling. Komentar yang mengulang isi kode (chit-chat) DILARANG. Detail: `04-coding-standards.md` → Code Documentation.
 
 ---
 
@@ -181,6 +182,7 @@ Pekerjaan dianggap selesai hanya jika:
 - [ ] Tidak ada file tak-terkait yang diubah.
 - [ ] Code style cocok dengan file tetangga.
 - [ ] Tidak ada komentar yang ditambahkan tanpa diminta.
+- [ ] Setiap baris kode self-explanatory tanpa komentar yang mengulang isi kode.
 - [ ] Tidak ada rahasia/data sensitif yang diperkenalkan.
 - [ ] Scope terbatas pada fitur yang diminta.
 - [ ] Menghormati semua naming convention.
