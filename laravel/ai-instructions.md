@@ -71,7 +71,7 @@ Prinsip-prinsip berikut berlaku universal:
 7. **Preserve intent, minimalkan perubahan terkait.** Jangan perbaiki bug yang tidak berhubungan.
 8. **Audit & jejak.** Mutasi data yang penting tercatat. Jangan menghapus jejak history.
 9. **Keamanan dasar.** Tidak ada password plaintext, tidak ada rahasia di git, tidak ada `dd()/dump()` pada kode tercommit.
-10. **Disiplin git.** Jangan commit langsung di `develop`/`main`. Satu fitur satu branch (dari `develop`). Commit message mengikuti conventional commits.
+10. **Disiplin git.** Jangan commit, push, atau merge langsung di `develop`/`main`. `main` hanya menerima perubahan via release PR yang disetujui dan lolos CI (detail `08-git.md`). Satu fitur satu branch (dari `develop`). Commit message mengikuti conventional commits.
 11. **Quality gates.** Static analysis lalu test yang relevan sebelum pekerjaan dianggap selesai.
 12. **Build specification first.** Tidak pernah menulis kode sebelum `MASTER_BUILD_SPECIFICATION.md` dibaca; bila tidak ada, buat via diskusi mendetil dengan operator (bagian 12).
 

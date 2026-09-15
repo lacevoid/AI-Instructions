@@ -52,6 +52,7 @@ The following behaviors are explicitly forbidden. These are absolute rules unles
 - ❌ Refactoring working code (speculative refactoring).
 - ❌ Fixing bugs not directly related to the current task.
 - ❌ Doing work directly on `develop` or `main` (create a feature branch from `develop`).
+- ❌ Pushing to `main`, or targeting `main` with a PR, outside the approved release flow (main accepts changes only via a green-CI, reviewed release PR from `develop` — see `08-git.md`).
 - ❌ Creating empty commits.
 - ❌ Pushing secrets or credentials.
 - ❌ Using `dd()`, `dump()`, or `ray()` in committed code.
