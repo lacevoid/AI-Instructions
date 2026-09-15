@@ -21,6 +21,10 @@ All the following conditions MUST be met before any task is considered complete.
 13. [ ] `MASTER_BUILD_SPECIFICATION.md` was read before writing code — or, if it was missing, it was created (complete, detailed, precise) via operator Q&A and confirmed before any code.
 14. [ ] Senior self-review done (rubric below) — every condition traced on both branches, diff read as a reviewer, not as its author.
 15. [ ] Edge-case probes applied to every touched code path (see `15-edge-cases.md`) — boundaries tested or explicitly designed for.
+16. [ ] Multi-layer feature decomposed into ordered phases, each verified before advancing (see `18-planning-and-safe-change.md`).
+17. [ ] Frontend↔backend contract stays in sync in the same change (see `20-frontend-and-contracts.md`).
+18. [ ] Change reproducible in a clean environment (lockfiles, fresh migration) and, for any user-visible flow, verified end-to-end (see `21-state-delivery-environment.md`).
+19. [ ] Decision log present — key decisions, assumptions, and anything that was NOT verified are surfaced to the operator (see `17-agent-discipline.md`).
 
 ---
 
