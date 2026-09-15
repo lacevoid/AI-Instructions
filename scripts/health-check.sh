@@ -48,8 +48,8 @@ say "== Referensi silang antar file instruksi =="
 # Collect every backtick-coded path token from repo-root and laravel/ markdown files.
 mapfile -t md_files < <(find . -maxdepth 1 -name '*.md'; find laravel -name '*.md')
 TOKENS_TMP="$(mktemp)"
-# shellcheck disable=SC2016
 for f in "${md_files[@]}"; do
+  # shellcheck disable=SC2016
   grep -hoE '`[^`]+\.(md|sh)`' "$f" >> "$TOKENS_TMP" 2>/dev/null || true
 done
 sort -u "$TOKENS_TMP" -o "$TOKENS_TMP"
