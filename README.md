@@ -26,10 +26,10 @@ AI-Instructions/
 └── laravel/             ← Template set instruksi (satu folder per framework/teknologi)
     ├── ai-instructions.md            ← Konstitusi (entry point)
     └── ai-instructions/
-        ├── 01-governance.md … 11-forbidden-behavior.md   ← Modul universal
-        ├── 12-project-specific/                          ← Invarian per proyek
-        │   ├── lingusid.md                               ← Invarian proyek LingSID
-        │   └── canonical-snippets.md                     ← Bank snippet verbatim + anchor
+        ├── 01-…-21-*.md                          ← Modul universal (01–11 + skill 13–21)
+        ├── 12-project-specific/                  ← Invarian per proyek
+        │   ├── lingusid.md                       ← Invarian proyek LingSID
+        │   └── canonical-snippets.md             ← Bank snippet verbatim + anchor
         └── README.md
 ```
 
@@ -57,6 +57,11 @@ AI-Instructions/
 3. **Master dapat di-custom**: script membuat `ai-instructions/master/` di proyek konsumen
    dan TIDAK menimpanya bila sudah ada — spesialisasi proyek dilakukan di sana, lalu script
    dijalankan ulang untuk mendistribusikan versi custom.
+4. **Self-instruction arsitek mengadopsi aturan kualitas `laravel/`**: modul universal dari set
+   `laravel/ai-instructions/` yang berlaku untuk kerja AI apa pun (evidence-anchored authoring,
+   quality gates + senior self-review, edge probes authoring, change impact analysis, debug
+   disipliner, agent discipline, reproduce-everywhere) diadopsi ke `AGENTS.md` bagian 5 dan
+   di-enforce lewat pre-commit hook + CI (`scripts/health-check.sh`, markdownlint, smoke test).
 
 ## Membuat Set Instruksi Baru
 
@@ -66,7 +71,8 @@ Ikuti `ARCHITECT-GUIDE.md` secara penuh (ringkasannya):
 2. Eksplorasi repository target (protocol eksplorasi 7 fase, termasuk koleksi snippet kanonik).
 3. Analisis (coding style, peletakan file, model fitur, testing, error handling, dll.).
 4. Pelajari `laravel/` sebagai **reference bar** — target kualitas minimum (bagian 6D playbook).
-5. Buat folder `<Framework>/` dengan struktur konstitusi + modul 01–11 + `12-project-specific/`.
+5. Buat folder `<Framework>/` dengan struktur konstitusi + modul 01–11 + skill kualitas 13–21 +
+   `12-project-specific/`.
 6. Tulis dengan evidence anchors + snippet kanonik verbatim.
 7. Verifikasi diri (bagian 9 playbook).
 8. Jalankan distribusi dari **root proyek konsumen**.
@@ -106,5 +112,5 @@ Setiap set WAJIB memuat KLAUSA 1–5 (detail penuh di `ARCHITECT-GUIDE.md` bagia
 
 | Set | Status | Catatan |
 |-----|--------|---------|
-| `laravel/` | Aktif | Berakar pada LingSID; konstitusi + 11 modul + invariant proyek di `12-project-specific/lingusid.md` + bank snippet kanonik; memuat protokol MASTER_BUILD_SPECIFICATION |
+| `laravel/` | Aktif | Berakar pada LingSID; konstitusi + modul 01–21 + invariant proyek di `12-project-specific/lingusid.md` + bank snippet kanonik; memuat protokol MASTER_BUILD_SPECIFICATION. Self-instruction arsitek (`AGENTS.md` §5) mengadopsi aturan kualitas universal dari set ini. |
 | `java/`, `react/` | Direncanakan | Didukung script (coming soon), folder belum dibuat |
