@@ -7,6 +7,7 @@ This file defines git branching and commit conventions for LingSID. The default/
 ## Branching
 
 ### Universal Rules
+
 - **`develop`** is the default integration branch (verified, tested code).
 - **`main`** is the protected release branch.
 - **DO NOT** commit, push, or merge directly to `develop` or `main`.
@@ -15,6 +16,7 @@ This file defines git branching and commit conventions for LingSID. The default/
 - Do NOT push or open a PR unless explicitly asked.
 
 ### Branch Base Decision Tree
+
 ```
 What are you working on?
 ├── A new feature → create branch from develop:  feat/{short-description}
@@ -25,6 +27,7 @@ What are you working on?
 ```
 
 ### Branch Workflow (Standard)
+
 ```
 1. git checkout develop
 2. git pull origin develop
@@ -40,6 +43,7 @@ What are you working on?
 ## Commits
 
 ### Required Discipline
+
 - Inspect `git status`, `git diff`, and `git log` before committing.
 - Stage only intended files; never commit secrets or artifacts.
 - Do not `git add .` blindly — review what is staged.
@@ -47,6 +51,7 @@ What are you working on?
 - **DO NOT** create empty commits.
 
 ### Prohibited Operations
+
 - Committing directly to `develop` or `main`.
 - Pushing to `main`, or creating a PR that targets `main`, outside the approved release flow (see «Release to Main»).
 - Force-pushing.
@@ -59,6 +64,7 @@ What are you working on?
 ## Commit Message Format (Conventional Commits)
 
 **Format:**
+
 ```
 <type>(<optional scope>): <concise description>
 ```
@@ -76,12 +82,14 @@ What are you working on?
 | `style` | Formatting, no logic change | `style: pint format actions` |
 
 **Rules:**
+
 1. Description concise and specific (imperative mood).
 2. Lowercase type and description; no period at the end.
 3. Max ~72 characters for the subject line.
 4. Use precise domain terms (`feat: add sid residents export`, not `feat: do stuff`).
 
 **Examples:**
+
 ```
 feat: add sid residents index page
 fix: guard against circular group membership
@@ -108,6 +116,7 @@ feature branch (feat/…, fix/…, hotfix/…)  →  PR →  develop  →  relea
 ```
 
 **MUST:**
+
 - Changes enter `develop` via PR from a short-lived feature/bugfix branch.
 - `main` accepts changes ONLY via a **release PR** from `develop` — never from a feature branch, and never by direct push/merge.
 - A release PR to `main` requires **all CI status checks green** (`tests` + `lint`) and at least **one human review** (see `10-quality-gates.md` → When Human Review Is Required).
@@ -115,6 +124,7 @@ feature branch (feat/…, fix/…, hotfix/…)  →  PR →  develop  →  relea
 - After a release, `develop` is fast-forwarded/re-tagged so it stays the ancestor of `main` (`main` ⊆ history of `develop`, never diverged).
 
 **MUST NOT:**
+
 - `git push origin main` — direct push to `main` is a violation.
 - Merging `main` into `develop` by hand to "sync"; use a normal `develop`-to-`main` release PR.
 - Overriding failed CI checks to merge a release PR.

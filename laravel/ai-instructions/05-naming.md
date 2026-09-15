@@ -9,6 +9,7 @@ This file defines naming conventions for context/action-based, Repository-driven
 ### Naming Pattern: `{Context}{Type}.php`
 
 Every PHP class follows:
+
 ```
 App\{Layer}\{Context}\{ClassName}
 ```
@@ -89,11 +90,13 @@ $article = $createWebArticleAction->handle($request->all());
 ## Database Naming
 
 ### Tables
+
 - Plural, snake_case: `residents` → `sid_residents`, `articles` → `web_articles`, `pages` → `web_pages`, `groups`, `terms`, `metadatas`, `menus`.
 - Domain-owned tables carry the context prefix: `sid_`, `web_`.
 - Pivot tables: `model_has_{relation}` — `model_has_groups`, `model_has_terms`, `model_has_metadata` (Spatie permission uses `model_has_roles`, `model_has_permissions`).
 
 ### Columns
+
 - snake_case: `birth_date`, `nik`, `author_id`, `parent_id`.
 - Foreign keys: `{related_table_singular}_id` (e.g., `author_id`, `group_id`, `parent_id`).
 - Timestamps: `created_at`, `updated_at` (standard Laravel).
@@ -101,6 +104,7 @@ $article = $createWebArticleAction->handle($request->all());
 - Enums stored as strings: `varchar`/`string` type, not native PHP enum type in DB.
 
 ### Primary Keys
+
 - Integer auto-increment (`id`).
 
 ---
@@ -132,12 +136,14 @@ Pattern: `dashboard.{context}.{subcontext}.{entity}.{action}` for authenticated 
 ## Frontend Naming
 
 ### Vue Files
+
 - PascalCase for components: `AppShell.vue`, `AppContent.vue`, `AppHeader.vue`, `AppLogo.vue`, `AppearanceTabs.vue`.
 - Pages mirror URI path: `resources/js/pages/Sid/Population/Residents/Index.vue`, `resources/js/pages/Web/Articles/Index.vue`.
 - Each CRUD resource has: `Index.vue`, `Create.vue`, `Edit.vue` (+ `Show.vue` where routed).
 - Pages for auth/settings stay flat in their folder: `resources/js/pages/Auth/*`, `resources/js/pages/Settings/*`.
 
 ### Vue Props
+
 - Interface named `Props`.
 - Typed explicitly.
 
@@ -149,6 +155,7 @@ interface Props {
 ```
 
 ### Inertia Page Names
+
 - Match the file path from `resources/js/pages/`: `Sid/Population/Residents/Index`, `Web/Articles/Index`.
 
 ---
@@ -174,6 +181,7 @@ enum GroupEnum: string
 ## Prohibited Naming
 
 Do NOT use:
+
 - Technical names for domain concepts: `TypeService`, `DataHandler`, `Manager`.
 - Generic names: `Helper.php`, `Utils.php`, `Service.php` — **generic** names are prohibited; a **domain-named** Service (`ArticleService`, `ResidentService`) is a valid, welcome layer pattern (see `03-architecture.md`).
 - Correct: `CreateWebArticleAction`, `GetSidResidentsAction`, `SidResidentRepository`, `HasGroups.php`, `ArticleService`.

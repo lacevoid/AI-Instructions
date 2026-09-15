@@ -1,0 +1,29 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  markdown:
+    runs-on: ubuntu-latest
+    name: Markdown lint
+    steps:
+      - uses: actions/checkout@v4
+      - run: npx --yes markdownlint-cli2@0.23.2
+        name: markdownlint-cli2
+
+  shell:
+    runs-on: ubuntu-latest
+    name: Shellcheck
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - run: shellcheck scripts/health-check.sh
+        name: shellcheck health-check.sh

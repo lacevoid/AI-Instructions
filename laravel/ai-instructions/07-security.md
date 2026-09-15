@@ -16,6 +16,7 @@ This file defines security rules, authentication/authorization patterns, and val
 ## Authorization
 
 ### Middleware
+
 - `auth` middleware for protected routes.
 - `verified` middleware for email verification.
 - `guest` middleware for public-only routes.
@@ -23,11 +24,13 @@ This file defines security rules, authentication/authorization patterns, and val
 - `throttle` middleware for rate limiting.
 
 ### Policy-Based
+
 - Policies exist for model-level authorization.
 - New features MUST implement actual authorization logic.
 - Do not ship placeholder policies that return `false` for everything.
 
 ### Role-Based (Spatie Permission)
+
 - `User` model uses `HasRoles` / `HasPermissions` (backed by `App\Contracts\Model\HasRolesContract` / `HasPermissionsContract`).
 - Enforce permissions server-side via middleware gates or `can:`/policies — never hide UI alone.
 - Audit role/permission changes (records via `spatie/laravel-activitylog`).
@@ -37,6 +40,7 @@ This file defines security rules, authentication/authorization patterns, and val
 ## Validation
 
 ### Primary: In Actions
+
 RuledActions validate data before business logic:
 
 ```php
@@ -50,6 +54,7 @@ public function rules(array $payload): array
 ```
 
 ### Secondary: In Controllers
+
 Simple inline validation for basic cases:
 
 ```php
@@ -60,7 +65,9 @@ $validatedData = $request->validate([
 ```
 
 ### Form Requests
+
 Used for authentication flows and settings (complex request-level validation).
+
 - Business logic validation belongs in RuledActions, not Form Requests.
 
 ---
@@ -68,6 +75,7 @@ Used for authentication flows and settings (complex request-level validation).
 ## Rate Limiting
 
 Implement rate limiting for sensitive endpoints:
+
 ```php
 if (RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
     throw ValidationException::withMessages([...]);
@@ -75,12 +83,14 @@ if (RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
 ```
 
 And in routes:
+
 ```php
 Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
     ->middleware(['signed', 'throttle:6,1']);
 ```
 
 ### Per-route rate limiting
+
 - Define named limiters in `App\Providers\AppServiceProvider` (`RateLimiter::for('{name}', …)`) and reference them on routes: `->middleware('throttle:{name}')`.
 - Apply `throttle:` to auth-adjacent endpoints (login, register, verify-email, password reset), file uploads, and any route that triggers external side-effects (email, SMS, exports).
 - Defaults: login/register `throttle:5,1`; general authenticated API `throttle:60,1` where applicable.
@@ -91,6 +101,7 @@ RateLimiter::for('uploads', fn (Request $request) => Limit::perMinute(10)->by($r
 ```
 
 ### CAPTCHA / anti-automation (when bots are a concern)
+
 - Add a honeypot field and/or rate limiting on public forms before applying CAPTCHA — CAPTCHA is a last resort, not a default.
 
 ---
@@ -99,10 +110,12 @@ RateLimiter::for('uploads', fn (Request $request) => Limit::perMinute(10)->by($r
 
 - All uploads go through `spatie/laravel-medialibrary` on the model (conversions, validation) — **never** store raw uploaded paths manually.
 - Validate server-side in the RuledAction:
+
   ```php
   'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
   'document' => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:10240'],
   ```
+
 - Rule set:
   - `image` for images; explicit `mimes:` whitelist (never allow `*` / arbitrary extensions).
   - `max:{kb}` size limit per entity (2 MB images, 10 MB documents are reasonable ceilings).
@@ -125,32 +138,40 @@ RateLimiter::for('uploads', fn (Request $request) => Limit::perMinute(10)->by($r
 ## Sensitive Data Handling
 
 ### Indonesian Personal Data (NIK / KK / Addresses)
+
 The SID domain handles Indonesian personal data (`nik`, family/address records). These are sensitive:
+
 - Never log, dump, or expose NIK/identity fields in responses, errors, or debug output.
 - Omit personal identity fields from lists/datasets unless the feature truly needs them; prefer `select()` over `*` in repository queries that expose them.
 - Mask or exclude identity attributes in audit/activity logs where feasible.
 
 ### Hidden Attributes
+
 ```php
 protected $hidden = ['password', 'remember_token'];
 ```
 
 ### Media Uploads (Spatie MediaLibrary)
+
 - Handle user-uploaded files through `spatie/laravel-medialibrary` on the model (conversions, validation) — never store raw uploaded paths manually.
 - Validate upload MIME/size server-side; sanitize filenames.
 
 ### Audit Trails (Spatie ActivityLog)
+
 - Important mutations (user, resident, group/menu settings) MUST be recorded via `activity()` / the model's `LogsActivity` trait so history is not lost.
 - Never delete activity/history records.
 
 ### Telescope (dev validation)
+
 Hide sensitive request details even when Telescope is enabled:
+
 ```php
 Telescope::hideRequestParameters(['_token', 'nik']);
 Telescope::hideRequestHeaders(['cookie', 'x-csrf-token', 'x-xsrf-token']);
 ```
 
 ### Password Hashing
+
 - `password` cast as `hashed` in User model.
 - `Hash::make()` used in password creation/reset.
 - Configure appropriate BCRYPT_ROUNDS for production and testing.
@@ -163,6 +184,7 @@ Telescope::hideRequestHeaders(['cookie', 'x-csrf-token', 'x-xsrf-token']);
 $request->session()->invalidate();
 $request->session()->regenerateToken();
 ```
+
 Used after logout and password changes.
 
 ---

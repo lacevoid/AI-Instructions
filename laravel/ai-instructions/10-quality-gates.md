@@ -76,6 +76,7 @@ For the LingSID project, additional gates apply (see `12-project-specific/lingus
 | `lint` | `./vendor/bin/phpstan analyse`, `./vendor/bin/pint --test`, `bun run lint`, `bun run format:check` | Static analysis + style enforcement |
 
 **Local parity rule:** before expecting a merge, the local branch MUST pass the same checks the CI runs:
+
 ```bash
 ./vendor/bin/phpstan analyse
 ./vendor/bin/pint --test      # or ./vendor/bin/pint to auto-fix first
@@ -84,6 +85,7 @@ bun run format:check
 ```
 
 **CI failure handling:**
+
 - Fix CI failures on the feature branch — never merge a red pipeline.
 - `lint` failures: run `./vendor/bin/pint` / `bun run lint -- --fix` / `bun run format` to auto-fix, then re-run the check.
 - `tests` failures: reproduce with `php artisan test --filter={FailingTest}` and fix only feature-related code.

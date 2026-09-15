@@ -96,6 +96,7 @@ Anda DILARANG menulis set instruksi sebelum menyelesaikan eksplorasi. Ikuti urut
 ### Phase 1 — Topologi Repository
 
 Inspect:
+
 - struktur root
 - direktori source / application / domain / infrastructure
 - test
@@ -111,6 +112,7 @@ Inspect:
 ### Phase 2 — Identifikasi Teknologi
 
 Tentukan (dan bagaimana sebenarnya digunakan, bukan sekadar didaftar):
+
 - bahasa, framework, library
 - versi runtime
 - build tools
@@ -124,6 +126,7 @@ Tentukan (dan bagaimana sebenarnya digunakan, bukan sekadar didaftar):
 ### Phase 3 — Rekonstruksi Arsitektur
 
 Jawab secara tegas:
+
 - Di mana business logic seharusnya berada?
 - Di mana infrastructure logic seharusnya berada?
 - Bagaimana data bergerak melalui sistem?
@@ -134,6 +137,7 @@ Jawab secara tegas:
 ### Phase 4 — Deteksi Pola
 
 Deteksi pola rekuren. Untuk TIAP pola yang terdeteksi, tentukan:
+
 - di mana digunakan
 - mengapa ada
 - tanggung jawab yang dimiliki
@@ -147,6 +151,7 @@ ditegaskan bila ada bukti implementasi.
 ### Phase 5 — Tentang Sumber Kebenaran
 
 Prioritas bukti:
+
 1. Implementasi yang sudah ada
 2. Pola implementasi yang berulang
 3. Test
@@ -163,6 +168,7 @@ kecelakaan atau usang.
 ### Phase 6 — Klasifikasi Keyakinan
 
 Untuk setiap aturan penting, klasifikasikan:
+
 - CONFIRMED RULE — diulang di banyak tempat.
 - STRONG INFERENCE — didukung beberapa contoh, tak terdokumentasi eksplisit.
 - WEAK INFERENCE — bukti terbatas.
@@ -207,6 +213,7 @@ kode representatif beserta path sumbernya (evidence anchor). Wajib kumpulkan:
    import alias, konvensi CSS.
 
 ATURAN:
+
 - Snippet WAJIB verbatim — salin apa adanya, jangan "diperbaiki" atau ditebak jika kabur.
 - Setiap snippet WAJIB mencantumkan **evidence anchor** (path, atau `path:line` bila perlu).
 - Jika ada bagian yang disingkat, tandai eksplisit dengan `…` / `// …` dan sebutkan bahwa
@@ -328,6 +335,7 @@ Buat folder baru dengan nama **nama teknologi/framework repository target** (mis
 ### A. `ai-instructions.md` — Konstitusi (entry point)
 
 Ikuti struktur konstitusi yang ada di `laravel/ai-instructions.md` sebagai template:
+
 - Header `# AI INSTRUCTION SYSTEM — CONSTITUTION`
 - Blok `[!CRITICAL]` protokol baca-sebelum-menulis.
 - File map instruksi.
@@ -386,6 +394,7 @@ yang saling melengkapi (lakukan keduanya):
 
 1. **Inline di modul terkait** — untuk aturan penting, sertakan blok
    `Canonical snippet:` berisi kode verbatim + evidence anchor. Contoh:
+
    ```
    Canonical snippet (verbatim — tiru persis): app/Actions/Web/Article/CreateWebArticleAction.php
    class CreateWebArticleAction extends Action implements RuledActionContract
@@ -395,6 +404,7 @@ yang saling melengkapi (lakukan keduanya):
        public function rules(array $payload): array { /* … */ }
    }
    ```
+
    Rujuk snippet ini secara eksplisit dari aturan yang bersangkutan
    («Tiru persis snippet di 03-architecture.md»).
 2. **Bank snippet terpusat (WAJIB untuk semua set)** — buat file konsolidasi
@@ -404,6 +414,7 @@ yang saling melengkapi (lakukan keduanya):
    REFERENCE BAR (bagian 6D) — set tanpa bank = belum selesai.
 
 **Cakupan minimum bank snippet terpusat:**
+
 - Abstraksi dasar & kontrak — base/abstract class + interface/contract, lengkap verbatim
   dengan signature (nama method, parameter style, return type) dan body penentu kontrak.
 - Dua gaya nyata bila keduanya ada di repository (mis. rules pipe-string `'required|...'`
@@ -416,17 +427,21 @@ yang saling melengkapi (lakukan keduanya):
 - Setiap snippet: verbatim + evidence anchor (`path` atau `path:line`).
 
 **Praktik penandaan defect/legacy (`// BAD`):**
+
 - Bila eksplorasi menemukan pola yang dipanggil tapi rusak/legacy dan JANGAN ditiru agent
   masa depan (mis. method yang tidak pernah didefinisikan dipanggil dari test,
   `handle()` dua argumen, payload scalar diteruskan ke Action ber-rule array,
   `update()`-returning-bool diberi assignment ke variabel Model), tulis di
   `11-forbidden-behavior.md` dan tandai di bank snippet dengan blok:
+
   ```
   // BAD — jangan tiru (ditemukan di <path>:line). Canonical: <kode yang benar>.
   ```
+
 - Beda eksplisit antara **kanonik** (yang WAJIB ditiru) dan **defect/legacy** (yang DILARANG).
 
 **Aturan penulisan snippet hasil generasi:**
+
 - Salin **verbatim** dari repository target; jangan memparafrase atau "memperbaiki".
 - Selalu sertakan evidence anchor (path, dan `path:line` bila perlu).
 - Potongan yang disingkat ditandai `…` / `// …` + keterangan eksplisit.
@@ -497,6 +512,7 @@ imperatif: MUST, SHOULD, MUST NOT, ONLY WHEN, PREFER, VERIFY.
 - Ganti dengan aturan tegas berbasis bukti, contoh:
   > «Business logic belongs in Actions under "X/Actions". Controllers MUST only perform request orchestration and response conversion.»
 - Sertakan **Evidence anchors** per aturan penting, contoh:
+
   ```
   Pattern: Use Action classes for application-level operations.
   Evidence:
@@ -504,6 +520,7 @@ imperatif: MUST, SHOULD, MUST NOT, ONLY WHEN, PREFER, VERIFY.
     - app/Actions/UpdateUser.php
     - app/Actions/DeleteUser.php
   ```
+
 - **JANGAN memalsukan evidence** — jangan buat path file yang tidak ada.
 
 ---
@@ -551,9 +568,11 @@ Setelah set instruksi selesai, WAJIB:
 
 2. **Jalankan distribusi otomatis** dari root **PROYEK KONSUMEN** (mis.
    `/home/ubuntu/Project/WahyuLingu/lingusid`), BUKAN dari root repo AI-Instructions ini:
+
    ```bash
    ./setup-ai-rules.sh <nama-folder>
    ```
+
    Contoh: `./setup-ai-rules.sh laravel`.
    Ini mendistribusikan `ai-instructions.md` ke `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
    `.github/copilot-instructions.md`, `.cursorrules`, `.cursor/rules/...`, `.windsurfrules`,
@@ -572,10 +591,12 @@ Setelah set instruksi selesai, WAJIB:
    - Template di `<Framework>/ai-instructions*` adalah **sumber kebenaran** untuk editing.
    - Script TIDAK menimpa `ai-instructions/master/` bila sudah ada — hapus/master dulu
      agar master disinkronkan ulang:
+
      ```bash
      rm -rf ai-instructions/master
      ./setup-ai-rules.sh <nama-folder>
      ```
+
    - Verifikasi konsistensi: template ↔ master ↔ hasil distribusi harus **byte-identical**
      (`diff -q`), lalu lampirkan hasil perbandingan.
    - Sweep referensi stale sebelum commit (mis. `rg` nama proyek/route lama yang masih

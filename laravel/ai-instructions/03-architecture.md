@@ -113,6 +113,7 @@ Real contexts: `Sid` (village data), `Web` (public content), `Dashboard`, `Setti
 (`app/Services/Sid/ResidentReportService.php`).
 
 **Composition rules:**
+
 - A Service MAY call Repositories, other Services, and Actions — it typically composes
   several services/actions/repositories for one cohesive workflow.
 - An Action stays single-concern (one use case) and calls Repositories (and other Actions).
@@ -146,6 +147,7 @@ Service → Repository, Service → Action, Service → Service
 ```
 
 **FORBIDDEN:**
+
 - Model → Repository
 - Repository → Action
 - Action → Controller
@@ -194,6 +196,7 @@ Route::prefix('dashboard/web')->name('dashboard.web.')->group(function () {
 **Naming convention:** `dashboard.{context}.{subcontext}.{entity}.{action}`
 
 Real names:
+
 - `dashboard.sid.population.residents.index` / `.create` / `.store` / `.edit` / `.update` / `.destroy`
 - `dashboard.web.articles.index` / `.create` / …
 - `dashboard.web.articles.categories.index` / …
@@ -223,6 +226,7 @@ resources/js/pages/
 **Rule:** Pages MUST mirror the URI path. Components MUST be in the correct contextual directory.
 
 Frontend conventions:
+
 - Composition API only `<script setup lang="ts">`.
 - Shared layout/components in `resources/js/components/` (`AppShell.vue`, `AppContent.vue`, `AppHeader.vue`, `AppLogo.vue`, …) and shadcn-vue primitives in `resources/js/components/ui/`.
 - Typed shared values via `@types`/`types/index.d.ts` (`App.Models.*`, `App.Data.*` dotted references).
@@ -258,6 +262,7 @@ Do not hardcode group behavior in controllers/actions; use `GroupEnum` cases and
 **`12-project-specific/canonical-snippets.md` is the authoritative verbatim snippet bank** (Action base, ruled/plain actions, controllers, repositories, models, traits, enums, exceptions, tests, frontend pages). Snippets are copied unchanged from the LingSID codebase and carry source anchors (`lingusid app/…:line`).
 
 **Invocation protocol (MUST):**
+
 - `$action->handle($request->all())` — ruled action: single array payload, validated inside the action.
 - `$action->handle(['id' => $id])` — delete/update by id inside the payload array.
 - `$action->handle(['resident' => $resident] + $request->all())` — model-aware rules (e.g. `Rule::unique(...)->ignore($payload['resident']->id)`).
@@ -272,6 +277,7 @@ Follow the bank's `// BAD` vs canonical replacement table rather than inventing 
 ## Abstraction Philosophy
 
 **DO:**
+
 - Use the existing base `Action` / `IndexAction` classes for business logic.
 - Use a domain **Service** layer when a use case spans multiple Actions/aggregates or is
   shared across contexts — it is equally valid as Actions and is simply not yet present in
@@ -285,6 +291,7 @@ Follow the bank's `// BAD` vs canonical replacement table rather than inventing 
 - Prefer auto-resolution over manual container bindings.
 
 **DON'T:**
+
 - Create generic catch-all classes (`Service.php`, `Helper.php`, `Utils.php`) — a Service
   MUST be domain-named and serve a concrete reused concern.
 - Introduce Services or DTOs gratuitously (without a cross-cutting/reused need).

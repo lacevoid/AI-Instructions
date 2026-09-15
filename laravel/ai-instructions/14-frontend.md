@@ -39,6 +39,7 @@ resources/js/
 ```
 
 **Rules:**
+
 - Pages MUST mirror the URI path from `resources/js/pages/`.
 - Components MUST be in the correct contextual directory — do not invent new folders without an analogue.
 - Shared layout/components live in `resources/js/components/`.
@@ -109,6 +110,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ```
 
 ### Component Order
+
 1. Imports (sorted by `prettier-plugin-organize-imports`).
 2. `interface Props { … }`.
 3. `defineProps<Props>()`.
@@ -118,6 +120,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 7. `<template>`.
 
 ### Script Setup Rules
+
 - Use `<script setup lang="ts">` — Composition API only. **NO Options API.**
 - Use `defineProps<Props>()` with a typed interface — never untyped props.
 - Use `defineEmits<{ (e: 'name', value: Type): void }>()` for events.
@@ -129,6 +132,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ## Typing Conventions
 
 ### TypeScript Types
+
 - Use `interface` for object shapes.
 - Use `type` for unions/intersections.
 - Props always typed with interfaces.
@@ -145,6 +149,7 @@ interface Props {
 - Map backend payload shapes explicitly — do not rely on implicit/global types for Inertia page props.
 
 ### Compiler Strictness
+
 - `vue-tsc --noEmit` passes for type checking (optional local check; CI does not run it by default).
 - Type errors block the `bun run build` and `bun run build:ssr` steps.
 
@@ -153,6 +158,7 @@ interface Props {
 ## Form Handling
 
 ### useForm (canonical for Inertia)
+
 ```typescript
 import { useForm } from '@inertiajs/vue3';
 
@@ -174,6 +180,7 @@ const save = () => {
 ```
 
 ### Form Rules
+
 - Use `useForm` for all Inertia data submissions against Laravel endpoints — not raw `fetch`/`axios`.
 - Submit via `form.post` / `form.put` / `form.patch` / `form.delete` to route names.
 - Display validation errors via `form.errors` (populated from `ValidationException` JSON).
@@ -193,6 +200,7 @@ const save = () => {
 ```
 
 ### Delete Operations
+
 ```vue
 <Link :href="route('dashboard.web.articles.destroy', article.id)" method="delete" as="button" type="button">
     <Button variant="destructive" size="sm">Hapus</Button>
@@ -217,6 +225,7 @@ const save = () => {
 ## Styling
 
 ### Tailwind CSS v4
+
 - Utility classes inline; no custom CSS unless needed (only when a utility is insufficient).
 - Conditional classes via `cn()` from `@/lib/utils`.
 - Dark mode via `.dark` class on `<html>` (tailwind `dark:` variants).
@@ -228,6 +237,7 @@ const buttonClasses = cn('inline-flex items-center', props.variant === 'outline'
 ```
 
 ### shadcn-vue Primitives
+
 - Use primitives from `resources/js/components/ui/` (`Button`, `Card`, `Table`, `Input`, `Dialog`, `Select`, …).
 - Do NOT copy/paste new shadcn primitives without checking they are not already present.
 - Component props follow shadcn-vue conventions: `variant`, `size`, `as-child`, merge with `+` operator for overrides.
@@ -242,10 +252,12 @@ const buttonClasses = cn('inline-flex items-center', props.variant === 'outline'
 - Utility helpers (formatting dates, currency, `cn()`) live in `resources/js/lib/`.
 
 **Create a composable when:**
+
 - The same logic is reused by 2+ components.
 - It encapsulates a cohesive interaction (form + validation flow, session timer, theming).
 
 **Do NOT create a composable for:**
+
 - One-off page logic (keep it in the page).
 - Trivial helpers (a function in `lib/` suffices).
 

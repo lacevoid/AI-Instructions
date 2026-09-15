@@ -40,11 +40,13 @@ This file defines how the agent should use tools: terminal, search, filesystem, 
 ## Linting & Formatting
 
 ### PHP
+
 - Format with Laravel Pint: `./vendor/bin/pint` (PSR-12 Laravel preset).
 - Check only (no write) for verification: `./vendor/bin/pint --test`.
 - Run PHPStan/Larastan at level 5 (`phpstan.neon`, paths `app/`, `config/`, `database/`, `routes/`) before considering work complete: `./vendor/bin/phpstan analyse`.
 
 ### TypeScript/Vue
+
 - Prettier with project config (organize-imports + tailwindcss plugins, printWidth 150, tabWidth 4).
 - Run ESLint flat config with Vue and TypeScript rules (ignores `resources/js/components/ui/**`).
 - Run via project scripts:
@@ -85,9 +87,11 @@ composer dev                     # Laravel dev assets (see script definition)
   - `php artisan route:list --path={path}` — verify route naming/prefix before editing routes.
   - `php artisan migrate:status` — verify migration order before/after edits.
   - `php artisan tinker` (interactive) — introspection snippets; prefer shell one-liners instead:
+
     ```bash
     php artisan tinker --execute="\App\Models\User::first()?->toArray()"
     ```
+
 - Check `storage/logs/laravel.log` via Read for runtime errors; never truncate/delete logs while diagnosing.
 
 ---
@@ -111,9 +115,11 @@ composer dev                     # Laravel dev assets (see script definition)
 ## Static Analysis
 
 - Run static analysis before considering work complete (level 5 per `phpstan.neon`):
+
   ```bash
   ./vendor/bin/phpstan analyse
   ```
+
 - Fix all issues found. Do not proceed while static analysis errors remain.
 - The `tests`/`lint` CI workflows re-run these checks on `develop`/`main` — local parity is required.
 
@@ -123,9 +129,11 @@ composer dev                     # Laravel dev assets (see script definition)
 
 - **Do NOT run the full test suite** unless explicitly asked.
 - When tests ARE run, run only relevant tests:
+
   ```bash
   php artisan test --filter=TestName
   ```
+
 - If tests fail, fix only the code related to the current feature.
 - Do NOT mock in Feature tests (use real database with `RefreshDatabase`).
 
