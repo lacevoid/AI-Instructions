@@ -41,13 +41,14 @@ ok() {
 # name forbidden generated artifacts — never resolved against this repo.
 SKIP_OR_EXTERNAL='^(app/|resources/|routes/|database/|config/|tests/|vendor/|public/|bootstrap/|node_modules/|stories/|\.github/|\.cursor/|\.clinerules/|CLAUDE\.md|GEMINI\.md|\.cursorrules|\.windsurfrules|\.continuerules|\.aider\.conf\.yml|AGENTS\.md|README\.md)'
 
-cd "$ROOT"
+cd "$ROOT" || exit 1
 
 say "== Referensi silang antar file instruksi =="
 
 # Collect every backtick-coded path token from repo-root and laravel/ markdown files.
 mapfile -t md_files < <(find . -maxdepth 1 -name '*.md'; find laravel -name '*.md')
 TOKENS_TMP="$(mktemp)"
+# shellcheck disable=SC2016
 for f in "${md_files[@]}"; do
   grep -hoE '`[^`]+\.(md|sh)`' "$f" >> "$TOKENS_TMP" 2>/dev/null || true
 done
