@@ -53,6 +53,7 @@ for f in "${md_files[@]}"; do
   grep -hoE '`[^`]+\.(md|sh)`' "$f" >> "$TOKENS_TMP" 2>/dev/null || true
 done
 sort -u "$TOKENS_TMP" -o "$TOKENS_TMP"
+# shellcheck disable=SC2016
 mapfile -t refs < <(sed -E 's/^`//; s/`$//' "$TOKENS_TMP")
 rm -f "$TOKENS_TMP"
 
