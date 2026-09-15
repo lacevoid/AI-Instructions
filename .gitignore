@@ -8,5 +8,5 @@ GEMINI.md
 .continuerules
 .clinerules/
 .cursor/
-.github/
+.github/copilot-instructions.md
 .aider.conf.yml

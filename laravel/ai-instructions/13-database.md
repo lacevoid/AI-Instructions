@@ -7,12 +7,14 @@ This file defines database rules: migrations, Eloquent relationships, factories,
 ## Migration Conventions
 
 ### Naming
+
 - Migration filenames use Laravel's timestamp format: `2024_01_01_000000_create_{table}_table.php`.
 - Create tables: `create_{table}_table` (plural snake_case).
 - Add columns: `add_{column}_to_{table}_table`.
 - Pivot tables: `create_{model}_has_{relation}_table`.
 
 ### Table Structure
+
 ```php
 Schema::create('web_articles', function (Blueprint $table) {
     $table->id();
@@ -26,6 +28,7 @@ Schema::create('web_articles', function (Blueprint $table) {
 ```
 
 ### Column Rules
+
 - Use `$table->id()` for auto-incrementing integer primary keys (project convention — see `03-architecture.md` Architectural Decision #7).
 - Use `$table->string()` for VARCHAR; `$table->text()` for long content.
 - Use `$table->timestamp()` for datetime columns, not `$table->dateTime()`.
@@ -35,6 +38,7 @@ Schema::create('web_articles', function (Blueprint $table) {
 - Soft deletes: `$table->softDeletes()` — only when business requires recovery.
 
 ### Foreign Keys
+
 - Always use `->constrained()` on foreign key migrations (enforces referential integrity at DB level).
 - Use `->constrained('table_name')` when the table name cannot be inferred from the column name.
 - Use `->nullOnDelete()` for optional relationships; `->cascadeOnDelete()` for owned relationships.
@@ -50,6 +54,7 @@ $table->foreignId('group_id')->constrained()->cascadeOnDelete();
 ```
 
 ### Indexing
+
 - Add index on foreign key columns used in WHERE/JOIN.
 - Add index on `slug` columns (used by `findBySlug()`).
 - Add composite index when queries filter on multiple columns frequently.
@@ -76,12 +81,14 @@ $table->index(['parent_id', 'type']); // composite index
 | Polymorphic Many-to-Many | `morphToMany()` | Taggable, Groupable |
 
 ### Naming Rules
+
 - Foreign key column: `{related_table_singular}_id` (e.g., `author_id`, `group_id`).
 - Method name: singular for hasOne/belongsTo (`author()`, `group()`).
 - Method name: plural for hasMany/belongsToMany (`articles()`, `groups()`).
 - Pivot table for belongsToMany: `{model}_has_{relation}` (e.g., `model_has_groups`).
 
 ### Polymorphic Taxonomy (LingSID-specific)
+
 The project uses a polymorphic taxonomy system — see `03-architecture.md` Reusable Taxonomy section. Models opt in via `HasGroups` / `HasMetadata` traits. Do NOT hardcode group behavior; use the traits and `GroupEnum`.
 
 ```php
@@ -93,6 +100,7 @@ public function groups(): MorphToMany
 ```
 
 ### Relationship Best Practices
+
 - Define relationships on the **owning** model (the one that "has").
 - Use `$fillable` on pivot data when needed for mass assignment.
 - Eager-load relationships to avoid N+1 queries — see Query Patterns below.
@@ -103,6 +111,7 @@ public function groups(): MorphToMany
 ## Model Conventions
 
 ### Fillable & Casts
+
 ```php
 class WebArticle extends Model
 {
@@ -125,6 +134,7 @@ class WebArticle extends Model
 ```
 
 ### Rules
+
 - Always declare `$table` explicitly (do not rely on Laravel's pluralization guess).
 - Always declare `$fillable` — never leave it empty or missing.
 - Use `$casts` for dates, JSON, enums, and decimals.
@@ -137,6 +147,7 @@ class WebArticle extends Model
 ## Query Patterns
 
 ### Eager Loading (N+1 Prevention)
+
 ```php
 // Always eager-load relationships when accessing them in views/lists
 $this->webArticleRepository->with(['author', 'groups'])->get();
@@ -148,6 +159,7 @@ return $this->with(['author', 'groups'])->all();
 **Rule:** If a template iterates over a relationship (e.g., `@each`, `v-for`), the parent query MUST eager-load it. Check query log or Laravel Debugbar for N+1 warnings.
 
 ### Scoped Queries
+
 ```php
 // Repository: custom scoped query
 class GroupRepository extends ModelRepository
@@ -160,6 +172,7 @@ class GroupRepository extends ModelRepository
 ```
 
 ### Query Builder Best Practices
+
 - Use `select()` to limit columns when only a subset is needed (especially for lists/exports).
 - Use `whereHas()` / `whereDoesntHave()` for relationship-based filtering.
 - Use `orderBy()` explicitly — do not rely on database insertion order.
@@ -167,6 +180,7 @@ class GroupRepository extends ModelRepository
 - Use `chunk()` or `cursor()` for processing large datasets in memory-efficient ways.
 
 ### Forbidden Query Patterns
+
 - ❌ `Model::all()` in controllers/actions — use repository methods.
 - ❌ `DB::table()` raw queries without strong justification — use Eloquent.
 - ❌ Raw SQL string interpolation (`DB::select("SELECT * FROM users WHERE id = $id")`).
@@ -177,11 +191,13 @@ class GroupRepository extends ModelRepository
 ## Transactions
 
 ### When to Use
+
 - Mutations that affect multiple tables or involve multiple steps.
 - Any operation where partial failure would leave inconsistent data.
 - Bulk operations that must be atomic.
 
 ### Pattern
+
 ```php
 DB::transaction(function () use ($payload) {
     $resident = $this->sidResidentRepository->store($payload);
@@ -195,6 +211,7 @@ DB::transaction(function () use ($payload) {
 ```
 
 ### Rules
+
 - Use `DB::transaction()` for multi-step mutations.
 - Do NOT wrap single operations in transactions (unnecessary overhead).
 - Transactions MUST be short — do not make API calls or heavy processing inside a transaction.
@@ -205,6 +222,7 @@ DB::transaction(function () use ($payload) {
 ## Factories
 
 ### Convention
+
 - One factory per model, in `database/factories/`.
 - Factory class: `{Model}Factory`.
 - Method: `definition()` returns array of fake data.
@@ -228,6 +246,7 @@ class WebArticleFactory extends Factory
 ```
 
 ### Rules
+
 - Use `User::factory()` as default foreign key value — it resolves via relationship.
 - Override defaults in tests: `User::factory()->create(['name' => 'Admin'])`.
 - Factory data MUST be realistic but deterministic (use `$this->faker`).
@@ -238,6 +257,7 @@ class WebArticleFactory extends Factory
 ## Seeders
 
 ### Convention
+
 - One seeder per context/domain in `database/seeders/`.
 - System data seeders (GroupEnum-based groups, default roles) run via `DatabaseSeeder`.
 - Use `firstOrCreate()` for idempotent seeding — re-running does not create duplicates.
@@ -258,6 +278,7 @@ class GroupSeeder extends Seeder
 ```
 
 ### Rules
+
 - Seeders MUST be idempotent — safe to run multiple times.
 - Use `firstOrCreate()` / `updateOrCreate()` instead of `create()` for system data.
 - Test data seeders (for development) go in `database/seeders/` but are NOT referenced from `DatabaseSeeder` in production.
@@ -279,6 +300,7 @@ class GroupSeeder extends Seeder
 ## Database Naming (Cross-Reference)
 
 See `05-naming.md` for full naming conventions. Quick reference:
+
 - Tables: plural, snake_case, context-prefixed (`sid_residents`, `web_articles`).
 - Columns: snake_case, foreign keys `{related}_id`.
 - Pivot tables: `model_has_{relation}` (no `$table->id()`).

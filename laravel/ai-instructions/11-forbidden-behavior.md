@@ -93,6 +93,7 @@ The following behaviors are explicitly forbidden. These are absolute rules unles
 ## Unknown Territory Handling
 
 When you encounter a situation not covered by these instructions:
+
 1. State the problem clearly.
 2. Propose the minimal fix.
 3. Get user confirmation before proceeding.

@@ -44,10 +44,12 @@ AI-Instructions/
      "DNA" format yang harus ditiru IDENTIK oleh agent masa depan, termasuk penandaan
      pola rusak/legacy (`// BAD`) yang dilarang ditiru.
 2. **Distribusi dilakukan di proyek konsumen**, bukan di repo ini:
+
    ```bash
    # di root proyek konsumen (mis. /home/ubuntu/Project/WahyuLingu/lingusid)
    ./setup-ai-rules.sh laravel
    ```
+
    Script menyalin konstitusi ke `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
    `.github/copilot-instructions.md`, `.cursorrules`, `.cursor/rules/laravel-directives.mdc`,
    `.windsurfrules`, `.clinerules/laravel-directives.md`, `.continuerules`,

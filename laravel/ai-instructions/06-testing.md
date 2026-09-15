@@ -67,12 +67,14 @@ public function testGroupCreation()
 ## Test Organization
 
 ### Unit Tests (`tests/Unit/`)
+
 - Model behavior tests.
 - Action logic tests (with mocked repositories).
 - Domain logic tests.
 - Mirror source structure: `tests/Unit/Actions/Group/CreateGroupActionTest.php`, `tests/Unit/Actions/Web/Dashboard/Sidebar/GetAllSidebarMenuActionTest.php`.
 
 ### Feature Tests (`tests/Feature/`)
+
 - HTTP endpoint tests.
 - Full integration tests with database.
 - Mirror route/feature structure:
@@ -118,6 +120,7 @@ class SomeTest extends TestCase
 ## Test Data
 
 ### Factory Usage (preferred)
+
 ```php
 $user = User::factory()->create();
 $group = Group::factory()->create(['name' => 'Test Group']);
@@ -125,6 +128,7 @@ $menu = Menu::factory()->create();
 ```
 
 ### Direct Creation (Unit Tests)
+
 ```php
 $group = Group::create([
     'name' => 'Test Group',
@@ -275,9 +279,11 @@ $this->expectExceptionMessage('Expected string groupKey');
 
 - **Do NOT run the full test suite** unless explicitly asked (it slows down development).
 - When tests ARE run, focus only on relevant tests:
+
   ```bash
   php artisan test --filter=ArticleTest
   ```
+
 - If tests fail, fix ONLY the code related to the current feature.
 - Do NOT fix unrelated test failures.
 
@@ -286,6 +292,7 @@ $this->expectExceptionMessage('Expected string groupKey');
 ## Fake-Based Testing (Notifications, Events, Queues)
 
 ### Notifications
+
 Use `Notification::fake()` — assert the notification was sent, then inspect its content (without actually dispatching mail/database drivers):
 
 ```php
@@ -304,6 +311,7 @@ Notification::assertNothingSent();
 ```
 
 ### Events
+
 Use `Event::fake()` + `assertDispatched` only when the event's listener would touch external systems. Prefer **real listeners** (integration) for local listeners — faking hides wiring bugs:
 
 ```php
@@ -316,6 +324,7 @@ Event::assertNotDispatched(ArticleUnpublished::class);
 ```
 
 ### Queued Jobs
+
 Use `Queue::fake()` — assert a job is pushed, and its payload, without running it:
 
 ```php
@@ -328,6 +337,7 @@ Queue::assertNotPushed(PruneAuditLogs::class);
 ```
 
 ### Mail
+
 Use `Mail::fake()` for mail-specific assertions (`assertSent`, `assertQueued`). Do not mix with `Notification::fake()` when the same flow sends both.
 
 **Rule:** Fakes are for boundary outbound effects (mail, notifications, jobs, HTTP). Eloquent/database and internal orchestration are tested with real code + `RefreshDatabase`.

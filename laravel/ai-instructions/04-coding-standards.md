@@ -7,6 +7,7 @@ This file defines coding style, formatting rules, and code conventions. Some rul
 ## PHP Style
 
 ### General
+
 - **Standard:** PSR-12
 - **Framework:** Laravel 12.x
 - **Indentation:** 4 spaces (no tabs)
@@ -16,6 +17,7 @@ This file defines coding style, formatting rules, and code conventions. Some rul
 - **PHP version:** ^8.2
 
 ### Class Structure
+
 - One class per file.
 - Namespace matches directory path.
 - `<?php` opening tag, no closing tag.
@@ -24,6 +26,7 @@ This file defines coding style, formatting rules, and code conventions. Some rul
 - Use statements ordered: classes, then functions, then constants.
 
 ### Method Style
+
 - Return types declared on all methods.
 - Nullable types use `?Type` syntax.
 - `readonly` is allowed but used sparingly (a few Actions use `protected readonly` promoted properties); plain `protected` promotion is the safe default. Match the neighbouring file.
@@ -31,11 +34,13 @@ This file defines coding style, formatting rules, and code conventions. Some rul
 - Method ordering: `__construct` → public methods → protected/private methods.
 
 ### Property Visibility
+
 - Properties use `protected` by default in Actions/Controllers (constructor promotion).
 - `private` used in base classes for internal state.
 - `$fillable` arrays in Models are always `protected`.
 
 ### Conditional Style
+
 ```php
 // Preferred: negated condition with early return
 if (! $condition) {
@@ -49,6 +54,7 @@ if (! is_string($groupKey)) {
 ```
 
 ### Array Syntax
+
 ```php
 // Associative arrays: short syntax with spaced brackets
 $validatedPayload = [
@@ -61,12 +67,14 @@ return [];
 ```
 
 ### String Style
+
 - Single quotes for simple strings.
 - Double quotes for strings with variables.
 - `sprintf()` for formatted strings.
 - `Str::of()` fluent interface for string manipulation.
 
 ### Import Ordering
+
 ```php
 // 1. PHP built-in classes
 use InvalidArgumentException;
@@ -174,6 +182,7 @@ class X extends Model
 ## TypeScript/Vue Style
 
 ### General
+
 - **Indentation:** 4 spaces
 - **Semicolons:** Yes (enforced by Prettier)
 - **Quotes:** Single quotes (enforced by Prettier)
@@ -181,6 +190,7 @@ class X extends Model
 - **Trailing commas:** Yes
 
 ### Vue Component Structure
+
 ```vue
 <script setup lang="ts">
 // Imports (ordered by prettier-plugin-organize-imports)
@@ -221,12 +231,14 @@ const submit = () => {
 ```
 
 ### TypeScript Types
+
 - Use `interface` for object shapes.
 - Use `type` for unions/intersections.
 - Props always typed with interfaces.
 - Model type references follow project convention (e.g., `App.Models.{Context}.{Model}`).
 
 ### CSS Classes
+
 - Tailwind CSS utility classes.
 - Use `cn()` helper for conditional classes (from `@/lib/utils`).
 - Use project UI component library (e.g., shadcn-vue) for UI primitives.
@@ -237,6 +249,7 @@ const submit = () => {
 ## Comment Style
 
 **DO NOT add comments** unless explicitly asked. The codebase is largely comment-free. The few existing comments are:
+
 - PHPDoc on model properties (`@var`).
 - Type annotations (`@return`, `@param`).
 - Occasional `@see` references.
@@ -260,6 +273,8 @@ When a comment is genuinely unavoidable, it may only explain a reason a human ca
 
 Permitted docblocks (tooling, not prose): PHPDoc `@var` on model properties, `@param` / `@return` type annotations, occasional `@see`.
 
+Worked GOOD / BAD / rewrite examples live in `12-project-specific/canonical-snippets.md` → Self-Explanatory Code Demonstrations.
+
 Do not add explanatory comments or documentation blocks unless explicitly asked.
 
 ---
@@ -267,10 +282,12 @@ Do not add explanatory comments or documentation blocks unless explicitly asked.
 ## Formatting Rules (Enforced by Tools)
 
 ### PHP
+
 - Laravel Pint (`./vendor/bin/pint`) with the default Laravel preset (PSR-12 based).
 - PHPStan/Larastan at level 5 (configured in `phpstan.neon`; paths `app/`, `config/`, `database/`, `routes/`).
 
 ### TypeScript/Vue
+
 - Prettier with:
   - `prettier-plugin-organize-imports` (auto-sorts imports).
   - `prettier-plugin-tailwindcss` (sorts Tailwind classes).

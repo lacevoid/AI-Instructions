@@ -168,9 +168,11 @@ Fix any issues found. Do not proceed until static analysis passes.
 If the user asks to run tests:
 
 1. Run only the relevant test file(s):
+
    ```bash
    php artisan test --filter=TestName
    ```
+
 2. Do NOT run the full test suite unless explicitly asked.
 3. If tests fail, fix only the code related to the current feature.
 

@@ -53,6 +53,7 @@ abstract class Action
 ```
 
 Signature facts you must preserve:
+
 - `handler()` is **`protected`** and shaped `($payload = null, array $validatedPayload = []): mixed`.
 - `handle(mixed $payload = null)` has **no return type declaration**.
 - Ruled actions receive the **validated** data as `$validatedPayload`; non-ruled actions only get `$payload`.
@@ -283,6 +284,7 @@ class DeleteWebArticleAction extends Action implements RuledActionContract
 ```
 
 **Rule-style summary (canonical by prevalence):**
+
 - **Pipe strings** (`'required|string|max:255'`) are the canonical form for create/update rules — `Web/Article` and `Group` actions.
 - **Array + `Rule::`** (`Rule::unique(...)`, `Rule::in(...)`, `Rule::exists(...)`) is used where a rule needs chaining or a closure over `$payload` — SID actions and `DeleteWebArticleAction`.
 - Use `Rule::unique(Model::class)` (not table strings) for SID; `'unique:web_articles,slug,…'` (table strings) for Web/Article.
@@ -477,6 +479,7 @@ public function store(Request $request, CreateWebArticleAction $createWebArticle
 **Both injection styles are present in the codebase.** Canonical preference: constructor injection when a controller uses several actions (SID); method injection is acceptable for one-off actions (Web). Match the style of the controller file you are editing.
 
 **Invocation protocol (MUST):**
+
 - Pass the whole input as a single array: `handle($request->all())` or `handle(['resident' => $resident] + $request->all())`.
 - You may pass **no argument** (`handle()`) for non-ruled list/dashboard actions.
 - You may pass a **Model** (`handle($resident)`) only to a **non-ruled** action.
@@ -955,6 +958,7 @@ XxxAction::handle($data);
 ```
 
 Canonical replacements:
+
 ```php
 $action->handle($request->all());                 // ruled action: single array payload
 $action->handle(['id' => $id]);                   // ruled delete/update: id inside the array
@@ -1003,6 +1007,7 @@ Schema::create('model_has_groups', function (Blueprint $table) {
 ```
 
 Style facts:
+
 - `$table->id()` integer auto-increment PK; `$table->foreignId(...)->constrained(...)->onDelete('cascade')` for FKs.
 - Pivot tables have NO `id` column — two FKs + optional composite `unique([...], '{table}_group_model_unique')`.
 - `$table->morphs('groupable')` for polymorphic relation columns (`groupable_id` + `groupable_type`).
@@ -1061,6 +1066,7 @@ class GroupFactory extends Factory
 ```
 
 Style facts:
+
 - `protected $model = Group::class;` — always declared.
 - `definition()` returns deterministic fake data; slug derived from the same `$name` via `Str::slug($name)` (never `$this->faker->slug()` which could disagree with the name).
 - Variants via `state()` returning a factory from a public method (`main()` / `sidebar()` / `footer()`). Other project factories (`MenuFactory`, `TermFactory`, `MetadataFactory`) follow the same shape — `protected $model` + `definition(): array`.
@@ -1092,6 +1098,7 @@ class GroupSeeder extends Seeder
 ```
 
 Style facts:
+
 - Seeders inject Actions via **method injection** in `run(SomeAction $action): void` and delegate to them instead of touching repositories/model logic directly.
 - Mutations wrapped in `DB::transaction()`.
 - `Laravel\Prompts\progress(label:, steps:, callback:)` for progress reporting on batch operations (named arguments).
@@ -1125,6 +1132,7 @@ class ShareDashboardData
 ```
 
 Style facts:
+
 - Middleware resolves an Action lazily via a closure inside `Inertia::share()` (deferred until the shared data is actually consumed).
 - `handle(Request $request, Closure $next): Response` — standard signature; shared helpers extracted to `protected` methods (`shareMenu(): void`).
 - Sibling middleware: `HandleAppearance.php`, `HandleInertiaRequests.php`, `ShareWebData.php`. Protected app routes run under `['auth', 'verified', ShareDashboardData::class]`.
@@ -1152,9 +1160,76 @@ class ContentArticlePolicy
 ```
 
 **Canonical expectation for new policies** (per `07-security.md`):
+
 - Reference a real model (`App\Models\Web\WebArticle`, `App\Models\Sid\SidResident`, …).
 - Implement actual authorization logic — never ship a `false`-returning stub.
 - Register via `Gate::policy()` / Laravel auto-discovery when referenced from controllers or `$this->authorize()`.
+
+---
+
+## Self-Explanatory Code Demonstrations
+
+Constitution principle #13 and `04-coding-standards.md` → Code Documentation demand that every line read like a human explaining what it does — no explanatory comments required. Below: one verbatim GOOD example from LingSID, then an illustrative BAD→GOOD pair.
+
+### GOOD (verbatim) — guard clause + fluent chain, zero comments — `lingusid app/Actions/Group/EnsureSystemGroupExistsAction.php:25`
+
+```php
+protected function handler($groupKey = null, array $validatedPayload = []): Group
+{
+    if (! is_string($groupKey)) {
+
+        throw new InvalidArgumentException('Expected string groupKey for group slug.');
+    }
+
+    $slug = Str::of($groupKey)->start(self::SYSTEM_GROUP_PREFIX)->slug()->toString();
+    $group = $this->groupRepository->findBySlug($slug);
+
+    if (! $group instanceof Group) {
+
+        $name = Str::of($slug)->replace('-', ' ')->title()->toString();
+        $description = sprintf('This group is for the %s functionalities.', Str::lower($name));
+
+        return $this->createGroupAction->handle(compact('name', 'description'));
+    }
+
+    return $group;
+}
+```
+
+What makes this self-explanatory: an early guard throws before work starts, intent-revealing names (`findBySlug`, `createGroupAction`) remove the need for "what/why" comments, conditions are plain (`! $group instanceof Group`), and the return path is linear. Note: no comment restates any line.
+
+### BAD (illustrative — NOT verbatim LingSID) — code that forces a comment
+
+```php
+// check if user is admin. if the user is not an admin but has role equal to
+// the admin-adjacent flag from the request we still allow it. otherwise reject.
+if ($user->role_type === 3 || $request->admin_adjacent === true && $user->is_active == 1) {
+    return redirect('/home'); // let the user pass
+}
+```
+
+Problems (each is a rule violation on its own):
+
+- Comments restate what the code does (chit-chat).
+- Magic number `3` and `true`/`== 1` hide intent.
+- Operator precedence makes the condition hard to read even with a comment.
+- The line "needs a comment to be understood" → the code must change, not be annotated.
+
+### GOOD (illustrative rewrite of the same logic)
+
+```php
+const int ROLE_TYPE_ADMIN = 3;
+
+if ($user->isNotAdmin() && ! $request->isAdminAdjacentApproved()) {
+    abort(403);
+}
+
+return $this->redirectAdminDashboard();
+```
+
+What changed: guarded conditions read as English, repeated intent extracted into named methods/constants, early abort simplifies the happy path, and every comment disappeared because the names carry the meaning.
+
+When real LingSID code is ambiguous (e.g. the `UpdateWebArticleAction` bool-reassignment defect above), the rule is the same: **fix the code, do not comment it** — never copy the defect with an explanatory comment attached.
 
 ---
 
