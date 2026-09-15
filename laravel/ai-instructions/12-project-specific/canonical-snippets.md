@@ -965,10 +965,205 @@ $action->handle();                                // non-ruled action with no in
 
 ---
 
+## 12. Migrations & Schema
+
+### Create table with FK constraint — `lingusid database/migrations/2025_09_01_024339_create_web_articles_table.php:14`
+
+```php
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('web_articles', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->string('slug')->unique();
+            $table->text('content');
+            $table->timestamp('published_at')->nullable();
+            $table->foreignId('author_id')->constrained('users')->onDelete('cascade');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('web_articles');
+    }
+};
+```
+
+### Pivot table (morphs + composite unique) — `lingusid database/migrations/2025_07_10_070450_create_model_has_groups_table.php:14`
+
+```php
+Schema::create('model_has_groups', function (Blueprint $table) {
+    $table->foreignId('group_id')->constrained()->onDelete('cascade');
+    $table->morphs('groupable');
+    $table->unique(['group_id', 'groupable_id', 'groupable_type'], 'model_has_groups_group_model_unique');
+});
+```
+
+Style facts:
+- `$table->id()` integer auto-increment PK; `$table->foreignId(...)->constrained(...)->onDelete('cascade')` for FKs.
+- Pivot tables have NO `id` column — two FKs + optional composite `unique([...], '{table}_group_model_unique')`.
+- `$table->morphs('groupable')` for polymorphic relation columns (`groupable_id` + `groupable_type`).
+- Self-referencing FK example: `$table->foreignId('parent_id')->nullable()->constrained('menus')->onDelete('cascade')` (`create_menus_table.php:20`).
+- Unique single-column example: `$table->string('slug')->unique()` (`create_groups_table.php:17`).
+
+---
+
+## 13. Factories
+
+### Factory with state methods — `lingusid database/factories/GroupFactory.php:9`
+
+```php
+class GroupFactory extends Factory
+{
+    protected $model = Group::class;
+
+    public function definition(): array
+    {
+        $name = $this->faker->unique()->word();
+
+        return [
+            'name' => $name,
+            'slug' => Str::slug($name),
+            'description' => $this->faker->paragraph(),
+        ];
+    }
+
+    public function main(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'main',
+            ];
+        });
+    }
+
+    public function sidebar(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'sidebar',
+            ];
+        });
+    }
+
+    public function footer(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'footer',
+            ];
+        });
+    }
+}
+```
+
+Style facts:
+- `protected $model = Group::class;` — always declared.
+- `definition()` returns deterministic fake data; slug derived from the same `$name` via `Str::slug($name)` (never `$this->faker->slug()` which could disagree with the name).
+- Variants via `state()` returning a factory from a public method (`main()` / `sidebar()` / `footer()`). Other project factories (`MenuFactory`, `TermFactory`, `MetadataFactory`) follow the same shape — `protected $model` + `definition(): array`.
+
+---
+
+## 14. Seeders
+
+### Idempotent system-group seeder — `lingusid database/seeders/GroupSeeder.php:13`
+
+```php
+class GroupSeeder extends Seeder
+{
+    public function run(EnsureSystemGroupExistsAction $ensureSystemGroupExistsAction): void
+    {
+        DB::transaction(function () use ($ensureSystemGroupExistsAction) {
+            $mainGroup = $ensureSystemGroupExistsAction->handle('main');
+
+            progress(
+                label  : '⏳ Menyiapkan grup sistem',
+                steps  : GroupEnum::cases(),
+                callback: function ($groupEnum) use ($ensureSystemGroupExistsAction, $mainGroup) {
+                    $mainGroup->morph(Group::class)->save($ensureSystemGroupExistsAction->handle($groupEnum->value));
+                }
+            );
+        });
+    }
+}
+```
+
+Style facts:
+- Seeders inject Actions via **method injection** in `run(SomeAction $action): void` and delegate to them instead of touching repositories/model logic directly.
+- Mutations wrapped in `DB::transaction()`.
+- `Laravel\Prompts\progress(label:, steps:, callback:)` for progress reporting on batch operations (named arguments).
+- System seeding is idempotent via `EnsureSystemGroupExistsAction` (create-if-missing). `TermSeeder.php:36` and `MenuSeeder.php:16` follow the same method-injection + transaction shape.
+
+---
+
+## 15. Middleware
+
+### Share middleware (Inertia data) — `lingusid app/Http/Middleware/ShareDashboardData.php:11`
+
+```php
+class ShareDashboardData
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $this->shareMenu();
+
+        return $next($request);
+    }
+
+    protected function shareMenu(): void
+    {
+        Inertia::share([
+            'sidebarMenus' => function (GetAllSidebarMenuAction $getAllSidebarMenu) {
+                return $getAllSidebarMenu->handle();
+            },
+        ]);
+    }
+}
+```
+
+Style facts:
+- Middleware resolves an Action lazily via a closure inside `Inertia::share()` (deferred until the shared data is actually consumed).
+- `handle(Request $request, Closure $next): Response` — standard signature; shared helpers extracted to `protected` methods (`shareMenu(): void`).
+- Sibling middleware: `HandleAppearance.php`, `HandleInertiaRequests.php`, `ShareWebData.php`. Protected app routes run under `['auth', 'verified', ShareDashboardData::class]`.
+
+---
+
+## 16. Policies
+
+> [!WARNING]
+> The ONLY policy file in the reference codebase — `lingusid app/Policies/ContentArticlePolicy.php:8` —
+> is a **placeholder defect**: it imports `App\Models\Content\ContentArticle` (a model that does NOT
+> exist in the codebase) and every method returns `false`. It is not registered/used anywhere.
+> Do NOT copy it as a template. When a real policy is needed, write one that performs actual
+> authorization (e.g. ownership checks, `$user->can()`, roles) and references a REAL model.
+
+```php
+// BAD — jangan tiru (lingusid app/Policies/ContentArticlePolicy.php:8)
+class ContentArticlePolicy
+{
+    public function viewAny(User $user): bool { return false; }   // placeholder
+    public function view(User $user, ContentArticle $contentArticle): bool { return false; }
+    // … create/update/delete/restore/forceDelete all return false …
+    // App\Models\Content\ContentArticle does not exist in the codebase.
+}
+```
+
+**Canonical expectation for new policies** (per `07-security.md`):
+- Reference a real model (`App\Models\Web\WebArticle`, `App\Models\Sid\SidResident`, …).
+- Implement actual authorization logic — never ship a `false`-returning stub.
+- Register via `Gate::policy()` / Laravel auto-discovery when referenced from controllers or `$this->authorize()`.
+
+---
+
 ## Logical Links
 
 - Architecture & layering: `03-architecture.md`
 - Method/naming reference: `05-naming.md`
 - Test patterns: `06-testing.md`
+- Database/migration/factory/seeder rules: `13-database.md`
+- Frontend rules: `14-frontend.md`
 - Explicit prohibitions: `11-forbidden-behavior.md`
 - LingSID invariants: `12-project-specific/lingusid.md`

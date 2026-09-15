@@ -69,7 +69,7 @@ What are you working on?
 | `refactor` | Refactor without behavior change | `refactor: extract resident update into action` |
 | `test` | Add/fix tests | `test: cover circular membership guard` |
 | `docs` | Documentation | `docs: update instruction system` |
-| `chore` | Maintenance/deps | `chore: bump leravel/pint` |
+| `chore` | Maintenance/deps | `chore: bump laravel/pint` |
 | `style` | Formatting, no logic change | `style: pint format actions` |
 
 **Rules:**

@@ -76,5 +76,5 @@ Use these packages where applicable. Do NOT add new dependencies without checkin
 - [ ] Frontend passes `bun run lint` (ESLint) and `bun run format:check` (Prettier).
 - [ ] `#[Test]` attribute + snake_case method names on new tests; `RefreshDatabase` on database tests.
 - [ ] Works on a feature branch off `develop`; never commit to `develop`/`main` directly.
-- [ ] No `dd()`, `dump()`, `ray()` in committed code.
+- [ ] No `dd()`, `dump()`, `ray()` in committed code (see `11-forbidden-behavior.md`).
 - [ ] No static call to instance methods (`XxxAction::handle()` must never appear).

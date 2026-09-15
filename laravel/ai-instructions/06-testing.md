@@ -9,6 +9,7 @@ This file defines testing conventions for PHPUnit/Laravel-based projects. Apply 
 - **PHPUnit** with Laravel test helpers.
 - **SQLite in-memory** database for all tests.
 - **Test suites:** `Unit` and `Feature` (defined in `phpunit.xml`).
+- **Runner:** use `php artisan test` (Pest-less, standard Laravel runner) — not `./vendor/bin/phpunit` (it skips Laravel bootstrap). Filter with `--filter=TestName`, group with `--testsuite=Unit|Feature`.
 
 ---
 
@@ -279,3 +280,74 @@ $this->expectExceptionMessage('Expected string groupKey');
   ```
 - If tests fail, fix ONLY the code related to the current feature.
 - Do NOT fix unrelated test failures.
+
+---
+
+## Fake-Based Testing (Notifications, Events, Queues)
+
+### Notifications
+Use `Notification::fake()` — assert the notification was sent, then inspect its content (without actually dispatching mail/database drivers):
+
+```php
+use Illuminate\Support\Facades\Notification;
+
+Notification::fake();
+
+$response = $this->actingAs($user)->post(route('…store'), [...]);
+
+Notification::assertSentTo(
+    $user,
+    ResetPasswordNotification::class,
+    fn ($notification) => $notification->token !== null
+);
+Notification::assertNothingSent();
+```
+
+### Events
+Use `Event::fake()` + `assertDispatched` only when the event's listener would touch external systems. Prefer **real listeners** (integration) for local listeners — faking hides wiring bugs:
+
+```php
+use Illuminate\Support\Facades\Event;
+
+Event::fake([WebArticlePublished::class]);
+// … trigger action …
+Event::assertDispatched(WebArticlePublished::class);
+Event::assertNotDispatched(ArticleUnpublished::class);
+```
+
+### Queued Jobs
+Use `Queue::fake()` — assert a job is pushed, and its payload, without running it:
+
+```php
+use Illuminate\Support\Facades\Queue;
+
+Queue::fake();
+// … trigger action …
+Queue::assertPushed(SendResidentReport::class, fn ($job) => $job->residentId === $resident->id);
+Queue::assertNotPushed(PruneAuditLogs::class);
+```
+
+### Mail
+Use `Mail::fake()` for mail-specific assertions (`assertSent`, `assertQueued`). Do not mix with `Notification::fake()` when the same flow sends both.
+
+**Rule:** Fakes are for boundary outbound effects (mail, notifications, jobs, HTTP). Eloquent/database and internal orchestration are tested with real code + `RefreshDatabase`.
+
+---
+
+## Test Coverage Guidance
+
+- Cover every RuledAction: happy path + at least one validation-failure path (assert `ValidationException` or `InvalidArgumentException('Payload must be an array.')` for scalar misuse).
+- Feature tests cover each route: `index` (assert view + response), `store` (assert database row via `assertDatabaseHas`), `update`, `destroy`.
+- Guard clauses (e.g. `EnsureSystemGroupExistsAction` throwing for non-string group key) get a unit test asserting `expectException` + `expectExceptionMessage`.
+- Authorization: test guest redirect to login and forbidden access for unauthorized roles where policies exist.
+- Do NOT chase percentage targets — meaningful behavior tests matter; a passing suite with no broken references beats a green percentage.
+- Use `--filter` to run only touched tests during development; full suite is for pre-PR/CI validation.
+
+---
+
+## Broken Test Patterns (Never Reproduce)
+
+- ❌ Calling `$action->execute($data)` — the method does not exist (`handle()` is the only invocation API; see `11-forbidden-behavior.md`).
+- ❌ Mocking repositories in Feature tests — feature tests use the real DB with `RefreshDatabase`.
+- ❌ `refreshApplication()` loops / `:void` omitted return types on tests.
+- ❌ PHPDoc `@test` / bare `test_` prefix without `#[Test]` attribute.

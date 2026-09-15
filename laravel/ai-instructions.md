@@ -24,7 +24,7 @@ Setiap agent WAJIB membaca file dalam urutan berikut:
 1. **Konstitusi ini** — memahami hierarki, prioritas, scope, workflow, dan gates.
 2. **`ai-instructions/01-governance.md`** — aturan meta dan resolusi konflik.
 3. **`ai-instructions/02-agent-workflow.md`** — urutan kerja wajib.
-4. **Modul topikal yang relevan** (`03`–`11`) sesuai teknologi dan tugas.
+4. **Modul topikal yang relevan** (`03`–`11`, `13`, `14`) sesuai teknologi dan tugas.
 5. **Modul project-specific** (`12-project-specific/`) yang cocok dengan repository saat ini.
 6. **`MASTER_BUILD_SPECIFICATION.md`** di root proyek — spesifikasi build proyek (bagian 12). Jika tidak ada, buat terlebih dahulu via diskusi mendetil dengan operator.
 
@@ -47,7 +47,9 @@ Jangan hanya membaca README. Jangan menyimpulkan dari nama file. Baca seluruh mo
 | `ai-instructions/08-git.md` | Branching, commits, version control | UNIVERSAL + PROJECT |
 | `ai-instructions/09-tools.md` | Linter, formatter, runtime, static analysis | UNIVERSAL + PROJECT |
 | `ai-instructions/10-quality-gates.md` | Quality gates, verifikasi akhir | GLOBAL |
-| `ai-instructions/11-forbidden-behavior.md` | Larangan eksplisit | GLOBAL |
+| `ai-instructions/11-forbidden-behavior.md` | Larangan eksplisit (single source of truth untuk prohibitions) | GLOBAL |
+| `ai-instructions/13-database.md` | Database rules: migration, relationships, factory, seeder, query, transaction | UNIVERSAL + PROJECT |
+| `ai-instructions/14-frontend.md` | Frontend rules: Vue 3, TypeScript, Inertia, Tailwind, form handling | UNIVERSAL + PROJECT |
 | `ai-instructions/12-project-specific/lingusid.md` | Aturan invarian LingSID | PROJECT-SPECIFIC |
 | `ai-instructions/12-project-specific/canonical-snippets.md` | Bank snippet kanonik verbatim LingSID (signature, abstraksi, gaya) | PROJECT-SPECIFIC |
 | `ai-instructions/README.md` | Laporan analisis & deliverable | DOKUMENTASI |
@@ -228,9 +230,9 @@ Sebelum menyelesaikan tugas:
 
 Bagian ini berlaku saat bekerja di repository **AI-Instructions** ini — yaitu saat AI diminta membuat atau memperbarui set instruksi (konstitusi + modul) untuk framework atau proyek di masa depan.
 
-1. **Gunakan set `laravel/` sebagai referensi struktur & gaya.** Set `laravel/` adalah set terlengkap dan paling presisi: ikuti layout konstitusi (`ai-instructions.md`), pengelompokan modul `01`–`11`, `12-project-specific/`, `README.md`, dan alur regenerasi distribusi (`setup-ai-rules.sh`).
+1. **Gunakan set `laravel/` sebagai referensi struktur & gaya.** Set `laravel/` adalah set terlengkap dan paling presisi: ikuti layout konstitusi (`ai-instructions.md`), pengelompokan modul `01`–`14`, `12-project-specific/`, `README.md`, dan alur regenerasi distribusi (`setup-ai-rules.sh`).
 2. **Baca modul `laravel/` sebagai bahan acuan saat menulis set baru.** Modul 03–11 dan `12-project-specific/*` (termasuk `lingusid.md` dan `canonical-snippets.md`) adalah referensi materi untuk menulis instruksi framework/proyek baru — tiru tingkat presisinya, gaya bahasa, struktur tabel, dan pola bukti source-anchored (verbatim snippet).
-3. **Pisahkan scope dengan benar:** universal (`01`–`11`) vs framework vs project-specific (`12-project-specific/`). Jangan memaksa aturan project/framework satu proyek menjadi universal.
+3. **Pisahkan scope dengan benar:** universal (`01`–`11`, `13`, `14`) vs framework vs project-specific (`12-project-specific/`). Jangan memaksa aturan project/framework satu proyek menjadi universal.
 4. **Grounded pada bukti kode.** Instruksi arsitektur/pola/naming/testing harus diverifikasi terhadap repository acuan (seperti yang dilakukan untuk LingSID) dan disertai snippet verbatim + anchor `path:line`.
 5. **Regenerasi wajib.** Setiap perubahan pada template `laravel/` Wajib diikuti regenerasi distribusi (`./setup-ai-rules.sh laravel`) setelah menghapus `ai-instructions/master` agar semua salinan (master + distribusi) konsisten.
 
@@ -250,8 +252,11 @@ ai-instructions/07-security.md         → Keamanan
 ai-instructions/08-git.md              → Git / version control
 ai-instructions/09-tools.md            → Penggunaan tools
 ai-instructions/10-quality-gates.md    → Quality gates
-ai-instructions/11-forbidden-behavior.md → Larangan
+ai-instructions/11-forbidden-behavior.md → Larangan (single source of truth)
+ai-instructions/13-database.md         → Database: migration, factory, seeder, query
+ai-instructions/14-frontend.md         → Frontend: Vue 3, TypeScript, Inertia, Tailwind
 ai-instructions/12-project-specific/   → Modul project-specific
+ai-instructions/12-project-specific/canonical-snippets.md → Snippet kanonik verbatim
 MASTER_BUILD_SPECIFICATION.md          → Root proyek — spesifikasi build (WAJIB dibaca)
 ```
 

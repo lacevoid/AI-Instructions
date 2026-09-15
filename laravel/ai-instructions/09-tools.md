@@ -41,6 +41,7 @@ This file defines how the agent should use tools: terminal, search, filesystem, 
 
 ### PHP
 - Format with Laravel Pint: `./vendor/bin/pint` (PSR-12 Laravel preset).
+- Check only (no write) for verification: `./vendor/bin/pint --test`.
 - Run PHPStan/Larastan at level 5 (`phpstan.neon`, paths `app/`, `config/`, `database/`, `routes/`) before considering work complete: `./vendor/bin/phpstan analyse`.
 
 ### TypeScript/Vue
@@ -51,6 +52,51 @@ This file defines how the agent should use tools: terminal, search, filesystem, 
   - `bun run format` / `bun run format:check` (Prettier)
   - `bunx vue-tsc --noEmit` (optional type check)
 - These commands are what CI (`lint` workflow) runs — keep them green locally.
+
+---
+
+## Composer Scripts (common project tools)
+
+Reference `composer.json` scripts before inventing commands. Common entries used in this kind of project:
+
+```bash
+# Laravel built-in
+php artisan about                # stack/version overview
+php artisan route:list           # registered routes (verify naming/prefixes)
+php artisan make:model ModelName --migration
+php artisan migrate --pretend    # preview SQL without executing
+php artisan db:show               # schema overview (Laravel 11+)
+
+# Project/CI parity
+composer dev                     # Laravel dev assets (see script definition)
+./vendor/bin/phpstan analyse     # static analysis (level 5)
+./vendor/bin/pint --test         # style check only
+```
+
+**Rule:** When a dev server / long-running process is needed (`composer dev`, `php artisan serve`, `bun run dev`), do NOT start it in the agent session — run in a separate terminal and ask the user for logs (see Background & Interactive Processes).
+
+---
+
+## Debugging & Diagnostics
+
+- Use **Laravel Debugbar** / **Telescope** local-first for query/N+1 inspection — do not ship debug output.
+- Diagnose a running app by asking the user for logs rather than starting the dev server.
+- Common diagnostics:
+  - `php artisan route:list --path={path}` — verify route naming/prefix before editing routes.
+  - `php artisan migrate:status` — verify migration order before/after edits.
+  - `php artisan tinker` (interactive) — introspection snippets; prefer shell one-liners instead:
+    ```bash
+    php artisan tinker --execute="\App\Models\User::first()?->toArray()"
+    ```
+- Check `storage/logs/laravel.log` via Read for runtime errors; never truncate/delete logs while diagnosing.
+
+---
+
+## Broken/Interactive Tools (avoid)
+
+- Do NOT run `git rebase -i`, `npm init` (interactive), or any command that prompts mid-run — they hang the session.
+- Do NOT run long-running dev servers (`composer dev`, `composer dev:ssr`, `php artisan serve`, `bun run dev`, `vite`) — see Background & Interactive Processes.
+- Never add dependencies just to solve a task; check the codebase and `composer.json` / `package.json` first (analogue-first, `03-architecture.md`).
 
 ---
 

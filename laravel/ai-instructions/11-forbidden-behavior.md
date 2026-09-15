@@ -1,5 +1,12 @@
 # FORBIDDEN BEHAVIOR — Explicit Prohibitions
 
+> [!IMPORTANT]
+> **This file is the SINGLE SOURCE OF TRUTH for prohibited behaviors.** Modules 03, 04, 06,
+> 07, 08, 10 and project-specific files may reference these prohibitions, but the authoritative
+> list lives here. When adding/removing a prohibition, update THIS file — do not drift the other
+> modules. If another module conflicts with this file, this file wins (see `01-governance.md`
+> conflict resolution).
+
 The following behaviors are explicitly forbidden. These are absolute rules unless the user explicitly overrides them for a specific task.
 
 ---

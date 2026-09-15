@@ -80,6 +80,46 @@ Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
     ->middleware(['signed', 'throttle:6,1']);
 ```
 
+### Per-route rate limiting
+- Define named limiters in `App\Providers\AppServiceProvider` (`RateLimiter::for('{name}', …)`) and reference them on routes: `->middleware('throttle:{name}')`.
+- Apply `throttle:` to auth-adjacent endpoints (login, register, verify-email, password reset), file uploads, and any route that triggers external side-effects (email, SMS, exports).
+- Defaults: login/register `throttle:5,1`; general authenticated API `throttle:60,1` where applicable.
+
+```php
+// In a service provider
+RateLimiter::for('uploads', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->id ?: $request->ip()));
+```
+
+### CAPTCHA / anti-automation (when bots are a concern)
+- Add a honeypot field and/or rate limiting on public forms before applying CAPTCHA — CAPTCHA is a last resort, not a default.
+
+---
+
+## File Upload Security
+
+- All uploads go through `spatie/laravel-medialibrary` on the model (conversions, validation) — **never** store raw uploaded paths manually.
+- Validate server-side in the RuledAction:
+  ```php
+  'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+  'document' => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx', 'max:10240'],
+  ```
+- Rule set:
+  - `image` for images; explicit `mimes:` whitelist (never allow `*` / arbitrary extensions).
+  - `max:{kb}` size limit per entity (2 MB images, 10 MB documents are reasonable ceilings).
+  - `dimensions:` when exact dimensions matter (e.g. avatars).
+- Store on private disks for sensitive documents; public disk only for non-sensitive public assets.
+- Never trust the client filename — MediaLibrary sanitizes; do not reconstruct paths from user input.
+- Reject empty uploads / oversized files before MediaLibrary processing (fail fast with `ValidationException`).
+
+---
+
+## CORS
+
+- Only enable cross-origin access when an authenticated cross-origin client actually exists (e.g. a separate frontend domain).
+- Configure in `config/cors.php`: restrict `allowed_origins`, `allowed_methods`, `allowed_headers` — do not use `*` for `allowed_origins` when credentials/cookies are involved.
+- Session-based auth uses cookies — `supports_credentials` must be `true` for cross-origin sessions to work; cross-origin then requires `withCredentials: true` in the client and CSRF token handling.
+- Inertia (same-origin) does NOT need CORS; never enable CORS just "in case".
+
 ---
 
 ## Sensitive Data Handling
@@ -147,10 +187,17 @@ Used after logout and password changes.
 8. **NEVER** trust user input — always validate.
 9. Use `constrained()` on foreign key migrations.
 10. **NEVER** commit secrets or API keys to the repository.
+11. **ALWAYS** whitelist upload MIME types and enforce a size limit server-side (see File Upload Security).
+12. **ALWAYS** rate-limit auth-adjacent and side-effect endpoints (see Rate Limiting).
+13. **NEVER** enable CORS for same-origin Inertia apps, or with `*` origins on credentialed setups (see CORS).
 
 ---
 
 ## Prohibited in Committed Code
+
+The authoritative forbidden list is `11-forbidden-behavior.md` (single source of truth). The
+security-specific highlights below MUST NOT diverge from it — if a rule belongs in the master
+list, update it there, not here:
 
 - Using `dd()`, `dump()`, or `ray()` in committed code.
 - Logging passwords, tokens, or sensitive data.

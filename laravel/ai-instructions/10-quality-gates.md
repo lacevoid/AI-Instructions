@@ -16,7 +16,7 @@ All the following conditions MUST be met before any task is considered complete.
 8. [ ] Scope is limited to the requested feature.
 9. [ ] All naming conventions followed.
 10. [ ] No speculative changes were made.
-11. [ ] No `dd()`, `dump()`, or `ray()` in committed code.
+11. [ ] No `dd()`, `dump()`, or `ray()` in committed code (see `11-forbidden-behavior.md` — single source of truth).
 12. [ ] File organization respects the feature's context.
 13. [ ] `MASTER_BUILD_SPECIFICATION.md` was read before writing code — or, if it was missing, it was created (complete, detailed, precise) via operator Q&A and confirmed before any code.
 
@@ -63,3 +63,40 @@ For the LingSID project, additional gates apply (see `12-project-specific/lingus
 - [ ] No static call to instance methods (`XxxAction::handle()`).
 - [ ] No references to non-existent classes/methods; all imports verified against the codebase.
 - [ ] No ActivityLog/audit deletion and no loss of history for important mutations.
+
+---
+
+## CI Pipeline (GitHub Actions)
+
+`.github/workflows/` runs the following on push/PR to `develop` and `main` (see `08-git.md`):
+
+| Workflow | Command | Purpose |
+|----------|---------|---------|
+| `tests` | `php artisan test` (full suite) | Verify no regression across unit + feature tests |
+| `lint` | `./vendor/bin/phpstan analyse`, `./vendor/bin/pint --test`, `bun run lint`, `bun run format:check` | Static analysis + style enforcement |
+
+**Local parity rule:** before expecting a merge, the local branch MUST pass the same checks the CI runs:
+```bash
+./vendor/bin/phpstan analyse
+./vendor/bin/pint --test      # or ./vendor/bin/pint to auto-fix first
+bun run lint
+bun run format:check
+```
+
+**CI failure handling:**
+- Fix CI failures on the feature branch — never merge a red pipeline.
+- `lint` failures: run `./vendor/bin/pint` / `bun run lint -- --fix` / `bun run format` to auto-fix, then re-run the check.
+- `tests` failures: reproduce with `php artisan test --filter={FailingTest}` and fix only feature-related code.
+
+---
+
+## When Human Review Is Required
+
+A task is NOT considered complete if any of the following is true — ask the operator for review/confirmation before finalizing:
+
+1. The change alters data integrity semantics (migrations that add/remove/modify columns, soft-delete changes, constraint changes).
+2. The change touches security-relevant surfaces (auth, authorization policies, upload handling, rate limiting, secrets/config).
+3. The change modifies domain invariants (system groups, taxonomy constants, audit/activity behavior).
+4. The change introduces a new dependency or a new architectural layer (Service, DTO, event system) that has no existing analogue.
+5. The change requires a new pattern that has no canonical snippet or analogue in the codebase (see `11-forbidden-behavior.md` Unknown Territory Handling).
+6. `MASTER_BUILD_SPECIFICATION.md` needs updating to stay truthful with a significant feature change.
