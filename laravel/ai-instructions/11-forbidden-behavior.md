@@ -69,6 +69,11 @@ The following behaviors are explicitly forbidden. These are absolute rules unles
 - ❌ Passing payload keys to Actions that do not match the repository/model columns or the RuledAction validation rules.
 - ❌ Inventing classes, methods, signatures, or API behavior from memory without opening the real file in the codebase (`canonical-snippets.md` — evidence-anchored programming). "It probably has `update()`" is a violation; verify first.
 - ❌ Marking work complete without the Senior Self-Review Rubric (`10-quality-gates.md`) and the edge-case probes (`15-edge-cases.md`) applied to the touched code paths — the honest estimate of "done" includes the boundaries tested. See `16-debugging.md` for the loop a live bug must follow (reproduce → isolate → hypothesize → minimal fix → verify), not shotgun edits.
+- ❌ Swallowing exceptions silently (empty `catch`, `catch () { /**/ }`, `->catch(fn () => null)` without a documented reason) — errors are a contract (`20-frontend-and-contracts.md`); an absorbed error without a decision-logged reason is a defect.
+- ❌ Hardcoding user-facing strings into code/components instead of lang files (`20-frontend-and-contracts.md` — UI text & i18n).
+- ❌ Adding a dependency without audit + justification — existing-alternative check, `composer audit`/`npm audit`, and a decision-log reason; a package duplicating an existing capability is scope creep (`21-state-delivery-environment.md`).
+- ❌ Running irreversible database operations (`dropColumn`, lossy type changes, data deletion) without operator confirmation, and writing migrations without a safe `down()` (`19-data-reliability.md`).
+- ❌ Building phase N+1 before phase N is verified, or declaring a multi-layer feature complete without per-phase verification (`18-planning-and-safe-change.md` — phase decomposition).
 
 ---
 
