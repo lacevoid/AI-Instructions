@@ -58,5 +58,7 @@ distribusi di root repo ini, hapus, jangan di-commit.
 - Commit singkat, bahasa Inggris, verb-prefixed (mis. `Remove generated artifacts`).
 - Jangan commit langsung tanpa konfirmasi operator bila menyangkut perubahan besar;
   tawarkan "commit + push?" dan tunggu persetujuan.
-- Enforcement: pastikan GitHub branch protection pada `main` aktif (require a PR before
-  merging + 1 approval, require status checks, no force pushes, no deletions, restrict pushers).
+- Enforcement (diterapkan di repo ini): GitHub branch protection pada `main` aktif — require a
+  PR before merging (0 approval untuk operator tunggal; operator meninjau lalu me-merge PR-nya
+  sendiri), do not allow bypassing (enforce admins), no force pushes, no deletions. Status
+  checks dikosongkan sampai ada CI; begitu workflow `tests`/`lint` ada, wajib dipasang.

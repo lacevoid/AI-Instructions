@@ -127,7 +127,12 @@ If the repository lives on GitHub, the following protection settings on `main` a
 - [ ] **Require status checks to pass before merging** — require the `tests` and `lint` workflows.
 - [ ] **Do not allow bypassing the above settings** — unchecked "Do not allow bypassing the above settings".
 - [ ] **Do not allow force pushes** and **Do not allow deletions** on `main`.
-- [ ] Restrict who can push to `main` (only release managers / CI bot).
+- [ ] **Restrict who can push to `main`** (only release managers / CI bot).
+- **Solo-operator adaptation:** with no second reviewer (personal repo), set required approvals
+  to `0` but KEEP "Require a pull request before merging", "Do not allow bypassing the above
+  settings", no force pushes, and no deletions. Direct pushes to `main` stay blocked; the
+  operator reviews and merges their own PRs. This is the minimum viable enforcement — team
+  repos should keep `1` approval + status checks.
 - Apply the same require-status-checks protection to `develop` when direct-push discipline needs backing.
 
 ---
