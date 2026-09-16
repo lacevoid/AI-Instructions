@@ -75,8 +75,8 @@ jobs:
           # --- Template team-dev (tim opencode) ---
           TMP2="$(mktemp -d)"
           mkdir -p "$TMP2/team-dev"
-          cp -r team-dev/ai-instructions.md team-dev/ai-instructions team-dev/opencode "$TMP2/team-dev/"
-          cp setup-ai-rules.sh "$TMP2/"
+          cp -r "$REPO/team-dev/ai-instructions.md" "$REPO/team-dev/ai-instructions" "$REPO/team-dev/opencode" "$TMP2/team-dev/"
+          cp "$REPO/setup-ai-rules.sh" "$TMP2/"
           ( cd "$TMP2" && ./setup-ai-rules.sh team-dev >/dev/null )
           for expected in \
             AGENTS.md opencode.json \
