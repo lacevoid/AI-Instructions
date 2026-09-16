@@ -566,6 +566,40 @@ distribute_module_dir() {
 }
 
 # ============================================================================
+# Fungsi: Distribusikan folder 'opencode/' milik template (agent + skill tim)
+# ke .opencode/ proyek konsumen. Folder 'opencode/' di template bersifat
+# OPTIONAL — tanpa folder ini tidak terjadi apa-apa (template lama tetap jalan).
+# Isi yang sudah ada di .opencode/ konsumen TIDAK dihapus; hanya ditambah/ditimpa.
+# ============================================================================
+distribute_opencode_dir() {
+    local source_dir="$1"
+    local target_dir="$2"
+
+    if [ ! -d "$source_dir" ]; then
+        echo -e "  ${YELLOW}⚠️  Folder 'opencode/' template tidak ada — tim opencode dilewati${NC}"
+        return 0
+    fi
+
+    mkdir -p "$target_dir"
+
+    # Salin setiap subfolder/file di opencode/ ke .opencode/ (tanpa menghapus lain)
+    for item in "${source_dir}"/*; do
+        local name
+        name="$(basename "$item")"
+        if [ -d "$item" ]; then
+            mkdir -p "${target_dir}/${name}"
+            cp -r "${item}"/. "${target_dir}/${name}"/
+        else
+            cp "$item" "${target_dir}/${name}"
+        fi
+        echo -e "  ${GREEN}✅${NC} opencode/${name} → .opencode/${name}"
+        count=$((count + 1))
+    done
+
+    echo -e "  ${YELLOW}ℹ️  Tim development opencode siap: .opencode/agent/* + .opencode/skills/${NC}"
+}
+
+# ============================================================================
 # Fungsi: Sinkronkan Master Instruction (bisa di-custom)
 # - Jika master belum ada, salin dari template framework.
 # - Jika master sudah ada, JANGAN ditimpa (user berhak mengeditnya).
@@ -607,6 +641,8 @@ Usage: $0 [<framework>]           Distribusikan instruksi ke proyek konsumen (pw
 
 Commands:
   distribute   (default) Bentuk/sinkronkan master lalu distribusikan ke semua AI tools.
+               Bila template memiliki folder opencode/ (agent+skill tim), isinya
+               disalin ke .opencode/ proyek konsumen (tanpa menghapus yang ada).
   reset        Hapus folder master yang di-custom, buat ulang dari template,
                lalu distribusikan ulang (kembali ke default template).
   wipe         Hapus semua file artefak hasil distribusi dari pwd:
@@ -947,6 +983,12 @@ echo -e "${BLUE}[10/10] Modul Instruksi${NC}"
 distribute_module_dir "${MASTER_MODULE_DIR}" "${TARGET_DIR}/ai-instructions" "Modul Instruksi"
 
 # ===========================================================================
+# 11. Tim opencode (opsional — template dengan folder opencode/agent|skills)
+# ===========================================================================
+echo -e "${BLUE}[11/11] Tim opencode (agent + skill)${NC}"
+distribute_opencode_dir "${FRAMEWORK_DIR}/opencode" "${TARGET_DIR}/.opencode"
+
+# ===========================================================================
 # Selesai
 # ===========================================================================
 echo ""
@@ -968,6 +1010,7 @@ echo "   ├── .clinerules/${FRAMEWORK_NAME}-directives.md        (Cline)"
 echo "   ├── .continuerules                               (Continue.dev)"
 echo "   ├── ai-instructions/                             (Modul 01-11 + project-specific)"
 echo "   ├── .aider.conf.yml                              (Aider)"
+echo "   ├── .opencode/agent|skills/                      (Tim opencode — bila template memilikinya)"
 echo "   └── opencode.json                                (opencode — default AI untuk pekerjaan)"
 echo ""
 echo -e "${YELLOW}💡 Tambah instruksi custom:${NC}"
