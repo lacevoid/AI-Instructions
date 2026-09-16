@@ -1,6 +1,6 @@
 # Artefak hasil distribusi setup-ai-rules.sh — hanya untuk proyek konsumen,
 # DILARANG di-commit ke repository authoring ini.
-ai-instructions/
+/ai-instructions/
 CLAUDE.md
 GEMINI.md
 .cursorrules
@@ -10,3 +10,9 @@ GEMINI.md
 .cursor/
 .github/copilot-instructions.md
 .aider.conf.yml
+
+# Tooling paket (composer / npm) — jangan di-commit.
+/vendor/
+/node_modules/
+/composer.lock
+/package-lock.json

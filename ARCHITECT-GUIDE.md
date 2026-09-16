@@ -579,6 +579,12 @@ Setelah set instruksi selesai, WAJIB:
    `.github/copilot-instructions.md`, `.cursorrules`, `.cursor/rules/...`, `.windsurfrules`,
    `.clinerules/...`, `.continuerules`, `.aider.conf.yml` — semua di **proyek konsumen**.
 
+   Adaptor eksekusi yang setara tersedia: `install.sh` (curl | sh, mengunduh tarball ke
+   cache lalu menjalankan `setup-ai-rules.sh` terhadap pwd), `bin/ainstruct` (bin paket
+   `lace/ainstruct` untuk Composer dan `@lace/ainstruct` untuk npm/npx). Ketiganya
+   mendukung subcommand `distribute`, `reset`, dan `wipe`. Rincian di README `Adaptor:
+   curl | sh, Composer, npm/npx`.
+
    > [!CRITICAL]
    > **DILARANG KERAS menjalankan `./setup-ai-rules.sh` di root repository AI-Instructions
    > ini.** Script dengan target root repo authoring menimpa instruksi khusus AI repositori ini

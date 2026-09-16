@@ -97,6 +97,47 @@ proyek konsumen** (dieksekusi dari root proyek konsumen, arah `pwd`):
 
 Keduanya dijalankan dari root proyek konsumen — **bukan** dari repo authoring ini.
 
+## Adaptor: curl | sh, Composer, npm/npx
+
+Repo ini menyediakan tiga adaptor agar `setup-ai-rules.sh` bisa dipakai langsung di
+**proyek konsumen** (arah `pwd`) tanpa menyalin repo secara manual. Semua adapter
+menjalankan fungsi yang sama: `distribute`, `reset`, `wipe`.
+
+### 1. curl | sh (tanpa instalasi)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lacevoid/AI-Instructions/main/install.sh | sh -s -- laravel
+```
+
+Unduhan tarball di-cache (`${XDG_CACHE_HOME:-$HOME/.cache}/ainstruct`), lalu
+`setup-ai-rules.sh` dieksekusi dari cache terhadap direktori saat ini. Opsi:
+`AINSTRUCT_SOURCE_URL` (sumber tarball), `AINSTRUCT_CACHE` (direktori cache),
+`AINSTRUCT_UPDATE=1` (paksa unduh ulang).
+
+### 2. Composer (binary global)
+
+```bash
+composer global require lace/ainstruct
+ainstruct laravel          # distribusikan framework
+ainstruct reset laravel    # kembali ke default template
+ainstruct wipe --force     # hapus semua artefak instruksi
+```
+
+Paket `lace/ainstruct` memasang bin `ainstruct` (symlink `vendor/bin/ainstruct`
+→ `bin/ainstruct`, yang me-resolve path akar paket lalu mendelegasikan ke
+`setup-ai-rules.sh`).
+
+### 3. npm / npx (scope `@lace`)
+
+```bash
+npx @lace/ainstruct laravel
+npx @lace/ainstruct reset laravel
+npx @lace/ainstruct wipe --force
+```
+
+Paket `@lace/ainstruct` (scope `@lace` bila tersedia) membungkus `bin/ainstruct`
+yang sama dengan paket Composer.
+
 ## Membuat Set Instruksi Baru
 
 Ikuti `ARCHITECT-GUIDE.md` secara penuh (ringkasannya):
