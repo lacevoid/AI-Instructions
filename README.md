@@ -72,6 +72,31 @@ AI-Instructions/
    disipliner, agent discipline, reproduce-everywhere) diadopsi ke `AGENTS.md` bagian 5 dan
    di-enforce lewat pre-commit hook + CI (`scripts/health-check.sh`, markdownlint, smoke test).
 
+## Reset & Wipe di Proyek Konsumen
+
+`setup-ai-rules.sh` juga mendukung dua perintah untuk mengelola state instruksi **di
+proyek konsumen** (dieksekusi dari root proyek konsumen, arah `pwd`):
+
+- **Reset ke default** — buang seluruh custom di `ai-instructions/master/`, bangun ulang
+  dari template framework, lalu distribusikan ulang. Sama dengan alur manual
+  `rm -rf ai-instructions/master && ./setup-ai-rules.sh <framework>`:
+
+  ```bash
+  ./setup-ai-rules.sh reset laravel
+  ```
+
+- **Wipe** — hapus SEMUA artefak instruksi dari proyek konsumen: `AGENTS.md`, `CLAUDE.md`,
+  `GEMINI.md`, `.github/copilot-instructions.md`, `.cursorrules`, `.cursor/`,
+  `.windsurfrules`, `.clinerules/`, `.continuerules`, `.aider.conf.yml`, dan `ai-instructions/`
+  (termasuk `master/` hasil custom):
+
+  ```bash
+  ./setup-ai-rules.sh wipe          # tanpa --force: diminta konfirmasi
+  ./setup-ai-rules.sh wipe --force  # untuk automation/CI tanpa prompt
+  ```
+
+Keduanya dijalankan dari root proyek konsumen — **bukan** dari repo authoring ini.
+
 ## Membuat Set Instruksi Baru
 
 Ikuti `ARCHITECT-GUIDE.md` secara penuh (ringkasannya):

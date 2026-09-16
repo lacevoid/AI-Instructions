@@ -598,6 +598,23 @@ Setelah set instruksi selesai, WAJIB:
      ./setup-ai-rules.sh <nama-folder>
      ```
 
+   - Alur di atas otomatis oleh subcommand `reset` (menghapus `ai-instructions/master/`
+     lalu distribusi ulang dari template):
+
+     ```bash
+     ./setup-ai-rules.sh reset <nama-folder>
+     ```
+
+   - Subcommand `wipe` menghapus seluruh artefak hasil distribusi dari proyek konsumen
+     (AGENTS.md, CLAUDE.md, GEMINI.md, .github/copilot-instructions.md, .cursorrules,
+     .cursor/, .windsurfrules, .clinerules/, .continuerules, .aider.conf.yml,
+     ai-instructions/ termasuk master/) — konfirmasi dulu kecuali diberi `--force`:
+
+     ```bash
+     ./setup-ai-rules.sh wipe            # konfirmasi dulu
+     ./setup-ai-rules.sh wipe --force    # tanpa prompt (CI/automation)
+     ```
+
    - Verifikasi konsistensi: template ↔ master ↔ hasil distribusi harus **byte-identical**
      (`diff -q`), lalu lampirkan hasil perbandingan.
    - Sweep referensi stale sebelum commit (mis. `rg` nama proyek/route lama yang masih
