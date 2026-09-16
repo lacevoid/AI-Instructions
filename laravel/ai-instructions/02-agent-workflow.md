@@ -69,7 +69,7 @@ Is MASTER_BUILD_SPECIFICATION.md present at the project root?
 Is this a new feature or modification?
 ├── New feature
 │   ├── Does the project have an existing analogue for this feature type?
-│   │   ├── YES → Go to Step 3 (Find Analoues)
+│   │   ├── YES → Go to Step 3 (Find Analogues)
 │   │   └── NO → Identify required layers, check conventions
 │   └── Does it need validation?
 │       ├── YES → Use RuledAction (implements RuledActionContract)

@@ -674,7 +674,7 @@ trait HasGroups
 
 ---
 
-## 7. Enums — `lingusid app/Enums/System/GroupEnum.php`
+## 7. Enums — `lingusid app/Enums/System/GroupEnum.php:1`
 
 ```php
 public enum GroupEnum: string
