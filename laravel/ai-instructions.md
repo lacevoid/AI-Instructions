@@ -78,10 +78,10 @@ Prinsip-prinsip berikut berlaku universal:
 7. **Preserve intent, minimalkan perubahan terkait.** Jangan perbaiki bug yang tidak berhubungan.
 8. **Audit & jejak.** Mutasi data yang penting tercatat. Jangan menghapus jejak history.
 9. **Keamanan dasar.** Tidak ada password plaintext, tidak ada rahasia di git, tidak ada `dd()/dump()` pada kode tercommit.
-10. **Disiplin git.** Jangan commit, push, atau merge langsung di `develop`/`main`. `main` hanya menerima perubahan via release PR yang disetujui dan lolos CI (detail `08-git.md`). Satu fitur satu branch (dari `develop`). Commit message mengikuti conventional commits.
+10. **Disiplin git.** Jangan commit, push, atau merge langsung di `develop`/`main`. `main` hanya menerima perubahan via release PR yang disetujui dan lolos CI (detail `ai-instructions/08-git.md`). Satu fitur satu branch (dari `develop`). Commit message mengikuti conventional commits.
 11. **Quality gates.** Static analysis lalu test yang relevan sebelum pekerjaan dianggap selesai.
 12. **Build specification first.** Tidak pernah menulis kode sebelum `MASTER_BUILD_SPECIFICATION.md` dibaca; bila tidak ada, buat via diskusi mendetil dengan operator (bagian 12).
-13. **Self-explanatory code (MUST).** Setiap baris kode WAJIB terbaca seperti manusia menjelaskan apa yang dilakukannya — nama variabel/method yang bermakna, fungsi kecil satu tanggung jawab, alur linear — sehingga tidak perlu komentar penjelas. Kode yang butuh komentar agar dimengerti HARUS diperbaiki (rename/extract/simplify), bukan dikomentari. Komentar/docblock hanya diizinkan untuk invariant bisnis yang non-obvious, rationale keputusan (`why`), dan anotasi tipe PHPDoc untuk tooling. Komentar yang mengulang isi kode (chit-chat) DILARANG. Detail: `04-coding-standards.md` → Code Documentation.
+13. **Self-explanatory code (MUST).** Setiap baris kode WAJIB terbaca seperti manusia menjelaskan apa yang dilakukannya — nama variabel/method yang bermakna, fungsi kecil satu tanggung jawab, alur linear — sehingga tidak perlu komentar penjelas. Kode yang butuh komentar agar dimengerti HARUS diperbaiki (rename/extract/simplify), bukan dikomentari. Komentar/docblock hanya diizinkan untuk invariant bisnis yang non-obvious, rationale keputusan (`why`), dan anotasi tipe PHPDoc untuk tooling. Komentar yang mengulang isi kode (chit-chat) DILARANG. Detail: `ai-instructions/04-coding-standards.md` → Code Documentation.
 
 ---
 
@@ -115,7 +115,7 @@ Instruksi eksplisit user mengalahkan semua aturan di bawah LEVEL 1. Document dev
 | FRAMEWORK | Berlaku hanya pada framework tertentu |
 | TASK | Berlaku hanya pada tipe tugas tertentu |
 
-Jangan memaksakan aturan project-specific sebagai aturan global. Detail di `01-governance.md`.
+Jangan memaksakan aturan project-specific sebagai aturan global. Detail di `ai-instructions/01-governance.md`.
 
 ---
 
@@ -165,8 +165,8 @@ Saat bekerja di proyek baru, agent WAJIB:
 
 1. Bila proyek baru belum repository git, WAJIB menjalankan `git init` pada langkah
    pertama — sebelum pekerjaan, branching, atau commit dimulai (Klausa 4; detail
-   `08-git.md`).
-2. Load konstitusi ini + `01-governance.md` + `02-agent-workflow.md`.
+   `ai-instructions/08-git.md`).
+2. Load konstitusi ini + `ai-instructions/01-governance.md` + `ai-instructions/02-agent-workflow.md`.
 3. Baca `MASTER_BUILD_SPECIFICATION.md` di root proyek; jika tidak ada, buat melalui diskusi mendetil dengan operator (bagian 12).
 4. Inspect repository saat ini (`routes`, `app/`, `resources/js/pages/`, `composer.json`, `package.json`, `phpunit.xml`, `phpstan.neon`, `.editorconfig`).
 5. Deteksi teknologi proyek (Laravel/Blade vs Laravel/Inertia/Vue; SQLite/MySQL; bun/npm).
@@ -197,13 +197,13 @@ Pekerjaan dianggap selesai hanya jika:
 - [ ] Scope terbatas pada fitur yang diminta.
 - [ ] Menghormati semua naming convention.
 - [ ] Tidak ada `dd()`, `dump()`, `ray()` pada kode tercommit.
-- [ ] Senior self-review rubrik dijalankan (`10-quality-gates.md`) — setiap kondisi ditelusuri kedua cabang; diff dibaca sebagai reviewer, bukan sebagai penulis.
-- [ ] Edge-case probes diterapkan (`15-edge-cases.md`) untuk setiap code path yang disentuh; yang tidak bisa diputuskan, diangkat ke operator.
-- [ ] Setiap kelas/method/signature yang dipakai terverifikasi ada di kode nyata (evidence-anchored — `canonical-snippets.md` rule 6).
-- [ ] Fitur multi-layer dipecah dalam fase berurutan dan tiap fase terverifikasi sebelum lanjut (`18-planning-and-safe-change.md`).
-- [ ] Kontrak frontend↔backend sinkron dalam perubahan yang sama (`20-frontend-and-contracts.md`).
-- [ ] Perubahan ter-reproduksi di lingkungan bersih (lockfile, migration fresh) dan, bila menyentuh alur user, diverifikasi end-to-end (`21-state-delivery-environment.md`).
-- [ ] Keputusan & asumsi tercatat dalam decision log; hal yang TIDAK diverifikasi dinyatakan eksplisit (`17-agent-discipline.md`).
+- [ ] Senior self-review rubrik dijalankan (`ai-instructions/10-quality-gates.md`) — setiap kondisi ditelusuri kedua cabang; diff dibaca sebagai reviewer, bukan sebagai penulis.
+- [ ] Edge-case probes diterapkan (`ai-instructions/15-edge-cases.md`) untuk setiap code path yang disentuh; yang tidak bisa diputuskan, diangkat ke operator.
+- [ ] Setiap kelas/method/signature yang dipakai terverifikasi ada di kode nyata (evidence-anchored — `ai-instructions/12-project-specific/canonical-snippets.md` rule 6).
+- [ ] Fitur multi-layer dipecah dalam fase berurutan dan tiap fase terverifikasi sebelum lanjut (`ai-instructions/18-planning-and-safe-change.md`).
+- [ ] Kontrak frontend↔backend sinkron dalam perubahan yang sama (`ai-instructions/20-frontend-and-contracts.md`).
+- [ ] Perubahan ter-reproduksi di lingkungan bersih (lockfile, migration fresh) dan, bila menyentuh alur user, diverifikasi end-to-end (`ai-instructions/21-state-delivery-environment.md`).
+- [ ] Keputusan & asumsi tercatat dalam decision log; hal yang TIDAK diverifikasi dinyatakan eksplisit (`ai-instructions/17-agent-discipline.md`).
 
 Gates tambahan project-specific: lihat `ai-instructions/10-quality-gates.md` dan module proyek.
 
