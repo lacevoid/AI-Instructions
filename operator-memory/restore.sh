@@ -24,5 +24,18 @@ cp "$REPO_DIR/config/opencode.jsonc"                  "$CFG_BASE/opencode/"
 cp "$REPO_DIR/config/skills/operator-memory/SKILL.md" "$CFG_BASE/opencode/skills/operator-memory/"
 cp "$REPO_DIR/config/skills/operator-memory/memory.md" "$CFG_BASE/opencode/skills/operator-memory/"
 
+# -- Terapkan identitas git lokal ke repo backup hasil clone --
+# Clone fresh tidak membawa user.name/user.email; tanpa ini backup.sh pertama
+# akan gagal dengan "Author identity unknown".
+if [ -f "$REPO_DIR/config/git-identity" ]; then
+    IFS= read -r GIT_NAME < "$REPO_DIR/config/git-identity"
+    GIT_EMAIL="$(sed -n '2p' "$REPO_DIR/config/git-identity")"
+    if [ -n "$GIT_NAME" ] && [ -n "$GIT_EMAIL" ]; then
+        git -C "$REPO_DIR" config user.name  "$GIT_NAME"
+        git -C "$REPO_DIR" config user.email "$GIT_EMAIL"
+        echo "[restore] identitas git diterapkan: $GIT_NAME <$GIT_EMAIL>"
+    fi
+fi
+
 echo "[restore] restore selesai."
 echo "[restore] restart opencode untuk mengaktifkan pengaturan."

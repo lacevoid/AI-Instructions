@@ -230,6 +230,11 @@ cp -f "$TOOLKIT_DIR/restore.sh" "$DEST/restore.sh"
 cp -f "$TOOLKIT_DIR/README.md"  "$DEST/README.md" 2>/dev/null || true
 chmod +x "$DEST/backup.sh" "$DEST/restore.sh"
 
+# identitas git disimpan ke config backup agar restore.sh bisa menerapkannya
+# di mesin baru (clone fresh TIDAK membawa user.name/user.email git lokal).
+printf '%s\n%s\n' "${NAME:-Operator}" "${EMAIL:-operator@localhost}" \
+  > "$DEST/config/git-identity"
+
 # identitas git lokal (repo backup) — tidak mengubah config global
 git -C "$DEST" config user.name  "${NAME:-Operator}"
 git -C "$DEST" config user.email "${EMAIL:-operator@localhost}"
