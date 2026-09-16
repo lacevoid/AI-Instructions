@@ -17,7 +17,7 @@ LAPISAN 2 — PABRIK (yang memproduksi & menjaga lapisan 1)
 ├── ARCHITECT-GUIDE.md   playbook authoring (wajib dibaca penuh)
 ├── setup-ai-rules.sh   script distribusi/reset/wipe/template (HANYA di proyek konsumen)
 ├── scripts/         health-check, install-hooks
-└── .github/workflows/  CI: markdownlint, shellcheck, integrity, smoke test
+└── .github/workflows/  CI: markdownlint, shellcheck, integrity, smoke test, meta
 
 LAPISAN 3 — MESIN ADAPTIF (yang membuat setiap salinan menjadi milik operatornya)
 └── operator-memory/  skill + memori per-operator + backup/restore dua arah

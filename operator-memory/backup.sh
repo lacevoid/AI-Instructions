@@ -130,8 +130,12 @@ if [ "$changed" -eq 1 ]; then
   git add -A
   if ! git diff --cached --quiet; then
     git commit -m "Sync $(date -u '+%Y-%m-%d %H:%M UTC')"
-    git push origin "$BRANCH"
-    log "sinkron ter-push ke GitHub"
+    if git remote | grep -q '^origin$'; then
+      git push origin "$BRANCH"
+      log "sinkron ter-push ke GitHub"
+    else
+      log "remote origin tidak ada — perubahan tersimpan lokal (local-only)"
+    fi
   else
     log "tidak ada perubahan setelah sinkronisasi"
   fi

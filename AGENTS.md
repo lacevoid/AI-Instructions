@@ -118,7 +118,8 @@ pekerjaan dokumentasi instruksi; rincian penuh ada di modul yang dirujuk):
 - Pre-commit hook `.githooks/pre-commit` menjalankan `scripts/health-check.sh --quiet` (lint
   markdown di-skip anggun bila `markdownlint-cli2` tidak terpasang); aktif via
   `bash scripts/install-hooks.sh`.
-- CI `lint` (markdownlint + shellcheck) dan `tests` (Instruction integrity + Distribution smoke
-  test) adalah status checks wajib pada branch protection `main`.
+- CI `lint` (markdownlint + shellcheck), `tests` (Instruction integrity + Distribution smoke
+  test), dan `meta` (operator-memory toolkit: shell syntax, template integrity, bootstrap,
+  backup/restore) adalah status checks wajib pada branch protection `main`.
 - Health-check umumnya bertambah jumlahnya tiap adopsi; aturan ini tidak mengharuskan angka
   tetap, tapi mengharuskan 0 kegagalan.
