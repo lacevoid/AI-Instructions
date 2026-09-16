@@ -37,7 +37,7 @@ jobs:
           ./setup-ai-rules.sh laravel >/dev/null
           for expected in \
             AGENTS.md CLAUDE.md GEMINI.md .cursorrules .windsurfrules \
-            .continuerules .aider.conf.yml \
+            .continuerules .aider.conf.yml opencode.json \
             .github/copilot-instructions.md \
             .cursor/rules/laravel-directives.mdc \
             .clinerules/laravel-directives.md \
@@ -45,6 +45,8 @@ jobs:
             ai-instructions/01-governance.md; do
             test -e "$expected" || { echo "MISSING: $expected"; exit 1; }
           done
+          grep -q 'default_agent": "build"' opencode.json \
+            || { echo "FAIL: opencode.json tidak mengonfigurasi default build agent"; exit 1; }
           printf '\n# CUSTOM\n' >> ai-instructions/master/ai-instructions.md
           ./setup-ai-rules.sh laravel >/dev/null
           grep -q 'CUSTOM' ai-instructions/master/ai-instructions.md
@@ -64,9 +66,9 @@ jobs:
           ./setup-ai-rules.sh wipe --force >/dev/null
           for gone in \
             AGENTS.md CLAUDE.md GEMINI.md .cursorrules .windsurfrules \
-            .continuerules .aider.conf.yml \
+            .continuerules .aider.conf.yml opencode.json \
             .github/copilot-instructions.md \
-            ai-instructions .cursor .clinerules; do
+            ai-instructions .cursor .clinerules .opencode; do
             test -e "$gone" && { echo "FAIL: $gone masih ada setelah wipe"; exit 1; }
           done
 

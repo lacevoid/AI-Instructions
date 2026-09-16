@@ -63,10 +63,15 @@ AI-Instructions/
    `.github/copilot-instructions.md`, `.cursorrules`, `.cursor/rules/laravel-directives.mdc`,
    `.windsurfrules`, `.clinerules/laravel-directives.md`, `.continuerules`,
    `.aider.conf.yml`, dan modul ke `ai-instructions/`.
-3. **Master dapat di-custom**: script membuat `ai-instructions/master/` di proyek konsumen
+3. **opencode dipasang sebagai default AI untuk pekerjaan**: selain `AGENTS.md`
+   (dibaca otomatis oleh opencode), script menulis `opencode.json` di root proyek
+   konsumen yang menu: `default_agent: "build"` + `instructions` dari `AGENTS.md`.
+   Jika CLI opencode belum terpasang, script menampilkan perintah pemasangan resmi
+   (`curl -fsSL https://opencode.ai/install | bash`).
+4. **Master dapat di-custom**: script membuat `ai-instructions/master/` di proyek konsumen
    dan TIDAK menimpanya bila sudah ada — spesialisasi proyek dilakukan di sana, lalu script
    dijalankan ulang untuk mendistribusikan versi custom.
-4. **Self-instruction arsitek mengadopsi aturan kualitas `laravel/`**: modul universal dari set
+5. **Self-instruction arsitek mengadopsi aturan kualitas `laravel/`**: modul universal dari set
    `laravel/ai-instructions/` yang berlaku untuk kerja AI apa pun (evidence-anchored authoring,
    quality gates + senior self-review, edge probes authoring, change impact analysis, debug
    disipliner, agent discipline, reproduce-everywhere) diadopsi ke `AGENTS.md` bagian 5 dan
