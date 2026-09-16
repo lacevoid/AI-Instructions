@@ -70,6 +70,40 @@ jobs:
             test -e "$gone" && { echo "FAIL: $gone masih ada setelah wipe"; exit 1; }
           done
 
+          # template manager: template milik konsumen (AINSTRUCT_HOME terisolasi)
+          export AINSTRUCT_HOME="$TMP/ahome"
+          # list: built-in laravel terlihat
+          ./setup-ai-rules.sh template list | grep 'laravel' >/dev/null || { echo "FAIL: list tidak memuat laravel"; exit 1; }
+          # clone built-in -> custom (customisasi wajib clone; built-in terproteksi)
+          ./setup-ai-rules.sh template clone mylaravel laravel >/dev/null
+          test -f "$AINSTRUCT_HOME/templates/mylaravel/ai-instructions.md" \
+            || { echo "FAIL: clone tidak membuat template custom"; exit 1; }
+          # path custom vs built-in (warn protected)
+          ./setup-ai-rules.sh template path mylaravel | grep "$AINSTRUCT_HOME" >/dev/null \
+            || { echo "FAIL: path custom salah"; exit 1; }
+          # distribusi memakai template custom: marker konsumen muncul
+          mkdir -p "$TMP/proj-custom"
+          ( cd "$TMP/proj-custom" && "$TMP/setup-ai-rules.sh" mylaravel 2>&1 \
+              | grep 'Template: custom konsumen' >/dev/null ) \
+            || { echo "FAIL: distribusi tidak memakai template konsumen"; exit 1; }
+          # built-in TERPROTEKSI: tidak bisa dihapus / di-update langsung
+          ./setup-ai-rules.sh template delete laravel >/dev/null 2>&1 && { echo "FAIL: built-in terhapus"; exit 1; }
+          ./setup-ai-rules.sh template update laravel >/dev/null 2>&1 && { echo "FAIL: built-in ter-update"; exit 1; }
+          test -d "$REPO/laravel" || { echo "FAIL: built-in hilang"; exit 1; }
+          # delete custom tanpa --force di non-interaktif ditolak
+          ./setup-ai-rules.sh template delete mylaravel >/dev/null 2>&1 && { echo "FAIL: delete tanpa force"; exit 1; }
+          # update custom dari built-in (--force)
+          ./setup-ai-rules.sh template update mylaravel --from laravel --force >/dev/null
+          diff -q "$AINSTRUCT_HOME/templates/mylaravel/ai-instructions.md" "$REPO/laravel/ai-instructions.md" >/dev/null \
+            || { echo "FAIL: update custom tidak sinkron"; exit 1; }
+          # create scaffold kosong
+          ./setup-ai-rules.sh template create blank >/dev/null
+          test -f "$AINSTRUCT_HOME/templates/blank/ai-instructions.md" \
+            || { echo "FAIL: create tidak membuat scaffold"; exit 1; }
+          # delete custom --force
+          ./setup-ai-rules.sh template delete mylaravel --force >/dev/null
+          test -e "$AINSTRUCT_HOME/templates/mylaravel" && { echo "FAIL: custom tidak terhapus"; exit 1; }
+
           # adapter: bin/ainstruct via symlink vendor/bin (composer / npx style)
           mkdir -p "$TMP/vendor/lace/ainstruct/bin" "$TMP/vendor/bin"
           cp "$REPO/setup-ai-rules.sh" "$TMP/vendor/lace/ainstruct/"

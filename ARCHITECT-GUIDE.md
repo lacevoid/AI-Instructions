@@ -582,8 +582,14 @@ Setelah set instruksi selesai, WAJIB:
    Adaptor eksekusi yang setara tersedia: `install.sh` (curl | sh, mengunduh tarball ke
    cache lalu menjalankan `setup-ai-rules.sh` terhadap pwd), `bin/ainstruct` (bin paket
    `lace/ainstruct` untuk Composer dan `@lace/ainstruct` untuk npm/npx). Ketiganya
-   mendukung subcommand `distribute`, `reset`, dan `wipe`. Rincian di README `Adaptor:
-   curl | sh, Composer, npm/npx`.
+   mendukung subcommand `distribute`, `reset`, `wipe`, dan `template`. Rincian di
+   README `Adaptor: curl | sh, Composer, npm/npx`.
+
+   Template milik **konsumen** dikelola via `template` (list/create/clone/update/
+   delete/path) dan hidup di `${AINSTRUCT_HOME:-${XDG_CONFIG_HOME:-$HOME/.config}/ainstruct}/templates`,
+   menang atas built-in bila nama sama. Template built-in repo ini (`laravel/`) TERPROTEKSI:
+   konsumen tidak bisa menghapus/memperbaruinya langsung — customisasi wajib lewat
+   `template clone`. Rincian di README `Template Manager: Template Milik Konsumen`.
 
    > [!CRITICAL]
    > **DILARANG KERAS menjalankan `./setup-ai-rules.sh` di root repository AI-Instructions

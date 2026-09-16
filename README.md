@@ -101,7 +101,7 @@ Keduanya dijalankan dari root proyek konsumen — **bukan** dari repo authoring 
 
 Repo ini menyediakan tiga adaptor agar `setup-ai-rules.sh` bisa dipakai langsung di
 **proyek konsumen** (arah `pwd`) tanpa menyalin repo secara manual. Semua adapter
-menjalankan fungsi yang sama: `distribute`, `reset`, `wipe`.
+menjalankan fungsi yang sama: `distribute`, `reset`, `wipe`, `template`.
 
 ### 1. curl | sh (tanpa instalasi)
 
@@ -137,6 +137,36 @@ npx @lace/ainstruct wipe --force
 
 Paket `@lace/ainstruct` (scope `@lace` bila tersedia) membungkus `bin/ainstruct`
 yang sama dengan paket Composer.
+
+## Template Manager: Template Milik Konsumen
+
+Konsumen dapat membuat/memiliki template sendiri secara instan — tanpa menunggu
+repo authoring menambah template — lalu menghapus/memperbaruinya lewat perintah.
+Template **built-in** (ship bersama paket, mis. `laravel/`) **TERPROTEKSI**:
+tidak bisa dihapus atau diubah/diperbarui langsung; untuk menyesuaikannya, konsumen
+**wajib clone sebagai template miliknya** lalu mengedit salinannya.
+
+Template konsumen tersimpan di `AINSTRUCT_HOME` (`${XDG_CONFIG_HOME:-$HOME/.config}/ainstruct`
+secara default, atau override `AINSTRUCT_HOME` untuk isolasi/CI) dan menang atas built-in
+bila namanya sama (shadow — bisa dibatalkan dengan menghapus template custom).
+
+```bash
+ainstruct template list                          # daftar built-in (proteksi) + custom
+ainstruct template create myfw                   # buat template/scaffold sendiri
+ainstruct template clone mylaravel laravel       # customisasi built-in → milik Anda
+ainstruct template update mylaravel --from laravel   # tarik ulang dari built-in
+ainstruct template delete myfw --force           # hapus template custom (built-in DITOLAK)
+ainstruct template path mylaravel                # lokasi direktori (untuk diedit)
+```
+
+- `create` membuat scaffold kosong (`ai-instructions.md` konstitusi + modul) yang
+  terbuka diedit. `clone` menyalin template (built-in atau custom) sebagai milik Anda.
+  `update` menimpa salinan Anda dari sumber (default: built-in senama; `--from <sumber>`
+  untuk sumber lain). `delete` menghapus template custom; built-in selalu DITOLAK dengan
+  pesan arahkan ke clone.
+- Operasi destruktif (`delete`, `update`) butuh konfirmasi `[y/N]`; di lingkungan
+  non-interaktif/CI wajib `--force`.
+- Setelah template custom tersedia, distribusikan seperti biasa: `ainstruct myfw`.
 
 ## Membuat Set Instruksi Baru
 
