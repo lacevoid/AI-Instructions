@@ -1,0 +1,23 @@
+{
+    "name": "lace/ainstruct",
+    "description": "AI Instructions CLI — distribute per-framework AI instruction sets (AGENTS.md, CLAUDE.md, GEMINI.md, Cursor, Windsurf, Cline, Continue, Aider) into a consumer project from the current directory.",
+    "type": "library",
+    "keywords": [
+        "ai",
+        "instructions",
+        "agents",
+        "claude",
+        "cursor",
+        "windsurf",
+        "cline",
+        "aider"
+    ],
+    "homepage": "https://github.com/lacevoid/AI-Instructions",
+    "support": {
+        "source": "https://github.com/lacevoid/AI-Instructions"
+    },
+    "require": {},
+    "bin": [
+        "bin/ainstruct"
+    ]
+}

@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# ============================================================================
+# AINSTRUCT — AI Instructions CLI (entrypoint universal)
+# ============================================================================
+# Titik masuk untuk semua adaptor:
+#   - Composer bin  : lace/ainstruct            → vendor/bin/ainstruct
+#   - npm / npx bin : @lace/ainstruct           → node_modules/.bin/ainstruct
+#   - Langsung      : ./bin/ainstruct <args>
+#
+# Delegasi ke setup-ai-rules.sh di direktori akar paket; arah kerja tetap pwd
+# (proyek konsumen). Path sendiri di-resolve melalui symlink sehingga bin yang
+# dipasang composer/npx menemukan direktori akar paket yang benar.
+# ============================================================================
+
+set -euo pipefail
+
+SELF="${BASH_SOURCE[0]}"
+
+# Pastikan SELF berupa path (bila dipanggil via PATH dengan nama bare saja).
+case "$SELF" in
+    */*) : ;;
+    *) SELF="$(command -v "$SELF" 2>/dev/null || printf '%s' "$SELF")" ;;
+esac
+
+# Resolve symlink (vendor/bin/ainstruct -> ../lace/ainstruct/bin/ainstruct).
+if command -v readlink >/dev/null 2>&1; then
+    _ln=0
+    while [ -L "$SELF" ] && [ "$_ln" -lt 32 ]; do
+        _TARGET="$(readlink "$SELF")"
+        case "$_TARGET" in
+            /*) SELF="$_TARGET" ;;
+            *) SELF="$(cd "$(dirname "$SELF")" && pwd)/$_TARGET" ;;
+        esac
+        _ln=$((_ln + 1))
+    done
+fi
+
+BIN_DIR="$(cd "$(dirname "$SELF")" && pwd)"
+ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd)"
+
+exec "${ROOT_DIR}/setup-ai-rules.sh" "$@"

@@ -48,8 +48,21 @@
 
 set -euo pipefail
 
-# Direktori script berada (sumber instruksi)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Direktori script berada (sumber instruksi) — symlink-aware agar bekerja
+# saat dipanggil lewat vendor/bin (composer), .bin (npx), atau symlink lain.
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+if command -v readlink >/dev/null 2>&1; then
+    _ln=0
+    while [ -L "$SCRIPT_PATH" ] && [ "$_ln" -lt 32 ]; do
+        _TARGET="$(readlink "$SCRIPT_PATH")"
+        case "$_TARGET" in
+            /*) SCRIPT_PATH="$_TARGET" ;;
+            *) SCRIPT_PATH="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)/$_TARGET" ;;
+        esac
+        _ln=$((_ln + 1))
+    done
+fi
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 
 # Direktori target (tempat script dijalankan)
 TARGET_DIR="$(pwd)"
