@@ -10,5 +10,8 @@ config:
   MD060:
     style: no_alignment
 
+ignores:
+  - ".opencode/node_modules/"
+
 globs:
   - "**/*.md"

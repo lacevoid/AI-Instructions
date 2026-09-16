@@ -1,0 +1,178 @@
+name: Meta
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    runs-on: ubuntu-latest
+    name: Shell syntax
+    steps:
+      - uses: actions/checkout@v4
+      - name: bash -n all operator-memory scripts
+        run: |
+          for s in operator-memory/*.sh; do
+            echo "--- $s ---"
+            bash -n "$s"
+          done
+
+  templates:
+    runs-on: ubuntu-latest
+    name: Template integrity
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify SKILL.md placeholders
+        run: |
+          # SKILL.md = mekanisme (sama untuk semua operator) → hanya butuh
+          # GITHUB_HANDLE + BACKUP_REPO (identitas repo backup).
+          for placeholder in GITHUB_HANDLE BACKUP_REPO; do
+            grep -q "{{$placeholder}}" operator-memory/skill/SKILL.md \
+              || { echo "FAIL: SKILL.md missing placeholder {{$placeholder}}"; exit 1; }
+          done
+          echo "SKILL.md placeholders: OK"
+      - name: Verify memory.md.start exists and has placeholders
+        run: |
+          test -f operator-memory/skill/memory.md.start \
+            || { echo "FAIL: memory.md.start not found"; exit 1; }
+          # memory.md.start = starter personal → 5 placeholder identitas.
+          for placeholder in NAME EMAIL GITHUB_HANDLE BACKUP_REPO DATE; do
+            grep -q "{{$placeholder}}" operator-memory/skill/memory.md.start \
+              || { echo "FAIL: memory.md.start missing placeholder {{$placeholder}}"; exit 1; }
+          done
+          echo "memory.md.start placeholders: OK"
+      - name: Verify README.md references all scripts
+        run: |
+          for script in bootstrap-operator-memory.sh backup.sh restore.sh; do
+            grep -q "$script" operator-memory/README.md \
+              || { echo "FAIL: README.md does not reference $script"; exit 1; }
+          done
+          echo "README.md references: OK"
+
+  bootstrap:
+    runs-on: ubuntu-latest
+    name: Bootstrap local-only
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run bootstrap in --local-only mode
+        run: |
+          set -euo pipefail
+          export HOME="$(mktemp -d)"
+          export XDG_CONFIG_HOME="$HOME/.config"
+          mkdir -p "$XDG_CONFIG_HOME"
+
+          ./operator-memory/bootstrap-operator-memory.sh \
+            --name "CI Test" \
+            --email "ci@test.local" \
+            --local-only
+
+          # Verify skill installed
+          test -f "$XDG_CONFIG_HOME/opencode/skills/operator-memory/SKILL.md" \
+            || { echo "FAIL: SKILL.md not installed"; exit 1; }
+
+          # Verify memory.md created
+          test -f "$XDG_CONFIG_HOME/opencode/skills/operator-memory/memory.md" \
+            || { echo "FAIL: memory.md not created"; exit 1; }
+
+          # Verify repo backup initialized
+          test -d "$XDG_CONFIG_HOME/operator-persona/.git" \
+            || { echo "FAIL: backup repo not initialized"; exit 1; }
+
+          # Verify SKILL.md has substituted values (not raw placeholders)
+          grep -q '{{' "$XDG_CONFIG_HOME/opencode/skills/operator-memory/SKILL.md" \
+            && { echo "FAIL: SKILL.md still has raw placeholder"; exit 1; }
+
+          # Verify memory.md: identitas ter-substitute
+          grep -q 'CI Test' "$XDG_CONFIG_HOME/opencode/skills/operator-memory/memory.md" \
+            || { echo "FAIL: memory.md name not substituted"; exit 1; }
+          grep -q '{{' "$XDG_CONFIG_HOME/opencode/skills/operator-memory/memory.md" \
+            && { echo "FAIL: memory.md still has raw placeholder"; exit 1; }
+
+          # Verify backup repo has config files
+          test -f "$XDG_CONFIG_HOME/operator-persona/config/skills/operator-memory/SKILL.md" \
+            || { echo "FAIL: backup repo missing SKILL.md"; exit 1; }
+          test -f "$XDG_CONFIG_HOME/operator-persona/config/skills/operator-memory/memory.md" \
+            || { echo "FAIL: backup repo missing memory.md"; exit 1; }
+
+          echo "bootstrap local-only: OK"
+
+  backup-restore:
+    runs-on: ubuntu-latest
+    name: Backup/restore cycle
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test backup after memory update
+        run: |
+          set -euo pipefail
+          export HOME="$(mktemp -d)"
+          export XDG_CONFIG_HOME="$HOME/.config"
+          mkdir -p "$XDG_CONFIG_HOME"
+
+          # Bootstrap first
+          ./operator-memory/bootstrap-operator-memory.sh \
+            --name "Backup Test" \
+            --email "backup@test.local" \
+            --local-only
+
+          SKILL_DIR="$XDG_CONFIG_HOME/opencode/skills/operator-memory"
+          REPO_DIR="$XDG_CONFIG_HOME/operator-persona"
+
+          # Simulate memory update (agent behavior)
+          printf '\n## Log\n- [test] Entry added by CI\n' >> "$SKILL_DIR/memory.md"
+
+          # Run backup (salinan di repo backup — REPO_DIR dari lokasi script)
+          ( cd "$REPO_DIR" && bash backup.sh 2>&1 ) \
+            || { echo "FAIL: backup.sh exited non-zero"; exit 1; }
+
+          # Verify commit was made
+          COMMIT_COUNT="$(git -C "$REPO_DIR" log --oneline | wc -l)"
+          test "$COMMIT_COUNT" -ge 2 \
+            || { echo "FAIL: expected >=2 commits (init + sync), got $COMMIT_COUNT"; exit 1; }
+
+          echo "backup cycle: OK"
+      - name: Test restore on fresh directory
+        run: |
+          set -euo pipefail
+          HOME_A="$(mktemp -d)"
+          export HOME="$HOME_A"
+          export XDG_CONFIG_HOME="$HOME/.config"
+          mkdir -p "$XDG_CONFIG_HOME"
+
+          # Bootstrap
+          ./operator-memory/bootstrap-operator-memory.sh \
+            --name "Restore Test" \
+            --email "restore@test.local" \
+            --local-only
+
+          REPO_A="$XDG_CONFIG_HOME/operator-persona"
+
+          # Simulate another device (fresh HOME/XDG): clone backup, restore
+          HOME_B="$(mktemp -d)"
+          XDG_CONFIG_HOME_B="$HOME_B/.config"
+          mkdir -p "$XDG_CONFIG_HOME_B"
+
+          # Copy backup repo to simulate cloned backup
+          cp -a "$REPO_A" "$HOME_B/operator-persona"
+
+          # Run restore on device B (HOME/XDG_CONFIG_HOME menunjuk perangkat B)
+          env HOME="$HOME_B" XDG_CONFIG_HOME="$XDG_CONFIG_HOME_B" \
+            bash "$HOME_B/operator-persona/restore.sh"
+
+          # Verify files restored
+          test -f "$XDG_CONFIG_HOME_B/opencode/skills/operator-memory/SKILL.md" \
+            || { echo "FAIL: restore did not create SKILL.md"; exit 1; }
+          test -f "$XDG_CONFIG_HOME_B/opencode/skills/operator-memory/memory.md" \
+            || { echo "FAIL: restore did not create memory.md"; exit 1; }
+
+          # Verify restored memory matches backup
+          diff "$REPO_A/config/skills/operator-memory/memory.md" \
+               "$XDG_CONFIG_HOME_B/opencode/skills/operator-memory/memory.md" \
+            || { echo "FAIL: restored memory does not match backup"; exit 1; }
+
+          echo "restore cycle: OK"
