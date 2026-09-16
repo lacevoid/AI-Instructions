@@ -27,6 +27,7 @@ jobs:
       - name: Smoke test setup-ai-rules.sh in a temp consumer dir
         run: |
           set -euo pipefail
+          REPO="$(pwd)"
           TMP="$(mktemp -d)"
           mkdir -p "$TMP/laravel"
           cp laravel/ai-instructions.md "$TMP/laravel/"
@@ -71,18 +72,18 @@ jobs:
 
           # adapter: bin/ainstruct via symlink vendor/bin (composer / npx style)
           mkdir -p "$TMP/vendor/lace/ainstruct/bin" "$TMP/vendor/bin"
-          cp setup-ai-rules.sh "$TMP/vendor/lace/ainstruct/"
-          cp bin/ainstruct "$TMP/vendor/lace/ainstruct/bin/"
-          cp -r laravel "$TMP/vendor/lace/ainstruct/laravel"
+          cp "$REPO/setup-ai-rules.sh" "$TMP/vendor/lace/ainstruct/"
+          cp "$REPO/bin/ainstruct" "$TMP/vendor/lace/ainstruct/bin/"
+          cp -r "$REPO/laravel" "$TMP/vendor/lace/ainstruct/laravel"
           ln -s ../lace/ainstruct/bin/ainstruct "$TMP/vendor/bin/ainstruct"
           ( cd "$TMP" && ./vendor/bin/ainstruct laravel >/dev/null )
           test -f "$TMP/AGENTS.md" || { echo "FAIL: bin/ainstruct tidak mendistribusikan"; exit 1; }
 
           # adapter: install.sh (curl | sh) via tarball lokal
           mkdir -p "$TMP/curl"
-          cp install.sh "$TMP/curl/"
+          cp "$REPO/install.sh" "$TMP/curl/"
           # bentuk codeload (top-level dir) — realistis untuk curl|sh
-          git archive --format=tar.gz --prefix=AI-Instructions-main/ -o "$TMP/curl/ainstruct.tar.gz" HEAD
+          git -C "$REPO" archive --format=tar.gz --prefix=AI-Instructions-main/ -o "$TMP/curl/ainstruct.tar.gz" HEAD
           ( cd "$TMP/curl" && AINSTRUCT_CACHE="$TMP/curl/.cache" \
               AINSTRUCT_SOURCE_URL="file://$TMP/curl/ainstruct.tar.gz" \
               sh install.sh laravel >/dev/null )
@@ -95,8 +96,8 @@ jobs:
           # bentuk datar (git archive tanpa prefix) juga harus didukung
           rm -rf "$TMP/curl2"
           mkdir -p "$TMP/curl2"
-          cp install.sh "$TMP/curl2/"
-          git archive --format=tar.gz -o "$TMP/curl2/ainstruct.tar.gz" HEAD
+          cp "$REPO/install.sh" "$TMP/curl2/"
+          git -C "$REPO" archive --format=tar.gz -o "$TMP/curl2/ainstruct.tar.gz" HEAD
           ( cd "$TMP/curl2" && AINSTRUCT_CACHE="$TMP/curl2/.cache" \
               AINSTRUCT_SOURCE_URL="file://$TMP/curl2/ainstruct.tar.gz" \
               sh install.sh laravel >/dev/null )
