@@ -4,17 +4,16 @@
   <img src="assets/logo.svg" alt="AI-INSTRUCTIONS — Instruction Architecture" width="340">
 </p>
 
-**Repository Instruction Architect — bengkel authoring set instruksi AI.**
+**Repository Instruction Architect — mesin adaptif (proyek meta) pengelola set instruksi AI.**
 
-Repositori ini BUKAN proyek konsumen teknologi apa pun. Ini adalah bengkel untuk
-**menganalisis set pembuatan instruksi**: repo ini menghasilkan, memperbarui, dan
-mendistribusikan **set instruksi AI** yang presisi untuk digunakan oleh AI coding agent
-di **proyek konsumen** (mis. LingSID).
+Repositori ini BUKAN proyek konsumen teknologi apa pun. Ini adalah **mesin adaptif**:
+sistem yang **memproduksi, menguji, mendistribusikan, dan mengadaptasi set instruksi AI**
+yang presisi untuk digunakan oleh AI coding agent di **proyek konsumen** (mis. LingSID),
+dan yang setiap salinannya membawa mekanisme yang sama dengan operator miliknya sendiri
+(memori + repo privat GitHub + sinkronisasi dua arah).
 
-Repositori ini BUKAN proyek konsumen teknologi apa pun. Ini adalah bengkel untuk
-**menganalisis set pembuatan instruksi**: repo ini menghasilkan, memperbarui, dan
-mendistribusikan **set instruksi AI** yang presisi untuk digunakan oleh AI coding agent
-di **proyek konsumen** (mis. LingSID).
+Baca **`VISION.md`** untuk visi lengkap tiga lapisan (artefak → pabrik → mesin adaptif)
+dan siklus hidup instruksi.
 
 ## Repo Ini Bukan Tempat Distribusi
 
@@ -30,10 +29,11 @@ Script hanya dijalankan di root **proyek konsumen**.
 AI-Instructions/
 ├── AGENTS.md            ← Self-instruction arsitek (peran, larangan, aturan git)
 ├── ARCHITECT-GUIDE.md   ← Playbook (wajib dibaca penuh sebelum bekerja)
+├── VISION.md            ← Visi meta: mesin adaptif tiga lapisan (artefak→pabrik→adaptif)
 ├── setup-ai-rules.sh    ← Script distribusi (HANYA untuk root proyek konsumen)
 ├── .gitignore           ← Mencegah artefak distribusi ter-commit ke repo ini
 ├── team-dev/            ← Template tim development opencode (.opencode/ agent + skill)
-├── operator-memory/     ← Mekanisme per-salinan (skill + backup dua arah + bootstrap)
+├── operator-memory/     ← MESIN ADAPTIF: skill + backup dua arah + bootstrap per-salinan
 └── laravel/             ← Template set instruksi (satu folder per framework/teknologi)
     ├── ai-instructions.md            ← Konstitusi (entry point)
     └── ai-instructions/
@@ -186,7 +186,7 @@ ainstruct template path mylaravel                # lokasi direktori (untuk diedi
   non-interaktif/CI wajib `--force`.
 - Setelah template custom tersedia, distribusikan seperti biasa: `ainstruct myfw`.
 
-## Operador Memory — Mekanisme yang Sama di Setiap Salinan
+## Operator Memory — Mesin Adaptif di Setiap Salinan
 
 Setiap **salinan repository ini** (fork, clone, atau distribusi via adaptor)
 membawa mekanisme `operator-memory/` yang sama: sebuah skill yang membuat agent
@@ -262,5 +262,5 @@ Setiap set WAJIB memuat KLAUSA 1–5 (detail penuh di `ARCHITECT-GUIDE.md` bagia
 |-----|--------|---------|
 | `laravel/` | Aktif | Berakar pada LingSID; konstitusi + modul 01–21 + invariant proyek di `12-project-specific/lingusid.md` + bank snippet kanonik; memuat protokol MASTER_BUILD_SPECIFICATION. Self-instruction arsitek (`AGENTS.md` §5) mengadopsi aturan kualitas universal dari set ini. |
 | `team-dev/` | Aktif | Template **tim development multi-agent** untuk konsumen: konstitusi + modul 01–21 + protokol diskusi peran (`03-team-protocol.md`) + role subagent opencode (`architecture-advisor`, `code-reviewer`, `qa-engineer`, `security-reviewer`) dan skill `team` yang didistribusikan ke `.opencode/` proyek konsumen. |
-| `operator-memory/` | Aktif | **Mekanisme per-salinan**: skill `operator-memory` + memori live (`~/.config/opencode/...`) + script backup dua arah, restore, dan bootstrap (`operator-memory/`) — setiap salinan repo me-bootstrap operatornya masing-masing ke repo privat GitHub. |
+| `operator-memory/` | Aktif | **MESIN ADAPTIF (lapisan 3)**: skill `operator-memory` + memori live (`~/.config/opencode/...`) + script backup dua arah, restore, dan bootstrap (`operator-memory/`) — setiap salinan repo me-bootstrap operatornya masing-masing ke repo privat GitHub. |
 | `java/`, `react/` | Direncanakan | Didukung script (coming soon), folder belum dibuat |

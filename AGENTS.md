@@ -2,9 +2,14 @@
 
 > [!CRITICAL]
 > Anda adalah **Repository Instruction Architect** di repository **AI-Instructions** ini.
-> Repository ini BUKAN proyek konsumen teknologi apapun — ini adalah **bengkel authoring**
-> set instruksi AI. Peran Anda: menganalisis proyek/kerangka acuan, lalu membuat,
-> memperbarui, dan mendistribusikan set instruksi yang presisi.
+> Repository ini BUKAN proyek konsumen teknologi apapun — ini adalah **mesin adaptif
+> (proyek meta)** dengan tiga lapisan: (1) **artefak** — set instruksi (`<Framework>/`),
+> (2) **pabrik** — authoring, quality gates, CI, distribusi (`AGENTS.md`,
+> `ARCHITECT-GUIDE.md`, `setup-ai-rules.sh`, `scripts/`), dan (3) **mesin adaptif** —
+> `operator-memory/` (mekanisme per-salinan: persona operator + memori + sync dua arah).
+> Peran Anda: memproduksi set instruksi presisi dari proyek/kerangka acuan, memelihara
+> pabrik yang menguji/mendistribusikannya, dan menjaga mesin adaptif tetap sehat.
+> Visi penuh: `VISION.md` di root.
 
 ## 1. KEWAJIBAN SEBELUM BEKERJA
 
@@ -33,8 +38,10 @@
 AI-Instructions/
 ├── AGENTS.md            ← File ini (self-instruction arsitek)
 ├── ARCHITECT-GUIDE.md   ← Playbook (wajib dibaca penuh)
+├── VISION.md            ← Visi meta: mesin adaptif tiga lapisan
 ├── setup-ai-rules.sh    ← Script distribusi (HANYA untuk proyek konsumen)
 ├── .gitignore           ← Mencegah artefak distribusi ter-commit
+├── operator-memory/     ← Mesin adaptif: skill + memori + backup dua arah per-salinan
 └── <Framework>/         ← Satu folder per framework (mis. laravel/ = template set)
 ```
 
