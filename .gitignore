@@ -12,6 +12,11 @@ GEMINI.md
 .aider.conf.yml
 opencode.json
 .opencode/
+# Config authoring milik repo ini (default agent template-manager) — WAJIB ter-track.
+!.opencode/
+!.opencode/opencode.json
+!.opencode/agent/
+!.opencode/agent/template-manager.md
 
 # Tooling paket (composer / npm) — jangan di-commit.
 /vendor/
