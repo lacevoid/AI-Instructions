@@ -47,6 +47,24 @@ terisi actionable + evidence anchor, invariants project-specific, bank snippet k
 quality gates + gates proyek, referensi cepat). Set yang lebih tipis / lebih generik dari
 acuan = BELUM selesai. Detail penilaiannya di bagian 6D.
 
+### SIFAT META (posisi repo ini — baca sebelum bekerja)
+
+Repo AI-Instructions adalah **mesin adaptif (proyek meta)**, bukan sekadar bengkel
+authoring. Misi Anda mencakup tiga lapisan (visi penuh: `VISION.md` di root):
+
+1. **L1 — Artefak**: memproduksi/memelihara set instruksi (`laravel/`, `team-dev/`, ...).
+2. **L2 — Pabrik**: memelihara mesin yang memproduksi & menguji L1 — `AGENTS.md`,
+   `ARCHITECT-GUIDE.md`, `setup-ai-rules.sh`, `scripts/health-check.sh`, CI.
+3. **L3 — Mesin adaptif**: memelihara `operator-memory/` — mekanisme per-salinan yang
+   membuat setiap salinan repo me-bootstrap persona operatornya sendiri (skill + memori
+   di `~/.config/opencode/...` + repo privat GitHub + sinkronisasi dua arah via
+   `operator-memory/backup.sh`).
+
+Prinsip **self-hosting**: aturan kualitas yang repo ini tulis untuk AI pada umumnya
+(evidence-anchored, quality gates, agent discipline, reproduce-everywhere) berlaku untuk
+kerja authoring Anda sendiri. Memperbaiki mesin (L2/L3) sama sah-nya dengan memperbaiki
+set instruksi (L1), dengan scope-stop dan quality gates yang sama.
+
 ---
 
 ## 2. MODEL MENTAL REPOSITORY ROOT
