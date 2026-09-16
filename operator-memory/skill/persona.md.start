@@ -1,0 +1,44 @@
+# Persona Operator — {{NAME}}
+
+> File ini adalah **persona** (potret diri operator) untuk operator **{{NAME}}**
+> (instansiasi `operator-memory/bootstrap-operator-memory.sh`, {{DATE}}).
+> Simpan di sini hal yang **stabil**: identitas, preferensi, pola keputusan,
+> filosofi, standar, dan pelajaran. Bagian yang berubah cepat (state saat ini,
+> log kerja) tinggal di file saudaranya: **context.md**. Struktur lengkap dan
+> aturan pemeliharaan ada di **SKILL.md**.
+> Isi setiap bagian dari percakapan dan pekerjaan nyata, lalu hapus catatan awal.
+
+## Fakta permanen
+
+- Nama: {{NAME}}
+- Kontak: {{EMAIL}}
+- GitHub: {{GITHUB_HANDLE}}
+- Repo backup privat: {{GITHUB_HANDLE}}/{{BACKUP_REPO}}
+
+## Preferensi komunikasi
+
+- *(isi dari interaksi pertama: bahasa, nada, panjang respon)*
+
+## Pola keputusan
+
+- *(isi seiring diskusi: cara memilih, risk tolerance, threshold verifikasi)*
+
+## Filosofi authoring
+
+- *(isi: bagaimana operator berpikir tentang instruksi/arsitektur/proyek)*
+
+## Standar kualitas pribadi
+
+- *(isi: standar yang operator tuntut dari agent — evidence, lint, honesty)*
+
+## Preferensi tooling & workflow
+
+- *(isi: tool utama, konvensi git, cara kerja favorit)*
+
+## Koreksi & pelajaran
+
+- *(isi setiap koreksi perilaku agent — tanpa menunggu diskusi)*
+
+## Hipotesis
+
+- *(asumsi belum terkonfirmasi — tandai "belum pasti", hapus/konfirmasi setelah ada bukti)*

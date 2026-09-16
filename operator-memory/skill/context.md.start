@@ -1,0 +1,17 @@
+# Konteks Pekerjaan — {{NAME}}
+
+> File ini mencatat **konteks kerja** operator **{{NAME}}** (instansiasi
+> `operator-memory/bootstrap-operator-memory.sh`, {{DATE}}): state saat ini,
+> progres, dan log. Sifatnya **dinamis** — berubah tiap sesi kerja.
+> Bagian yang stabil (identitas, preferensi, pola keputusan) tinggal di
+> **persona.md**. Struktur lengkap dan aturan pemeliharaan ada di **SKILL.md**.
+> Isi dari pekerjaan nyata, lalu hapus catatan awal.
+
+## State saat ini (checkpoint — {{DATE}})
+
+- *(isi: progres yang sedang berjalan, keputusan terakhir, hal yang wajib
+  diingat sesi berikutnya)*
+
+## Log
+
+- [{{DATE}}] Inisialisasi konteks operator via `operator-memory/bootstrap-operator-memory.sh`.

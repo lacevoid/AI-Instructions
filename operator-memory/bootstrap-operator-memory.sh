@@ -11,12 +11,14 @@
 #   1. Identitas operator (nama, email, handle GitHub) — argumen atau interaktif.
 #   2. Buat repo privat GitHub <handle>/<repo> (@gh) bila belum ada; clone ke
 #      ${XDG_CONFIG_HOME:-$HOME/.config}/operator-persona.
-#   3. Pasang skill + memori starter ke ~/.config/opencode/ (memori lama dijaga).
-#   4. Tautkan memory.md ke opencode.jsonc (dibuat bila belum ada).
+#   3. Pasang skill + memori starter (persona.md + context.md) ke
+#      ~/.config/opencode/ (memori lama dijaga; memory.md legacy dimigrasi).
+#   4. Tautkan persona.md + context.md ke opencode.jsonc (dibuat bila belum ada).
 #   5. Sinkronkan config ke repo backup, commit + push.
 #
-# Setelah selesai: restart opencode. Agent selanjutnya membaca memory.md,
-# memperbaruinya di checkpoint kerja, dan menjalankan backup.sh (dua arah).
+# Setelah selesai: restart opencode. Agent selanjutnya membaca persona.md (siapa
+# operator) + context.md (di mana kita), memperbaruinya di checkpoint kerja,
+# dan menjalankan backup.sh (dua arah).
 # Restore di mesin lain: clone repo privat lalu jalankan restore.sh.
 #
 # Opsi non-interaktif / CI / pengujian:
@@ -155,33 +157,84 @@ else
   exit 1
 fi
 
-# --- Pasang memori: adopsi remote atau seed starter (jangan timpa memori live) ---
-if [[ -f "$SKILL_DIR/memory.md" ]]; then
-  log "memori live dipertahankan: $SKILL_DIR/memory.md"
+# --- Migrasi memory.md legacy → persona.md + context.md (deterministik) ---
+# Heading yang termasuk konteks dinamis; sisanya adalah persona (stabil).
+CONTEXT_HEADING_PREFIXES=("State saat ini" "Log")
+is_context_heading() {
+  local h="$1"
+  for p in "${CONTEXT_HEADING_PREFIXES[@]}"; do
+    if [[ "$h" == "## $p"* ]]; then return 0; fi
+  done
+  return 1
+}
+
+split_legacy_memory() {
+  # $1 = sumber memory.md legacy, $2 = direktori tujuan (SKILL_DIR)
+  # Hasil: $2/persona.md + $2/context.md. Sumber TIDAK dihapus.
+  local src="$1" dst="$2"
+  log "migrasi memory.md legacy -> persona.md + context.md"
+  local bucket="persona"
+  local persona_file="$dst/persona.md"
+  local context_file="$dst/context.md"
+  : > "$persona_file"
+  : > "$context_file"
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" == "## "* ]]; then
+      if is_context_heading "$line"; then bucket="context"; else bucket="persona"; fi
+    fi
+    if [[ "$bucket" == "persona" ]]; then
+      printf '%s\n' "$line" >> "$persona_file"
+    else
+      printf '%s\n' "$line" >> "$context_file"
+    fi
+  done < "$src"
+}
+
+# --- Pasang memori: persona.md (stabil) + context.md (dinamis) ---
+PERSONA_REF=""
+CONTEXT_REF=""
+if [[ -f "$SKILL_DIR/persona.md" && -f "$SKILL_DIR/context.md" ]]; then
+  log "memori live dipertahankan: $SKILL_DIR/persona.md + context.md"
+elif [[ -f "$SKILL_DIR/memory.md" ]]; then
+  # Legacy dari versi awal: migrasi sekali, sumber dijaga utuh.
+  split_legacy_memory "$SKILL_DIR/memory.md" "$SKILL_DIR"
+  log "memory.md legacy tetap tersimpan (tidak dihapus)."
+elif [[ -f "$DEST/config/skills/operator-memory/persona.md" \
+     && -f "$DEST/config/skills/operator-memory/context.md" ]]; then
+  cp "$DEST/config/skills/operator-memory/persona.md"  "$SKILL_DIR/persona.md"
+  cp "$DEST/config/skills/operator-memory/context.md"  "$SKILL_DIR/context.md"
+  log "memori diadopsi dari repo backup (perangkat lain)."
 elif [[ -f "$DEST/config/skills/operator-memory/memory.md" ]]; then
   cp "$DEST/config/skills/operator-memory/memory.md" "$SKILL_DIR/memory.md"
-  log "memori diadopsi dari repo backup (perangkat lain)."
-elif [[ -f "$TOOLKIT_DIR/skill/memory.md.start" ]]; then
+  split_legacy_memory "$SKILL_DIR/memory.md" "$SKILL_DIR"
+  log "memori legacy diadopsi dari repo backup lalu dimigrasi."
+else
   sed -e "s|{{NAME}}|$NAME|g" \
       -e "s|{{EMAIL}}|$EMAIL|g" \
       -e "s|{{GITHUB_HANDLE}}|$GITHUB_HANDLE|g" \
       -e "s|{{BACKUP_REPO}}|$BACKUP_REPO|g" \
       -e "s|{{DATE}}|$DATE_UTC|g" \
-      "$TOOLKIT_DIR/skill/memory.md.start" > "$SKILL_DIR/memory.md"
-  log "memori starter dibuat: $SKILL_DIR/memory.md"
-else
-  log "GAGAL: template memori tidak ditemukan." >&2
-  exit 1
+      "$TOOLKIT_DIR/skill/persona.md.start" > "$SKILL_DIR/persona.md"
+  log "persona starter dibuat: $SKILL_DIR/persona.md"
+  sed -e "s|{{NAME}}|$NAME|g" \
+      -e "s|{{EMAIL}}|$EMAIL|g" \
+      -e "s|{{GITHUB_HANDLE}}|$GITHUB_HANDLE|g" \
+      -e "s|{{BACKUP_REPO}}|$BACKUP_REPO|g" \
+      -e "s|{{DATE}}|$DATE_UTC|g" \
+      "$TOOLKIT_DIR/skill/context.md.start" > "$SKILL_DIR/context.md"
+  log "context starter dibuat: $SKILL_DIR/context.md"
 fi
 
-# --- Tautkan memory.md ke opencode.jsonc global ---
+# --- Tautkan persona.md + context.md ke opencode.jsonc global ---
 CONFIG_FILE="$OPENCODE_DIR/opencode.jsonc"
 # Rujukan portabel bila lokasi standar (~/.config/opencode), agar restore di
 # mesin lain tetap menunjuk benar; path absolut bila XDG_CONFIG_HOME di-override.
 if [[ "$OPENCODE_DIR" == "$HOME/.config/opencode" ]]; then
-  MEM_REF="~/.config/opencode/skills/operator-memory/memory.md"
+  PERSONA_REF="~/.config/opencode/skills/operator-memory/persona.md"
+  CONTEXT_REF="~/.config/opencode/skills/operator-memory/context.md"
 else
-  MEM_REF="$SKILL_DIR/memory.md"
+  PERSONA_REF="$SKILL_DIR/persona.md"
+  CONTEXT_REF="$SKILL_DIR/context.md"
 fi
 if [[ ! -f "$CONFIG_FILE" ]]; then
   mkdir -p "$OPENCODE_DIR"
@@ -189,46 +242,55 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
-    "__MEM_REF__"
+    "__PERSONA_REF__",
+    "__CONTEXT_REF__"
   ]
 }
 EOF
-  sed -i "s|__MEM_REF__|$MEM_REF|" "$CONFIG_FILE"
+  sed -i "s|__PERSONA_REF__|$PERSONA_REF|; s|__CONTEXT_REF__|$CONTEXT_REF|" "$CONFIG_FILE"
   log "opencode.jsonc dibuat: $CONFIG_FILE"
-elif grep -q 'operator-memory/memory\.md' "$CONFIG_FILE"; then
-  log "opencode.jsonc sudah memuat referensi memory.md (tidak diubah)."
+elif grep -q 'operator-memory/persona\.md' "$CONFIG_FILE" \
+     && grep -q 'operator-memory/context\.md' "$CONFIG_FILE"; then
+  log "opencode.jsonc sudah memuat referensi persona.md + context.md (tidak diubah)."
 else
   if command -v python3 >/dev/null 2>&1 \
      && python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$CONFIG_FILE" 2>/dev/null; then
     cp "$CONFIG_FILE" "$CONFIG_FILE.bak.$DATE_UTC"
-    python3 - "$CONFIG_FILE" "$MEM_REF" <<'PYEOF'
+    python3 - "$CONFIG_FILE" "$PERSONA_REF" "$CONTEXT_REF" <<'PYEOF'
 import json, sys
-path, ref = sys.argv[1], sys.argv[2]
+path, p_ref, c_ref = sys.argv[1], sys.argv[2], sys.argv[3]
 cfg = json.load(open(path))
 cfg.setdefault("instructions", [])
-if ref not in cfg["instructions"]:
-    cfg["instructions"].append(ref)
+# Buang referensi legacy memory.md bila ada, lalu tambahkan pasangan baru.
+cfg["instructions"] = [i for i in cfg["instructions"] if "operator-memory/memory.md" not in i]
+for ref in (p_ref, c_ref):
+    if ref not in cfg["instructions"]:
+        cfg["instructions"].append(ref)
 with open(path, "w") as f:
     json.dump(cfg, f, indent=2)
     f.write("\n")
 PYEOF
-    log "opencode.jsonc diperbarui (referensi memory.md ditambahkan)."
+    log "opencode.jsonc diperbarui (referensi persona.md + context.md)."
   else
     log "PERINGATAN: opencode.jsonc sudah ada dan bukan JSON murni —"
     log "           tambahkan manual baris ini ke daftar instructions:"
-    log "           \"$MEM_REF\""
+    log "           \"$PERSONA_REF\" dan \"$CONTEXT_REF\""
   fi
 fi
 
 # --- Sinkronkan config ke repo backup + commit/push ---
 log "menyalin config ke repo backup..."
 cp -f "$SKILL_DIR/SKILL.md"   "$DEST/config/skills/operator-memory/SKILL.md"
-cp -f "$SKILL_DIR/memory.md"  "$DEST/config/skills/operator-memory/memory.md"
+cp -f "$SKILL_DIR/persona.md" "$DEST/config/skills/operator-memory/persona.md"
+cp -f "$SKILL_DIR/context.md" "$DEST/config/skills/operator-memory/context.md"
+# Legacy memory.md di repo backup dihapus dari config (sudah dimigrasi).
+rm -f "$DEST/config/skills/operator-memory/memory.md"
 cp -f "$CONFIG_FILE"          "$DEST/config/opencode.jsonc" 2>/dev/null || true
 cp -f "$TOOLKIT_DIR/backup.sh"  "$DEST/backup.sh"
 cp -f "$TOOLKIT_DIR/restore.sh" "$DEST/restore.sh"
+cp -f "$TOOLKIT_DIR/metrics.sh" "$DEST/metrics.sh" 2>/dev/null || true
 cp -f "$TOOLKIT_DIR/README.md"  "$DEST/README.md" 2>/dev/null || true
-chmod +x "$DEST/backup.sh" "$DEST/restore.sh"
+chmod +x "$DEST/backup.sh" "$DEST/restore.sh" "$DEST/metrics.sh" 2>/dev/null || true
 
 # identitas git disimpan ke config backup agar restore.sh bisa menerapkannya
 # di mesin baru (clone fresh TIDAK membawa user.name/user.email git lokal).
@@ -258,14 +320,17 @@ cat <<EOF
 
 ══════════════════════════════════════════════════════════
 ✅ Operator memory siap untuk: $NAME <$EMAIL>
-   Skill + memori : $SKILL_DIR
-   Config global  : $CONFIG_FILE
-   Repo backup    : $DEST
-   Sinkronisasi   : dua arah (tarik → gabung → push) via backup.sh
+   Skill + persona  : $SKILL_DIR/persona.md
+   Skill + context  : $SKILL_DIR/context.md
+   Config global    : $CONFIG_FILE
+   Repo backup      : $DEST
+   Sinkronisasi     : dua arah (tarik → gabung → push) via backup.sh
+   Metrik adaptasi  : $DEST/metrics.sh (statistik persona/context)
 ══════════════════════════════════════════════════════════
 Langkah berikut:
    1. RESTART opencode agar skill aktif.
-   2. Saat mencatat kegiatan, agent memperbarui memory.md lalu
-      menjalankan backup.sh (otomatis di checkpoint kerja).
+   2. Saat mencatat kegiatan, agent memperbarui persona.md (siapa operator)
+      dan context.md (di mana kita) lalu menjalankan backup.sh (otomatis
+      di checkpoint kerja).
    3. Mesin lain: clone repo privat lalu restore.sh.
 EOF
