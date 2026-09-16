@@ -7,12 +7,17 @@
 #
 # Penggunaan:
 #   chmod +x setup-ai-rules.sh
-#   ./setup-ai-rules.sh [framework]
+#   ./setup-ai-rules.sh [framework]           # Distribusikan instruksi ke pwd
+#   ./setup-ai-rules.sh reset [framework]     # Reset instruksi ke default template
+#   ./setup-ai-rules.sh wipe [--force]        # Hapus SEMUA artefak instruksi dari pwd
+#   ./setup-ai-rules.sh help                  # Tampilkan bantuan
 #
 # Contoh:
 #   ./setup-ai-rules.sh laravel
 #   ./setup-ai-rules.sh java
 #   ./setup-ai-rules.sh          # Auto-detect dari direktori saat ini
+#   ./setup-ai-rules.sh reset laravel   # Buang custom master, kembali ke default template
+#   ./setup-ai-rules.sh wipe --force    # Hapus semua instruksi tanpa konfirmasi
 #
 # Framework yang didukung:
 #   - laravel   → Laravel AI Instructions
@@ -35,6 +40,8 @@
 #        ai-instructions/master/ai-instructions/     ← modul instruksi (opsional, EDIT DI SINI)
 #   2. Edit file master sesuai kebutuhan Anda.
 #   3. Jalankan ulang script ini → versi custom didistribusikan ke semua file.
+#   4. Untuk membuang custom dan kembali ke default template:
+#        ./setup-ai-rules.sh reset <framework>
 #   DILARANG mengedit file hasil distribusi (AGENTS.md, CLAUDE.md, ai-instructions/*.md, dll)
 #   langsung, karena akan ditimpa setiap kali script dijalankan.
 # ============================================================================
@@ -47,8 +54,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Direktori target (tempat script dijalankan)
 TARGET_DIR="$(pwd)"
 
-# Framework yang akan didistribusikan
-FRAMEWORK="${1:-}"
+# Framework yang akan didistribusikan (diatur oleh parsing subcommand di MAIN)
+FRAMEWORK=""
 
 # Fungsi: lowercase
 to_lower() {
@@ -193,6 +200,119 @@ sync_master() {
 }
 
 # ============================================================================
+# Fungsi: Tampilkan usage / bantuan
+# ============================================================================
+usage() {
+    cat <<USAGE
+Usage: $0 [<framework>]           Distribusikan instruksi ke proyek konsumen (pwd)
+       $0 reset [<framework>]     Reset instruksi ke default template
+                                  (hapus ai-instructions/master + distribusi ulang)
+       $0 wipe [--force]          Hapus SEMUA artefak instruksi dari pwd
+       $0 help                    Tampilkan bantuan ini
+
+Commands:
+  distribute   (default) Bentuk/sinkronkan master lalu distribusikan ke semua AI tools.
+  reset        Hapus folder master yang di-custom, buat ulang dari template,
+               lalu distribusikan ulang (kembali ke default template).
+  wipe         Hapus semua file artefak hasil distribusi dari pwd:
+               AGENTS.md, CLAUDE.md, GEMINI.md, .github/copilot-instructions.md,
+               .cursorrules, .cursor/, .windsurfrules, .clinerules/,
+               .continuerules, .aider.conf.yml, ai-instructions/ (termasuk master/).
+               Tanpa --force, diminta konfirmasi.
+
+Options:
+  --force      Lewati konfirmasi pada perintah wipe (untuk automation/CI).
+
+Examples:
+  ./setup-ai-rules.sh laravel          Distribusikan framework laravel
+  ./setup-ai-rules.sh reset laravel    Kembalikan ke default template lalu distribusikan
+  ./setup-ai-rules.sh wipe --force     Hapus semua instruksi tanpa konfirmasi
+USAGE
+}
+
+# ============================================================================
+# Fungsi: Reset — hapus master hasil custom agar disinkronkan ulang dari template
+# ============================================================================
+reset_master() {
+    local master_dir="${TARGET_DIR}/ai-instructions/master"
+    if [ -d "$master_dir" ]; then
+        echo -e "${YELLOW}♻️  Reset: menghapus master hasil custom: ${master_dir}${NC}"
+        rm -rf "$master_dir"
+    else
+        echo -e "${YELLOW}♻️  Reset: master belum ada — akan dibuat dari template.${NC}"
+    fi
+}
+
+# ============================================================================
+# Fungsi: Wipe — hapus semua artefak instruksi dari direktori target (pwd)
+# ============================================================================
+wipe_instructions() {
+    local force=0
+    if [[ "${1:-}" == "--force" ]]; then
+        force=1
+    fi
+
+    echo -e "${YELLOW}🧹 Wipe instruksi AI dari: ${TARGET_DIR}${NC}"
+    echo -e "    Akan dihapus: AGENTS.md, CLAUDE.md, GEMINI.md,"
+    echo -e "    .github/copilot-instructions.md, .cursorrules, .cursor/,"
+    echo -e "    .windsurfrules, .clinerules/, .continuerules, .aider.conf.yml,"
+    echo -e "    ai-instructions/ (termasuk master/ hasil custom)."
+    echo ""
+
+    if [[ $force -ne 1 ]]; then
+        if [[ ! -t 0 ]]; then
+            echo -e "${RED}❌ Terminal non-interaktif — jalankan dengan --force untuk mengeksekusi wipe.${NC}"
+            exit 1
+        fi
+        read -r -p "Yakin ingin menghapus semua file di atas? [y/N] " ans
+        if [[ ! "$ans" =~ ^[yY] ]]; then
+            echo -e "${YELLOW}Wipe dibatalkan.${NC}"
+            exit 0
+        fi
+    fi
+
+    local count=0
+    local item
+    for item in \
+        "AGENTS.md" \
+        "CLAUDE.md" \
+        "GEMINI.md" \
+        ".github/copilot-instructions.md" \
+        ".cursorrules" \
+        ".windsurfrules" \
+        ".continuerules" \
+        ".aider.conf.yml"; do
+        if [[ -e "${TARGET_DIR}/${item}" ]]; then
+            rm -f "${TARGET_DIR}/${item}"
+            echo -e "  ${RED}🗑️${NC} ${item}"
+            count=$((count + 1))
+        fi
+    done
+
+    for item in ".cursor" ".clinerules" "ai-instructions"; do
+        if [[ -d "${TARGET_DIR}/${item}" ]]; then
+            rm -rf "${TARGET_DIR:?}/${item}"
+            echo -e "  ${RED}🗑️${NC} ${item}/"
+            count=$((count + 1))
+        fi
+    done
+
+    # Bersihkan direktori induk yang kini kosong (abaikan bila masih terpakai)
+    for item in ".github" ".clinerules" ".cursor"; do
+        if [[ -d "${TARGET_DIR}/${item}" ]]; then
+            rmdir "${TARGET_DIR}/${item}" 2>/dev/null || true
+        fi
+    done
+
+    echo ""
+    echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}✅ Wipe selesai! ${count} artefak dihapus.${NC}"
+    echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
+    echo ""
+    echo -e "${YELLOW}ℹ️  Untuk memasang kembali, jalankan: ./setup-ai-rules.sh <framework>${NC}"
+}
+
+# ============================================================================
 # Fungsi: Buat file Cursor .mdc dengan frontmatter
 # ============================================================================
 distribute_cursor_mdc() {
@@ -253,6 +373,32 @@ EOF
 # ============================================================================
 
 show_header
+
+# Parsing subcommand
+COMMAND="$(to_lower "${1:-}")"
+case "$COMMAND" in
+    ""|distribute)
+        FRAMEWORK="${2:-}"
+        ;;
+    reset)
+        shift
+        FRAMEWORK="${1:-}"
+        reset_master
+        echo ""
+        ;;
+    wipe)
+        shift
+        wipe_instructions "$@"
+        exit 0
+        ;;
+    help|-h|--help)
+        usage
+        exit 0
+        ;;
+    *)
+        FRAMEWORK="${1:-}"
+        ;;
+esac
 
 # Auto-detect jika tidak ada framework yang ditentukan
 if [ -z "$FRAMEWORK" ]; then
