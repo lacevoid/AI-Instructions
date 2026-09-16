@@ -12,11 +12,11 @@ GEMINI.md
 .aider.conf.yml
 opencode.json
 .opencode/
-# Config authoring milik repo ini (default agent template-manager + tim authoring) — WAJIB ter-track.
+# Config authoring milik repo ini (default agent plenger + tim authoring) — WAJIB ter-track.
 !.opencode/
 !.opencode/opencode.json
 !.opencode/agent/
-!.opencode/agent/template-manager.md
+!.opencode/agent/plenger.md
 !.opencode/agent/architect-reviewer.md
 !.opencode/agent/evidence-checker.md
 !.opencode/agent/quality-gate-runner.md
