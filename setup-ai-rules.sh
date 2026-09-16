@@ -36,6 +36,7 @@
 #   - Cline                    → .clinerules/<framework>-directives.md
 #   - Aider                    → .aider.conf.yml
 #   - Continue.dev             → .continuerules
+#   - opencode                 → opencode.json + AGENTS.md (default AI untuk pekerjaan)
 #
 # Workflow custom (menambahkan instruksi custom):
 #   1. Jalankan script ini → dibuat master instruction yang bisa di-custom:
@@ -611,7 +612,8 @@ Commands:
   wipe         Hapus semua file artefak hasil distribusi dari pwd:
                AGENTS.md, CLAUDE.md, GEMINI.md, .github/copilot-instructions.md,
                .cursorrules, .cursor/, .windsurfrules, .clinerules/,
-               .continuerules, .aider.conf.yml, ai-instructions/ (termasuk master/).
+               .continuerules, .aider.conf.yml, opencode.json, .opencode/,
+               ai-instructions/ (termasuk master/).
                Tanpa --force, diminta konfirmasi.
   template     Kelola template milik konsumen (custom): list, create, clone, update,
                delete, path. Built-in TERPROTEKSI — customisasi lewat clone.
@@ -679,7 +681,8 @@ wipe_instructions() {
         ".cursorrules" \
         ".windsurfrules" \
         ".continuerules" \
-        ".aider.conf.yml"; do
+        ".aider.conf.yml" \
+        "opencode.json"; do
         if [[ -e "${TARGET_DIR}/${item}" ]]; then
             rm -f "${TARGET_DIR}/${item}"
             echo -e "  ${RED}🗑️${NC} ${item}"
@@ -687,7 +690,7 @@ wipe_instructions() {
         fi
     done
 
-    for item in ".cursor" ".clinerules" "ai-instructions"; do
+    for item in ".cursor" ".clinerules" ".opencode" "ai-instructions"; do
         if [[ -d "${TARGET_DIR}/${item}" ]]; then
             rm -rf "${TARGET_DIR:?}/${item}"
             echo -e "  ${RED}🗑️${NC} ${item}/"
@@ -696,7 +699,7 @@ wipe_instructions() {
     done
 
     # Bersihkan direktori induk yang kini kosong (abaikan bila masih terpakai)
-    for item in ".github" ".clinerules" ".cursor"; do
+    for item in ".github" ".clinerules" ".cursor" ".opencode"; do
         if [[ -d "${TARGET_DIR}/${item}" ]]; then
             rmdir "${TARGET_DIR}/${item}" 2>/dev/null || true
         fi
@@ -763,6 +766,29 @@ EOF
     done
 
     echo -e "  ${GREEN}✅${NC} Aider → .aider.conf.yml"
+    count=$((count + 1))
+}
+
+# ============================================================================
+# Fungsi: Buat opencode.json — opencode sebagai default AI untuk pekerjaan
+# ============================================================================
+create_opencode_config() {
+    local target="$1"
+
+    if ! command -v opencode >/dev/null 2>&1; then
+        echo -e "  ${YELLOW}⚠️${NC} opencode CLI tidak terpasang — pasang dengan:"
+        echo -e "      curl -fsSL https://opencode.ai/install | bash"
+    fi
+
+    cat > "$target" << 'OP'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md"],
+  "default_agent": "build"
+}
+OP
+
+    echo -e "  ${GREEN}✅${NC} opencode → ${target} (default AI untuk pekerjaan)"
     count=$((count + 1))
 }
 
@@ -861,57 +887,63 @@ echo ""
 # ===========================================================================
 # 1. Claude / Anthropic → AGENTS.md
 # ===========================================================================
-echo -e "${BLUE}[1/9] Claude / Anthropic${NC}"
+echo -e "${BLUE}[1/10] Claude / Anthropic${NC}"
 distribute "$MASTER_FILE" "${TARGET_DIR}/AGENTS.md" "AGENTS.md"
 distribute "$MASTER_FILE" "${TARGET_DIR}/CLAUDE.md" "CLAUDE.md"
 
 # ===========================================================================
 # 2. Google Gemini → GEMINI.md
 # ===========================================================================
-echo -e "${BLUE}[2/9] Google Gemini${NC}"
+echo -e "${BLUE}[2/10] Google Gemini${NC}"
 distribute "$MASTER_FILE" "${TARGET_DIR}/GEMINI.md" "GEMINI.md"
 
 # ===========================================================================
 # 3. GitHub Copilot → .github/copilot-instructions.md
 # ===========================================================================
-echo -e "${BLUE}[3/9] GitHub Copilot${NC}"
+echo -e "${BLUE}[3/10] GitHub Copilot${NC}"
 distribute "$MASTER_FILE" "${TARGET_DIR}/.github/copilot-instructions.md" "Copilot Instructions"
 
 # ===========================================================================
 # 4. Cursor → .cursorrules + .cursor/rules/<framework>-directives.mdc
 # ===========================================================================
-echo -e "${BLUE}[4/9] Cursor${NC}"
+echo -e "${BLUE}[4/10] Cursor${NC}"
 distribute "$MASTER_FILE" "${TARGET_DIR}/.cursorrules" ".cursorrules"
 distribute_cursor_mdc "$MASTER_FILE" "${TARGET_DIR}/.cursor/rules/${FRAMEWORK_NAME}-directives.mdc" "$FRAMEWORK_NAME"
 
 # ===========================================================================
 # 5. Windsurf → .windsurfrules
 # ===========================================================================
-echo -e "${BLUE}[5/9] Windsurf${NC}"
+echo -e "${BLUE}[5/10] Windsurf${NC}"
 distribute "$MASTER_FILE" "${TARGET_DIR}/.windsurfrules" ".windsurfrules"
 
 # ===========================================================================
 # 6. Cline → .clinerules/<framework>-directives.md
 # ===========================================================================
-echo -e "${BLUE}[6/9] Cline${NC}"
+echo -e "${BLUE}[6/10] Cline${NC}"
 distribute "$MASTER_FILE" "${TARGET_DIR}/.clinerules/${FRAMEWORK_NAME}-directives.md" "Cline Rules"
 
 # ===========================================================================
 # 7. Continue.dev → .continuerules
 # ===========================================================================
-echo -e "${BLUE}[7/9] Continue.dev${NC}"
+echo -e "${BLUE}[7/10] Continue.dev${NC}"
 distribute "$MASTER_FILE" "${TARGET_DIR}/.continuerules" ".continuerules"
 
 # ===========================================================================
 # 8. Aider → .aider.conf.yml
 # ===========================================================================
-echo -e "${BLUE}[8/9] Aider${NC}"
+echo -e "${BLUE}[8/10] Aider${NC}"
 create_aider_config "${TARGET_DIR}/.aider.conf.yml" "${MASTER_MODULE_DIR}/"
 
 # ===========================================================================
-# 9. Modul ai-instructions/ (01-11 + 12-project-specific)
+# 9. opencode → opencode.json (default AI untuk pekerjaan) + AGENTS.md (shared)
 # ===========================================================================
-echo -e "${BLUE}[9/9] Modul Instruksi${NC}"
+echo -e "${BLUE}[9/10] opencode${NC}"
+create_opencode_config "${TARGET_DIR}/opencode.json"
+
+# ===========================================================================
+# 10. Modul ai-instructions/ (01-11 + 12-project-specific)
+# ===========================================================================
+echo -e "${BLUE}[10/10] Modul Instruksi${NC}"
 distribute_module_dir "${MASTER_MODULE_DIR}" "${TARGET_DIR}/ai-instructions" "Modul Instruksi"
 
 # ===========================================================================
@@ -925,7 +957,7 @@ echo ""
 echo -e "${YELLOW}📋 File yang di-generate:${NC}"
 echo "   ├── ai-instructions/master/ai-instructions.md  (MASTER — edit di sini!)"
 echo "   ├── ai-instructions/master/ai-instructions/    (Modul master — edit di sini, opsional)"
-echo "   ├── AGENTS.md                                    (Claude/Anthropic)"
+echo "   ├── AGENTS.md                                    (Claude/Anthropic + opencode)"
 echo "   ├── CLAUDE.md                                    (Claude)"
 echo "   ├── GEMINI.md                                    (Google Gemini)"
 echo "   ├── .github/copilot-instructions.md              (GitHub Copilot)"
@@ -935,7 +967,8 @@ echo "   ├── .windsurfrules                               (Windsurf)"
 echo "   ├── .clinerules/${FRAMEWORK_NAME}-directives.md        (Cline)"
 echo "   ├── .continuerules                               (Continue.dev)"
 echo "   ├── ai-instructions/                             (Modul 01-11 + project-specific)"
-echo "   └── .aider.conf.yml                              (Aider)"
+echo "   ├── .aider.conf.yml                              (Aider)"
+echo "   └── opencode.json                                (opencode — default AI untuk pekerjaan)"
 echo ""
 echo -e "${YELLOW}💡 Tambah instruksi custom:${NC}"
 echo "   1. Edit ai-instructions/master/ai-instructions.md (dan/atau ai-instructions/master/ai-instructions/)"

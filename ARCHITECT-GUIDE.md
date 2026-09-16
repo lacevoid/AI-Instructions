@@ -577,7 +577,9 @@ Setelah set instruksi selesai, WAJIB:
    Contoh: `./setup-ai-rules.sh laravel`.
    Ini mendistribusikan `ai-instructions.md` ke `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
    `.github/copilot-instructions.md`, `.cursorrules`, `.cursor/rules/...`, `.windsurfrules`,
-   `.clinerules/...`, `.continuerules`, `.aider.conf.yml` — semua di **proyek konsumen**.
+   `.clinerules/...`, `.continuerules`, `.aider.conf.yml`, `opencode.json` (opencode —
+   default AI untuk pekerjaan, `default_agent: "build"` + instruksi dari `AGENTS.md`)
+   — semua di **proyek konsumen**.
 
    Adaptor eksekusi yang setara tersedia: `install.sh` (curl | sh, mengunduh tarball ke
    cache lalu menjalankan `setup-ai-rules.sh` terhadap pwd), `bin/ainstruct` (bin paket

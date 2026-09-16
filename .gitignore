@@ -10,6 +10,8 @@ GEMINI.md
 .cursor/
 .github/copilot-instructions.md
 .aider.conf.yml
+opencode.json
+.opencode/
 
 # Tooling paket (composer / npm) — jangan di-commit.
 /vendor/

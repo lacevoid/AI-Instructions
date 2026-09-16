@@ -43,7 +43,7 @@ ok() {
 
 # Paths that exist only in consumer projects (referenced in instructions) or that
 # name forbidden generated artifacts — never resolved against this repo.
-SKIP_OR_EXTERNAL='^(app/|resources/|routes/|database/|config/|tests/|vendor/|public/|bootstrap/|node_modules/|stories/|\.github/|\.cursor/|\.clinerules/|CLAUDE\.md|GEMINI\.md|\.cursorrules|\.windsurfrules|\.continuerules|\.aider\.conf\.yml|AGENTS\.md|README\.md)'
+SKIP_OR_EXTERNAL='^(app/|resources/|routes/|database/|config/|tests/|vendor/|public/|bootstrap/|node_modules/|stories/|\.github/|\.cursor/|\.clinerules/|\.opencode/|CLAUDE\.md|GEMINI\.md|\.cursorrules|\.windsurfrules|\.continuerules|\.aider\.conf\.yml|opencode\.json|AGENTS\.md|README\.md)'
 
 cd "$ROOT" || exit 1
 
@@ -152,7 +152,7 @@ while IFS= read -r artifact; do
   else
     ok "tidak ada $artifact"
   fi
-done < <(printf '%s\n' CLAUDE.md GEMINI.md .cursorrules .windsurfrules .continuerules .clinerules .cursor .aider.conf.yml .github/copilot-instructions.md)
+done < <(printf '%s\n' CLAUDE.md GEMINI.md .cursorrules .windsurfrules .continuerules .clinerules .cursor .aider.conf.yml .github/copilot-instructions.md opencode.json .opencode)
 
 say ""
 if [[ $FAILED -gt 0 ]]; then
