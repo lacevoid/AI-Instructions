@@ -32,6 +32,8 @@ AI-Instructions/
 ├── ARCHITECT-GUIDE.md   ← Playbook (wajib dibaca penuh sebelum bekerja)
 ├── setup-ai-rules.sh    ← Script distribusi (HANYA untuk root proyek konsumen)
 ├── .gitignore           ← Mencegah artefak distribusi ter-commit ke repo ini
+├── team-dev/            ← Template tim development opencode (.opencode/ agent + skill)
+├── operator-memory/     ← Mekanisme per-salinan (skill + backup dua arah + bootstrap)
 └── laravel/             ← Template set instruksi (satu folder per framework/teknologi)
     ├── ai-instructions.md            ← Konstitusi (entry point)
     └── ai-instructions/
@@ -184,6 +186,31 @@ ainstruct template path mylaravel                # lokasi direktori (untuk diedi
   non-interaktif/CI wajib `--force`.
 - Setelah template custom tersedia, distribusikan seperti biasa: `ainstruct myfw`.
 
+## Operador Memory — Mekanisme yang Sama di Setiap Salinan
+
+Setiap **salinan repository ini** (fork, clone, atau distribusi via adaptor)
+membawa mekanisme `operator-memory/` yang sama: sebuah skill yang membuat agent
+belajar meniru **operator salinan tersebut** — identitas, gaya, preferensi, pola
+keputusan — lalu menyimpannya di `~/.config/opencode/skills/operator-memory/memory.md`
+yang di-sinkronkan **dua arah** ke repo privat GitHub operator.
+
+Mekanisme bersifat **per-salinan**: operator A di salinan A punya memori, repo
+backup, dan GitHub sendiri; operator B di salinan B membangun identitasnya
+sendiri. `operator-memory/backup.sh` tidak pernah menimpa — selalu tarik lalu
+gabung.
+
+```bash
+# di setiap salinan, oleh operator salinan tersebut:
+./operator-memory/bootstrap-operator-memory.sh
+# non-interaktif:
+./operator-memory/bootstrap-operator-memory.sh --name "Nama" --email "x@y.id" --github handle
+```
+
+Script membuat repo privat GitHub `operator-persona` (via `gh`), memasang skill +
+memori ke `~/.config/opencode/`, menautkan `opencode.jsonc`, dan menyiapkan
+`operator-memory/backup.sh` (pull → merge 3-arah → push) +
+`operator-memory/restore.sh`. Detail di `operator-memory/README.md`.
+
 ## Membuat Set Instruksi Baru
 
 Ikuti `ARCHITECT-GUIDE.md` secara penuh (ringkasannya):
@@ -235,4 +262,5 @@ Setiap set WAJIB memuat KLAUSA 1–5 (detail penuh di `ARCHITECT-GUIDE.md` bagia
 |-----|--------|---------|
 | `laravel/` | Aktif | Berakar pada LingSID; konstitusi + modul 01–21 + invariant proyek di `12-project-specific/lingusid.md` + bank snippet kanonik; memuat protokol MASTER_BUILD_SPECIFICATION. Self-instruction arsitek (`AGENTS.md` §5) mengadopsi aturan kualitas universal dari set ini. |
 | `team-dev/` | Aktif | Template **tim development multi-agent** untuk konsumen: konstitusi + modul 01–21 + protokol diskusi peran (`03-team-protocol.md`) + role subagent opencode (`architecture-advisor`, `code-reviewer`, `qa-engineer`, `security-reviewer`) dan skill `team` yang didistribusikan ke `.opencode/` proyek konsumen. |
+| `operator-memory/` | Aktif | **Mekanisme per-salinan**: skill `operator-memory` + memori live (`~/.config/opencode/...`) + script backup dua arah, restore, dan bootstrap (`operator-memory/`) — setiap salinan repo me-bootstrap operatornya masing-masing ke repo privat GitHub. |
 | `java/`, `react/` | Direncanakan | Didukung script (coming soon), folder belum dibuat |
