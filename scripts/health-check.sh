@@ -146,9 +146,15 @@ done
 say ""
 say "== Artefak distribusi tidak boleh ada di root =="
 
+# Artefak hasil distribusi dilarang di root authoring, KECUALI bila memang
+# file milik repo ini (ter-track git) — mis. .opencode/ agent + config default.
 while IFS= read -r artifact; do
   if [[ -e "$artifact" ]]; then
-    fail "artefak distribusi ada di root: $artifact"
+    if [[ -n "$(git ls-files -- "$artifact")" ]]; then
+      ok "authoring-owned (tracked): $artifact"
+    else
+      fail "artefak distribusi ada di root: $artifact"
+    fi
   else
     ok "tidak ada $artifact"
   fi
