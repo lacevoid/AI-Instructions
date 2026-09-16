@@ -10,6 +10,7 @@
 #   ./setup-ai-rules.sh [framework]           # Distribusikan instruksi ke pwd
 #   ./setup-ai-rules.sh reset [framework]     # Reset instruksi ke default template
 #   ./setup-ai-rules.sh wipe [--force]        # Hapus SEMUA artefak instruksi dari pwd
+#   ./setup-ai-rules.sh template <cmd>        # Kelola template milik konsumen
 #   ./setup-ai-rules.sh help                  # Tampilkan bantuan
 #
 # Contoh:
@@ -18,6 +19,8 @@
 #   ./setup-ai-rules.sh          # Auto-detect dari direktori saat ini
 #   ./setup-ai-rules.sh reset laravel   # Buang custom master, kembali ke default template
 #   ./setup-ai-rules.sh wipe --force    # Hapus semua instruksi tanpa konfirmasi
+#   ./setup-ai-rules.sh template clone mylaravel laravel   # customisasi built-in
+#   ./setup-ai-rules.sh template create myfw              # buat template sendiri
 #
 # Framework yang didukung:
 #   - laravel   → Laravel AI Instructions
@@ -70,6 +73,12 @@ TARGET_DIR="$(pwd)"
 # Framework yang akan didistribusikan (diatur oleh parsing subcommand di MAIN)
 FRAMEWORK=""
 
+# Template milik konsumen (dapat dibuat/hapus/perbarui) vs built-in paket (terproteksi).
+# Built-in hidup di SCRIPT_DIR; template konsumen hidup di AINSTRUCT_HOME/templates
+# dan menang (shadow) atas built-in jika namanya sama.
+AINSTRUCT_HOME_DIR="${AINSTRUCT_HOME:-${XDG_CONFIG_HOME:-$HOME/.config}/ainstruct}"
+CONSUMER_TEMPLATES_DIR="${AINSTRUCT_HOME_DIR}/templates"
+
 # Fungsi: lowercase
 to_lower() {
     echo "$1" | tr '[:upper:]' '[:lower:]'
@@ -96,14 +105,21 @@ show_header() {
 # Fungsi: Tampilkan available frameworks
 # ============================================================================
 show_frameworks() {
-    echo -e "${YELLOW}📂 Available frameworks:${NC}"
+    echo -e "${YELLOW}📂 Frameworks tersedia:${NC}"
+    echo -e "  ${BLUE}Built-in (terproteksi):${NC}"
     for dir in "${SCRIPT_DIR}"/*/; do
         if [ -d "$dir" ] && [ -f "$dir/ai-instructions.md" ]; then
-            local name
-            name="$(basename "$dir")"
-            echo -e "   • ${GREEN}${name}${NC}"
+            echo -e "   • ${GREEN}$(basename "$dir")${NC}"
         fi
     done
+    echo -e "  ${YELLOW}Custom (milik konsumen — dapat diubah/hapus):${NC}"
+    if [ -d "${CONSUMER_TEMPLATES_DIR}" ]; then
+        for dir in "${CONSUMER_TEMPLATES_DIR}"/*/; do
+            if [ -d "$dir" ] && [ -f "$dir/ai-instructions.md" ]; then
+                echo -e "   • ${GREEN}$(basename "$dir")${NC}"
+            fi
+        done
+    fi
     echo ""
 }
 
@@ -113,13 +129,30 @@ show_frameworks() {
 auto_detect_framework() {
     echo -e "${YELLOW}🔍 Auto-detecting framework...${NC}"
 
-    # Check if there's only one framework available
+    # Kumpulkan semua template (konsumen dulu), dedup nama (konsumen shadow built-in)
     local frameworks=()
+    local unique=()
+    if [ -d "${CONSUMER_TEMPLATES_DIR}" ]; then
+        for dir in "${CONSUMER_TEMPLATES_DIR}"/*/; do
+            if [ -d "$dir" ] && [ -f "$dir/ai-instructions.md" ]; then
+                frameworks+=("$(basename "$dir")")
+            fi
+        done
+    fi
     for dir in "${SCRIPT_DIR}"/*/; do
         if [ -d "$dir" ] && [ -f "$dir/ai-instructions.md" ]; then
             frameworks+=("$(basename "$dir")")
         fi
     done
+    local fw u found
+    for fw in "${frameworks[@]}"; do
+        found=0
+        for u in "${unique[@]}"; do
+            if [ "$u" = "$fw" ]; then found=1; break; fi
+        done
+        if [ "$found" -eq 0 ]; then unique+=("$fw"); fi
+    done
+    frameworks=("${unique[@]}")
 
     if [ ${#frameworks[@]} -eq 1 ]; then
         FRAMEWORK="${frameworks[0]}"
@@ -136,6 +169,353 @@ auto_detect_framework() {
         echo -e "${RED}❌ No frameworks found in ${SCRIPT_DIR}${NC}"
         exit 1
     fi
+}
+
+# ============================================================================
+# Fungsi: Cari direktori template — konsumen (home) DIDAHULUKAN, lalu built-in
+# ============================================================================
+find_template_dir() {
+    local name="$1"
+    local lower
+    lower="$(to_lower "$name")"
+    local dir
+    local result=""
+
+    if [ -d "${CONSUMER_TEMPLATES_DIR}" ]; then
+        for dir in "${CONSUMER_TEMPLATES_DIR}"/*/; do
+            if [ -d "$dir" ] && [ "$(to_lower "$(basename "$dir")")" = "$lower" ] && [ -f "${dir}ai-instructions.md" ]; then
+                result="${dir%/}"
+                break
+            fi
+        done
+    fi
+
+    if [ -z "$result" ]; then
+        for dir in "${SCRIPT_DIR}"/*/; do
+            if [ -d "$dir" ] && [ "$(to_lower "$(basename "$dir")")" = "$lower" ] && [ -f "${dir}ai-instructions.md" ]; then
+                result="${dir%/}"
+                break
+            fi
+        done
+    fi
+
+    printf '%s' "$result"
+}
+
+# ============================================================================
+# Template Manager — template milik konsumen (create/clone/update/delete/list/path)
+# Built-in TERPROTEKSI: tidak dapat dihapus/diubah; customisasi via clone.
+# ============================================================================
+validate_template_name() {
+    local name="$1"
+    case "$name" in
+        ""|*/*|.*|*[!A-Za-z0-9_-]*)
+            echo -e "${RED}❌ Nama template tidak valid: '${name}'${NC}" >&2
+            echo "   (hanya huruf/angka/-/_; tanpa '/'; tanpa diawali '.')" >&2
+            exit 1
+            ;;
+    esac
+}
+
+is_builtin_template() {
+    local name="$1"
+    local lower
+    lower="$(to_lower "$name")"
+    local dir
+    for dir in "${SCRIPT_DIR}"/*/; do
+        if [ -d "$dir" ] && [ -f "$dir/ai-instructions.md" ] && [ "$(to_lower "$(basename "$dir")")" = "$lower" ]; then
+            printf '%s' "${dir%/}"
+            return 0
+        fi
+    done
+    return 1
+}
+
+template_usage() {
+    cat <<'TEMPLATE_USAGE'
+Template manager — kelola template AI Instructions milik konsumen.
+Built-in (dibuat repo authoring) TERPROTEKSI: tidak bisa dihapus/diubah; untuk
+menyesuaikannya, clone sebagai template milik Anda lalu edit bebas.
+
+Commands:
+  template list                              Daftar semua template (built-in & custom)
+  template create <name> [--force]           Buat template kosong (scaffold) milik konsumen
+  template clone <name> <source> [--force]   Salin template (built-in/custom) sebagai milik konsumen
+  template update <name> [--from <source>] [--force]  Perbarui template custom dari sumber
+  template delete <name> [--force]           Hapus template custom (built-in DITOLAK: terproteksi)
+  template path <name>                       Cetak lokasi direktori template (untuk diedit)
+
+Examples:
+  ainstruct template list
+  ainstruct template clone mylaravel laravel     # customisasi built-in laravel sbg milik Anda
+  ainstruct template update mylaravel --from laravel
+  ainstruct template delete mylaravel --force
+TEMPLATE_USAGE
+}
+
+template_list() {
+    echo -e "${YELLOW}📚 Template AI Instructions${NC}"
+    echo ""
+    echo -e "  ${BLUE}Built-in (TERPROTEKSI):${NC}"
+    local n=0 dir
+    for dir in "${SCRIPT_DIR}"/*/; do
+        if [ -f "$dir/ai-instructions.md" ]; then
+            echo -e "    • ${GREEN}$(basename "$dir")${NC}"
+            n=$((n + 1))
+        fi
+    done
+    [ "$n" -eq 0 ] && echo "    (tidak ada)"
+    echo ""
+    echo -e "  ${GREEN}Custom (milik konsumen — dapat diubah/hapus):${NC}"
+    n=0
+    if [ -d "${CONSUMER_TEMPLATES_DIR}" ]; then
+        for dir in "${CONSUMER_TEMPLATES_DIR}"/*/; do
+            if [ -f "$dir/ai-instructions.md" ]; then
+                echo -e "    • ${GREEN}$(basename "$dir")${NC}  (${dir%/})"
+                n=$((n + 1))
+            fi
+        done
+    fi
+    [ "$n" -eq 0 ] && echo "    (belum ada — 'template create <nama>' atau 'template clone <nama> laravel')"
+    echo ""
+}
+
+template_create() {
+    local name="" force=0
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --force) force=1; shift ;;
+            *) if [ -z "$name" ]; then name="$1"; else echo "arg tak dikenal: $1" >&2; exit 1; fi; shift ;;
+        esac
+    done
+    validate_template_name "$name"
+
+    local target="${CONSUMER_TEMPLATES_DIR}/${name}"
+    if [ -d "$target" ]; then
+        echo -e "${RED}❌ Template custom sudah ada: ${target}${NC}" >&2
+        exit 1
+    fi
+    local conflict
+    conflict="$(find_template_dir "$name")"
+    if [ -n "$conflict" ] && [ "$force" -ne 1 ]; then
+        echo -e "${RED}❌ Nama '${name}' sudah dipakai oleh: ${conflict}${NC}" >&2
+        echo -e "   Pakai nama lain, atau --force untuk mengambil alih nama (shadow built-in)." >&2
+        exit 1
+    fi
+
+    mkdir -p "${target}/ai-instructions"
+    cat > "${target}/ai-instructions.md" <<'SCAFFOLD'
+# AI INSTRUCTION SYSTEM — CONSTITUTION
+
+> [!CRITICAL]
+> Template scaffold dibuat lewat `template create` — TERBUKA untuk diedit konsumen.
+> Bangun set instruksi presisi di sini, lalu distribusikan dengan
+> `ainstruct <nama-template>`.
+
+# File Map
+
+- `ai-instructions.md`  ← konstitusi (entry point). Tulis prinsip, priority system,
+                          rule scope, workflow wajib, quality gates, referensi cepat.
+- `ai-instructions/`    ← modul bernomor (`01-governance.md`, `02-agent-workflow.md`, …).
+                          Referensikan setiap modul dari konstitusi.
+
+# Workflow Wajib
+
+1. Wajib baca `MASTER_BUILD_SPECIFICATION.md` di root proyek sebelum menulis kode.
+2. Aturan ditulis MUST / MUST NOT yang actionable, spesifik, dan berdasar bukti proyek target.
+3. Verifikasi sendiri sebelum "selesai": lint, health check, dan uji distribusi.
+SCAFFOLD
+    cat > "${target}/ai-instructions/README.md" <<'SCAFFOLD_MODULE'
+# Modul Instruksi (scaffold)
+
+Buat modul bernomor di direktori ini (contoh: `01-governance.md`, `02-agent-workflow.md`)
+dan referensikan dari `ai-instructions.md` di atas.
+SCAFFOLD_MODULE
+
+    echo -e "${GREEN}✅ Template custom dibuat: ${target}${NC}"
+    echo -e "${YELLOW}💡 Edit file di direktori tsb. Untuk salin dari template lain: 'template clone <nama> <sumber>'.${NC}"
+}
+
+template_clone() {
+    local name="" source="" force=0
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --force) force=1; shift ;;
+            *) if [ -z "$name" ]; then name="$1"; elif [ -z "$source" ]; then source="$1"; else echo "arg tak dikenal: $1" >&2; exit 1; fi; shift ;;
+        esac
+    done
+    validate_template_name "$name"
+    if [ -z "$source" ]; then
+        echo -e "${RED}❌ 'template clone' butuh <source> (contoh: 'template clone mylaravel laravel')${NC}" >&2
+        template_usage
+        exit 1
+    fi
+
+    local src
+    src="$(find_template_dir "$source")"
+    if [ -z "$src" ]; then
+        echo -e "${RED}❌ Sumber template tidak ditemukan: '${source}'${NC}" >&2
+        exit 1
+    fi
+
+    local conflict
+    conflict="$(find_template_dir "$name")"
+    if [ -n "$conflict" ] && [ "$force" -ne 1 ]; then
+        echo -e "${RED}❌ Nama '${name}' sudah dipakai oleh: ${conflict}${NC}" >&2
+        echo -e "   Gunakan --force untuk menimpa template custom / shadow built-in." >&2
+        exit 1
+    fi
+
+    local target="${CONSUMER_TEMPLATES_DIR}/${name}"
+    if [ -e "$target" ]; then
+        rm -rf "$target"
+    fi
+    mkdir -p "${CONSUMER_TEMPLATES_DIR}"
+    cp -r "$src" "$target"
+
+    echo -e "${GREEN}✅ Template '${name}' di-clone dari '${source}': ${target}${NC}"
+    echo -e "${YELLOW}💡 Built-in terproteksi; template klon ini milik Anda — bebas diubah/dihapus.${NC}"
+}
+
+template_update() {
+    local name="" from="" force=0
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --force) force=1; shift ;;
+            --from) from="${2:-}"; shift 2 ;;
+            *) if [ -z "$name" ]; then name="$1"; else echo "arg tak dikenal: $1" >&2; exit 1; fi; shift ;;
+        esac
+    done
+    validate_template_name "$name"
+
+    local target="${CONSUMER_TEMPLATES_DIR}/${name}"
+    if [ ! -d "$target" ]; then
+        local builtin_dir
+        builtin_dir="$(is_builtin_template "$name" || true)"
+        if [ -n "$builtin_dir" ]; then
+            echo -e "${RED}❌ '${name}' adalah built-in TERPROTEKSI — tidak bisa diperbarui langsung.${NC}" >&2
+            echo -e "   Customisasi lewat clone: 'template clone <nama> ${name}' lalu edit/update '${name}' milik Anda." >&2
+        else
+            echo -e "${RED}❌ Template custom tidak ditemukan: '${name}'${NC}" >&2
+        fi
+        exit 1
+    fi
+
+    local from_dir=""
+    if [ -z "$from" ]; then
+        from_dir="$(is_builtin_template "$name" || true)"
+        if [ -z "$from_dir" ]; then
+            echo -e "${RED}❌ Tidak ada built-in '$name' — berikan '--from <sumber>' (mis. template update ${name} --from laravel)${NC}" >&2
+            exit 1
+        fi
+    else
+        from_dir="$(find_template_dir "$from")"
+        if [ -z "$from_dir" ]; then
+            echo -e "${RED}❌ Sumber tidak ditemukan: '${from}'${NC}" >&2
+            exit 1
+        fi
+    fi
+    if [ "$from_dir" = "$target" ]; then
+        echo -e "${RED}❌ Sumber dan target sama ('${name}'). Pakai '--from <sumber-lain>' atau '--from <built-in-nama-sama>'.${NC}" >&2
+        exit 1
+    fi
+
+    if [ "$force" -ne 1 ]; then
+        if [ ! -t 0 ]; then
+            echo -e "${RED}❌ Terminal non-interaktif — berikan --force untuk mengeksekusi update.${NC}" >&2
+            exit 1
+        fi
+        read -r -p "Timpa template custom '${name}' dari '${from_dir}' (menghapus edit Anda)? [y/N] " ans
+        if [[ ! "$ans" =~ ^[yY] ]]; then
+            echo -e "${YELLOW}Dibatalkan.${NC}"
+            exit 0
+        fi
+    fi
+
+    rm -rf "$target"
+    cp -r "$from_dir" "$target"
+    echo -e "${GREEN}✅ Template custom '${name}' diperbarui dari '${from_dir}'.${NC}"
+}
+
+template_delete() {
+    local name="" force=0
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --force) force=1; shift ;;
+            *) if [ -z "$name" ]; then name="$1"; else echo "arg tak dikenal: $1" >&2; exit 1; fi; shift ;;
+        esac
+    done
+    validate_template_name "$name"
+
+    local target="${CONSUMER_TEMPLATES_DIR}/${name}"
+    if [ -d "$target" ]; then
+        if [ "$force" -ne 1 ]; then
+            if [ ! -t 0 ]; then
+                echo -e "${RED}❌ Terminal non-interaktif — berikan --force untuk mengeksekusi delete.${NC}" >&2
+                exit 1
+            fi
+            read -r -p "Hapus template custom '${name}'? [y/N] " ans
+            if [[ ! "$ans" =~ ^[yY] ]]; then
+                echo -e "${YELLOW}Dibatalkan.${NC}"
+                exit 0
+            fi
+        fi
+        rm -rf "$target"
+        echo -e "${GREEN}🗑️ Template custom '${name}' dihapus.${NC}"
+        return 0
+    fi
+
+    local builtin_dir
+    builtin_dir="$(is_builtin_template "$name" || true)"
+    if [ -n "$builtin_dir" ]; then
+        echo -e "${RED}❌ '${name}' adalah built-in TERPROTEKSI — tidak bisa dihapus.${NC}" >&2
+        echo -e "   Clone sebagai milik Anda dulu: 'template clone <nama> ${name}', lalu hapus '<nama>'.${NC}" >&2
+        exit 1
+    fi
+    echo -e "${RED}❌ Template tidak ditemukan: '${name}'${NC}" >&2
+    exit 1
+}
+
+template_path() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        template_usage
+        exit 1
+    fi
+    local dir
+    dir="$(find_template_dir "$name")"
+    if [ -z "$dir" ]; then
+        echo -e "${RED}❌ Template tidak ditemukan: '${name}'${NC}" >&2
+        exit 1
+    fi
+    case "$dir" in
+        "${CONSUMER_TEMPLATES_DIR}"/*)
+            printf '%s\n' "$dir"
+            ;;
+        *)
+            echo -e "${YELLOW}⚠️  '${name}' = built-in TERPROTEKSI (jangan diedit langsung; clone dulu).${NC}" >&2
+            printf '%s\n' "$dir"
+            ;;
+    esac
+}
+
+template_cmd() {
+    local action="${1:-help}"
+    shift || true
+    case "$action" in
+        list) template_list ;;
+        create) template_create "$@" ;;
+        clone) template_clone "$@" ;;
+        update) template_update "$@" ;;
+        delete) template_delete "$@" ;;
+        path) template_path "${1:-}" ;;
+        help|-h|--help) template_usage ;;
+        *)
+            echo -e "${RED}❌ 'template' aksi tak dikenal: ${action}${NC}" >&2
+            template_usage
+            exit 1
+            ;;
+    esac
 }
 
 # ============================================================================
@@ -221,6 +601,7 @@ Usage: $0 [<framework>]           Distribusikan instruksi ke proyek konsumen (pw
        $0 reset [<framework>]     Reset instruksi ke default template
                                   (hapus ai-instructions/master + distribusi ulang)
        $0 wipe [--force]          Hapus SEMUA artefak instruksi dari pwd
+       $0 template <cmd>          Kelola template AI Instructions (lihat 'template help')
        $0 help                    Tampilkan bantuan ini
 
 Commands:
@@ -232,12 +613,16 @@ Commands:
                .cursorrules, .cursor/, .windsurfrules, .clinerules/,
                .continuerules, .aider.conf.yml, ai-instructions/ (termasuk master/).
                Tanpa --force, diminta konfirmasi.
+  template     Kelola template milik konsumen (custom): list, create, clone, update,
+               delete, path. Built-in TERPROTEKSI — customisasi lewat clone.
 
 Options:
   --force      Lewati konfirmasi pada perintah wipe (untuk automation/CI).
 
 Examples:
   ./setup-ai-rules.sh laravel          Distribusikan framework laravel
+  ./setup-ai-rules.sh template list    Daftar template (built-in & custom)
+  ./setup-ai-rules.sh template clone mylaravel laravel   # customisasi built-in
   ./setup-ai-rules.sh reset laravel    Kembalikan ke default template lalu distribusikan
   ./setup-ai-rules.sh wipe --force     Hapus semua instruksi tanpa konfirmasi
 USAGE
@@ -404,6 +789,11 @@ case "$COMMAND" in
         wipe_instructions "$@"
         exit 0
         ;;
+    template)
+        shift
+        template_cmd "$@"
+        exit 0
+        ;;
     help|-h|--help)
         usage
         exit 0
@@ -418,20 +808,11 @@ if [ -z "$FRAMEWORK" ]; then
     auto_detect_framework
 fi
 
-# Validasi framework
-FRAMEWORK_LOWER="$(to_lower "$FRAMEWORK")"
-
-# Cari direktori framework (case-insensitive)
-FRAMEWORK_DIR=""
-for dir in "${SCRIPT_DIR}"/*/; do
-    if [ -d "$dir" ] && [ "$(to_lower "$(basename "$dir")")" = "$FRAMEWORK_LOWER" ]; then
-        FRAMEWORK_DIR="${dir%/}"
-        break
-    fi
-done
+# Cari direktori template (case-insensitive): konsumen (home) dulu, lalu built-in
+FRAMEWORK_DIR="$(find_template_dir "$FRAMEWORK")"
 
 if [ -z "$FRAMEWORK_DIR" ]; then
-    echo -e "${RED}❌ Framework directory tidak ditemukan: ${FRAMEWORK}${NC}"
+    echo -e "${RED}❌ Framework/template directory tidak ditemukan: ${FRAMEWORK}${NC}"
     echo ""
     show_frameworks
     exit 1
@@ -446,8 +827,19 @@ if [ ! -f "$SOURCE_FILE" ]; then
     exit 1
 fi
 
-echo -e "${YELLOW}📦 Framework: ${FRAMEWORK_NAME}${NC}"
-echo -e "${YELLOW}📄 Template: ${SOURCE_FILE}${NC}"
+# Marker sumber template — built-in terproteksi vs template milik konsumen
+case "$FRAMEWORK_DIR" in
+    "${CONSUMER_TEMPLATES_DIR}"/*)
+        TEMPLATE_SOURCE_NOTE="${YELLOW}🧩 Template: custom konsumen (terbuka untuk diedit)${NC}"
+        ;;
+    *)
+        TEMPLATE_SOURCE_NOTE="${YELLOW}🧩 Template: built-in (terproteksi — clone untuk customisasi)${NC}"
+        ;;
+esac
+
+echo -e "${YELLOW}📦 Framework/Template: ${FRAMEWORK_NAME}${NC}"
+echo -e "${TEMPLATE_SOURCE_NOTE}"
+echo -e "${YELLOW}📄 Sumber: ${FRAMEWORK_DIR}${NC}"
 echo -e "${YELLOW}🎯 Target: ${TARGET_DIR}${NC}"
 echo ""
 
