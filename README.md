@@ -65,9 +65,9 @@ AI-Instructions/
    `.aider.conf.yml`, dan modul ke `ai-instructions/`.
 
    Template **`team-dev`** juga mendistribusikan **tim development opencode**
-   (subagent `team-lead`, `code-reviewer`, `qa-engineer`, `security-reviewer` +
-   skill `team`) ke `.opencode/` proyek konsumen, sehingga AI agent dapat
-   berdiskusi multi-perspektif saat mengerjakan proyek:
+   (subagent `architecture-advisor`, `code-reviewer`, `qa-engineer`,
+   `security-reviewer` + skill `team`) ke `.opencode/` proyek konsumen, sehingga
+   AI agent dapat berdiskusi multi-perspektif saat mengerjakan proyek:
 
    ```bash
    # di root proyek konsumen
@@ -234,5 +234,5 @@ Setiap set WAJIB memuat KLAUSA 1–5 (detail penuh di `ARCHITECT-GUIDE.md` bagia
 | Set | Status | Catatan |
 |-----|--------|---------|
 | `laravel/` | Aktif | Berakar pada LingSID; konstitusi + modul 01–21 + invariant proyek di `12-project-specific/lingusid.md` + bank snippet kanonik; memuat protokol MASTER_BUILD_SPECIFICATION. Self-instruction arsitek (`AGENTS.md` §5) mengadopsi aturan kualitas universal dari set ini. |
-| `team-dev/` | Aktif | Template **tim development multi-agent** untuk konsumen: konstitusi + modul 01–12 + protokol diskusi peran (`03-team-protocol.md`) + role subagent opencode (`team-lead`, `code-reviewer`, `qa-engineer`, `security-reviewer`) dan skill `team` yang didistribusikan ke `.opencode/` proyek konsumen. |
+| `team-dev/` | Aktif | Template **tim development multi-agent** untuk konsumen: konstitusi + modul 01–21 + protokol diskusi peran (`03-team-protocol.md`) + role subagent opencode (`architecture-advisor`, `code-reviewer`, `qa-engineer`, `security-reviewer`) dan skill `team` yang didistribusikan ke `.opencode/` proyek konsumen. |
 | `java/`, `react/` | Direncanakan | Didukung script (coming soon), folder belum dibuat |

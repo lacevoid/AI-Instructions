@@ -83,7 +83,7 @@ jobs:
             ai-instructions/master/ai-instructions.md \
             ai-instructions/01-governance.md \
             ai-instructions/03-team-protocol.md \
-            .opencode/agent/team-lead.md \
+            .opencode/agent/architecture-advisor.md \
             .opencode/agent/code-reviewer.md \
             .opencode/agent/qa-engineer.md \
             .opencode/agent/security-reviewer.md \

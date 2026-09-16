@@ -1,6 +1,6 @@
 ---
 name: team
-description: Use when bekerja di proyek ini dan membutuhkan perspektif tim development — orchestrator harus memanggil subagent (team-lead, code-reviewer, qa-engineer, security-reviewer) untuk berdiskusi sebelum menetapkan keputusan. Trigger kata kunci: "tim", "team", "review", "second opinion", "diskusi", "bantu menilai", "code review", "qa review", "security review".
+description: Use when bekerja di proyek ini dan membutuhkan perspektif tim development — orchestrator harus memanggil subagent (architecture-advisor, code-reviewer, qa-engineer, security-reviewer) untuk berdiskusi sebelum menetapkan keputusan. Trigger kata kunci: "tim", "team", "review", "second opinion", "diskusi", "bantu menilai", "code review", "qa review", "security review".
 ---
 
 # Skill Team — Protokol Diskusi Tim Development
@@ -13,7 +13,7 @@ tim development** sebelum menetapkan keputusan. Protokol lengkap ada di
 
 | Role | Dipanggil saat | Frontmatter color |
 |------|----------------|-------------------|
-| `team-lead` | Desain arsitektur/struktur, alur fitur, penempatan kode | accent |
+| `architecture-advisor` | Desain arsitektur/struktur, alur fitur, penempatan kode | accent |
 | `code-reviewer` | Kualitas & kebenaran kode, pola, scope, style | warning |
 | `qa-engineer` | Kesesuaian spec, edge case, makna test | info |
 | `security-reviewer` | Auth, secrets, validasi, data sensitif, boundary | error |

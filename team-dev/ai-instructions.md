@@ -68,10 +68,10 @@ relevan sebelum menulis kode.
 > merupakan spesifikasi build proyek. Ia WAJIB dibaca sebelum kode (bagian 12).
 >
 > **Catatan tim opencode:** bila `setup-ai-rules.sh` menjalankan template `team-dev`,
-> subagent role (orchestrator `team-lead`, `code-reviewer`, `qa-engineer`,
+> subagent role (`architecture-advisor`, `code-reviewer`, `qa-engineer`,
 > `security-reviewer`) dan skill `team` ditempatkan di `.opencode/agent/` dan
-> `.opencode/skills/`. Agent utama tetap dapat memanggil subagent tersebut via
-> Task tool; protokol pemanggilan ada di `03-team-protocol.md`.
+> `.opencode/skills/`. Agent utama (orchestrator) tetap dapat memanggil subagent
+> tersebut via Task tool; protokol pemanggilan ada di `03-team-protocol.md`.
 
 ---
 
@@ -198,21 +198,24 @@ protokol diskusi dan kapan memanggil subagent: `03-team-protocol.md`.
 
 Saat bekerja di proyek baru, agent WAJIB:
 
-1. Load konstitusi ini + `01-governance.md` + `02-agent-workflow.md` +
+1. Bila proyek baru belum repository git, WAJIB menjalankan `git init` pada langkah
+   pertama — sebelum pekerjaan, branching, atau commit dimulai (Klausa 4; detail
+   `08-git.md`).
+2. Load konstitusi ini + `01-governance.md` + `02-agent-workflow.md` +
    `03-team-protocol.md`.
-2. Baca `MASTER_BUILD_SPECIFICATION.md`; jika tidak ada, buat melalui diskusi
+3. Baca `MASTER_BUILD_SPECIFICATION.md`; jika tidak ada, buat melalui diskusi
    mendetil dengan operator (bagian 12).
-3. Inspect repository saat ini (struktur, manifest dependensi, config, test).
-4. Deteksi teknologi & konvensi proyek yang sebenarnya dipakai — jangan menebak.
-5. Deteksi konvensi project-specific (pola direktori, pola penamaan).
-6. Terapkan global rules.
-7. Terapkan aturan framework/language yang berlaku.
-8. Terapkan aturan project-specific (`12-project-specific/`).
-9. Isi `12-project-specific/project-invariants.md` dan
-   `12-project-specific/canonical-snippets.md` dengan bukti nyata dari
-   repository (lihat `01-governance.md` untuk kapan/apa yang harus diisi).
-10. Bekerja mengikuti workflow bagian 8.
-11. Validasi terhadap quality gates bagian 10.
+4. Inspect repository saat ini (struktur, manifest dependensi, config, test).
+5. Deteksi teknologi & konvensi proyek yang sebenarnya dipakai — jangan menebak.
+6. Deteksi konvensi project-specific (pola direktori, pola penamaan).
+7. Terapkan global rules.
+8. Terapkan aturan framework/language yang berlaku.
+9. Terapkan aturan project-specific (`12-project-specific/`).
+10. Isi `12-project-specific/project-invariants.md` dan
+    `12-project-specific/canonical-snippets.md` dengan bukti nyata dari
+    repository (lihat `01-governance.md` untuk kapan/apa yang harus diisi).
+11. Bekerja mengikuti workflow bagian 8.
+12. Validasi terhadap quality gates bagian 10.
 
 ---
 

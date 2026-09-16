@@ -30,7 +30,8 @@ saat onboarding dan dicatat di `12-project-specific/project-invariants.md`.
 
 ## 3. Peran tim
 
-- `quality-gate-runner` (bila tersedia) / orchestrator menjalankan gates.
+- Orchestrator menjalankan gates (dengan bantuan `qa-engineer` / `code-reviewer`
+  bila tersedia).
 - `code-reviewer` memeriksa bahwa diff sudah lolos tooling (tidak ada file
   yang "kebetulan" lolos karena lint di-skip).
 

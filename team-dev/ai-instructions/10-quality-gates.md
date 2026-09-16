@@ -47,8 +47,9 @@ operator.
 
 ## 4. Peran tim
 
-- `quality-gate-runner` (subagent, tersedia di template opencode) menjalankan
-  gates dan melaporkan jujur bila ada yang TIDAK dijalankan.
+- **Orchestrator menjalankan gates** dan melaporkan jujur bila ada yang TIDAK
+  dijalankan. Bila subagent (`qa-engineer`, `code-reviewer`) tersedia, minta
+  mereka memverifikasi dari perspektif masing-masing.
 - Gates yang gagal TIDAK bisa "dianggap selesai" oleh orchestrator; hal itu
   memicu REVISI, dan bila diabaikan = veto (lihat `03-team-protocol.md`).
 
