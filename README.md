@@ -191,7 +191,8 @@ ainstruct template path mylaravel                # lokasi direktori (untuk diedi
 Setiap **salinan repository ini** (fork, clone, atau distribusi via adaptor)
 membawa mekanisme `operator-memory/` yang sama: sebuah skill yang membuat agent
 belajar meniru **operator salinan tersebut** — identitas, gaya, preferensi, pola
-keputusan — lalu menyimpannya di `~/.config/opencode/skills/operator-memory/memory.md`
+keputusan — lalu menyimpannya di `~/.config/opencode/skills/operator-memory/persona.md` (siapa operator)
+dan `~/.config/opencode/skills/operator-memory/context.md` (di mana kita)
 yang di-sinkronkan **dua arah** ke repo privat GitHub operator.
 
 Mekanisme bersifat **per-salinan**: operator A di salinan A punya memori, repo

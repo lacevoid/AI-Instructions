@@ -27,10 +27,9 @@ LAPISAN 3 — MESIN ADAPTIF (yang membuat setiap salinan menjadi milik operatorn
   lalu didistribusikan ke proyek konsumen.
 - **Lapisan 3** adalah lompatan meta: setiap **salinan repo ini** membawa mekanisme
   yang sama (`operator-memory/`), dan operator salinan tersebut menjalankan
-  `operator-memory/bootstrap-operator-memory.sh` untuk membuat **persona miliknya
-  sendiri** — identitas, gaya, pola keputusan — disimpan di
-  `~/.config/opencode/skills/operator-memory/memory.md` dan di-sinkronkan
-  **dua arah** ke repo privat GitHub operator.
+`operator-memory/bootstrap-operator-memory.sh` untuk membuat **persona miliknya
+   sendiri** — identitas, gaya, pola keputusan — disimpan di `~/.config/opencode/skills/operator-memory/persona.md` + `~/.config/opencode/skills/operator-memory/context.md` dan di-sinkronkan
+   **dua arah** ke repo privat GitHub operator.
 
 ## Prinsip Self-Hosting
 

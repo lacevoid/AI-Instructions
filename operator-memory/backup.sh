@@ -10,10 +10,13 @@ CFG_BASE="${XDG_CONFIG_HOME:-$HOME/.config}"
 OPENCODE_DIR="$CFG_BASE/opencode"
 
 # File yang disinkronkan (relatif terhadap config/)
+# memory.md legacy TIDAK lagi disinkronkan — sudah dimigrasi ke persona.md
+# (siapa operator, stabil) + context.md (di mana kita, dinamis) di bootstrap.
 FILES=(
   "opencode.jsonc"
   "skills/operator-memory/SKILL.md"
-  "skills/operator-memory/memory.md"
+  "skills/operator-memory/persona.md"
+  "skills/operator-memory/context.md"
 )
 
 cd "$REPO_DIR"

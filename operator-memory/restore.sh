@@ -22,7 +22,14 @@ fi
 mkdir -p "$CFG_BASE/opencode/skills/operator-memory"
 cp "$REPO_DIR/config/opencode.jsonc"                  "$CFG_BASE/opencode/"
 cp "$REPO_DIR/config/skills/operator-memory/SKILL.md" "$CFG_BASE/opencode/skills/operator-memory/"
-cp "$REPO_DIR/config/skills/operator-memory/memory.md" "$CFG_BASE/opencode/skills/operator-memory/"
+cp "$REPO_DIR/config/skills/operator-memory/persona.md" "$CFG_BASE/opencode/skills/operator-memory/"
+cp "$REPO_DIR/config/skills/operator-memory/context.md" "$CFG_BASE/opencode/skills/operator-memory/"
+# Legacy memory.md dari backup lama (bila masih ada) ikut dipulihkan agar
+# tidak ada data yang hilang; file baru (persona/context) adalah otoritasnya.
+if [ -f "$REPO_DIR/config/skills/operator-memory/memory.md" ]; then
+    cp "$REPO_DIR/config/skills/operator-memory/memory.md" "$CFG_BASE/opencode/skills/operator-memory/"
+    echo "[restore] memory.md legacy ikut dipulihkan (sudah tidak disinkronkan)."
+fi
 
 # -- Terapkan identitas git lokal ke repo backup hasil clone --
 # Clone fresh tidak membawa user.name/user.email; tanpa ini backup.sh pertama
