@@ -91,7 +91,7 @@ Tidak semua?                             ──TIDAK─▶ Implement langsung (L
 
 | Kondisi | Subagent yang dipanggil |
 |---------|-------------------------|
-| Desain arsitektur / struktur file baru | `team-lead` (orchestrator tetap memutuskan) |
+| Desain arsitektur / struktur file baru | `architecture-advisor` (orchestrator tetap memutuskan) |
 | Kode berisiko / perlu second opinion | `code-reviewer` |
 | Fitur yang bisa diuji / perlu skenario edge | `qa-engineer` |
 | Auth, secrets, validasi, data sensitif | `security-reviewer` |

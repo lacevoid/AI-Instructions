@@ -163,17 +163,20 @@ Detail, decision trees, dan checklist fitur: `ai-instructions/02-agent-workflow.
 
 Saat bekerja di proyek baru, agent WAJIB:
 
-1. Load konstitusi ini + `01-governance.md` + `02-agent-workflow.md`.
-2. Baca `MASTER_BUILD_SPECIFICATION.md` di root proyek; jika tidak ada, buat melalui diskusi mendetil dengan operator (bagian 12).
-3. Inspect repository saat ini (`routes`, `app/`, `resources/js/pages/`, `composer.json`, `package.json`, `phpunit.xml`, `phpstan.neon`, `.editorconfig`).
-4. Deteksi teknologi proyek (Laravel/Blade vs Laravel/Inertia/Vue; SQLite/MySQL; bun/npm).
-5. Deteksi konvensi project-specific di repository (pola direktori, pola penamaan, pola action/repository).
-6. Terapkan global rules.
-7. Terapkan aturan framework/language yang berlaku (Laravel, PHP, Vue, TypeScript).
-8. Terapkan aturan repository-specific (termasuk `12-project-specific/` jika cocok).
-9. Resolve conflict sesuai hierarki pada bagian 4.
-10. Bekerja mengikuti workflow bagian 8.
-11. Validasi terhadap quality gates di bagian 10.
+1. Bila proyek baru belum repository git, WAJIB menjalankan `git init` pada langkah
+   pertama — sebelum pekerjaan, branching, atau commit dimulai (Klausa 4; detail
+   `08-git.md`).
+2. Load konstitusi ini + `01-governance.md` + `02-agent-workflow.md`.
+3. Baca `MASTER_BUILD_SPECIFICATION.md` di root proyek; jika tidak ada, buat melalui diskusi mendetil dengan operator (bagian 12).
+4. Inspect repository saat ini (`routes`, `app/`, `resources/js/pages/`, `composer.json`, `package.json`, `phpunit.xml`, `phpstan.neon`, `.editorconfig`).
+5. Deteksi teknologi proyek (Laravel/Blade vs Laravel/Inertia/Vue; SQLite/MySQL; bun/npm).
+6. Deteksi konvensi project-specific di repository (pola direktori, pola penamaan, pola action/repository).
+7. Terapkan global rules.
+8. Terapkan aturan framework/language yang berlaku (Laravel, PHP, Vue, TypeScript).
+9. Terapkan aturan repository-specific (termasuk `12-project-specific/` jika cocok).
+10. Resolve conflict sesuai hierarki pada bagian 4.
+11. Bekerja mengikuti workflow bagian 8.
+12. Validasi terhadap quality gates di bagian 10.
 
 Jangan berasumsi semua proyek berikutnya memakai stack yang sama. Deteksi, jangan tebak.
 
@@ -242,19 +245,7 @@ Sebelum menyelesaikan tugas:
 
 ---
 
-## 13. MEMBUAT / MEMPERBARUI SET INSTRUKSI (Instruction Authoring)
-
-Bagian ini berlaku saat bekerja di repository **AI-Instructions** ini — yaitu saat AI diminta membuat atau memperbarui set instruksi (konstitusi + modul) untuk framework atau proyek di masa depan.
-
-1. **Gunakan set `laravel/` sebagai referensi struktur & gaya.** Set `laravel/` adalah set terlengkap dan paling presisi: ikuti layout konstitusi (`ai-instructions.md`), pengelompokan modul `01`–`21`, `12-project-specific/`, `README.md`, dan alur regenerasi distribusi (`setup-ai-rules.sh`).
-2. **Baca modul `laravel/` sebagai bahan acuan saat menulis set baru.** Modul 03–11, 13–21, dan `12-project-specific/*` (termasuk `lingusid.md` dan `canonical-snippets.md`) adalah referensi materi untuk menulis instruksi framework/proyek baru — tiru tingkat presisinya, gaya bahasa, struktur tabel, dan pola bukti source-anchored (verbatim snippet).
-3. **Pisahkan scope dengan benar:** universal (`01`–`11`, `13`–`21`) vs framework vs project-specific (`12-project-specific/`). Jangan memaksa aturan project/framework satu proyek menjadi universal.
-4. **Grounded pada bukti kode.** Instruksi arsitektur/pola/naming/testing harus diverifikasi terhadap repository acuan (seperti yang dilakukan untuk LingSID) dan disertai snippet verbatim + anchor `path:line`.
-5. **Regenerasi wajib.** Setiap perubahan pada template `laravel/` Wajib diikuti regenerasi distribusi (`./setup-ai-rules.sh laravel`) setelah menghapus `ai-instructions/master` agar semua salinan (master + distribusi) konsisten.
-
----
-
-## 14. REFERENSI CEPAT
+## 13. REFERENSI CEPAT
 
 ```
 ai-instructions.md                     → File ini — konstitusi

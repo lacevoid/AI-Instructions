@@ -38,7 +38,7 @@ Bila `setup-ai-rules.sh` mendistribusikan template `team-dev`, selain file
 instruksi, ia juga menempatkan **role subagent** dan **skill diskusi** ke
 `.opencode/` proyek konsumen:
 
-- `.opencode/agent/team-lead.md` — orchestrator / pemimpin tim
+- `.opencode/agent/architecture-advisor.md` — perspektif arsitektur/struktur (bukan pemimpin eksekusi)
 - `.opencode/agent/code-reviewer.md` — review kode
 - `.opencode/agent/qa-engineer.md` — review QA & edge case
 - `.opencode/agent/security-reviewer.md` — review keamanan (veto)

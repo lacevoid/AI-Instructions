@@ -8,7 +8,8 @@ development" — beberapa AI agent dengan perspektif berbeda bekerja bersama.
 
 | Peran | Deskripsi | Tanggung jawab inti |
 |-------|-----------|---------------------|
-| `team-lead` (orchestrator) | Agent utama yang menjalankan task | Memimpin, membagi pekerjaan, mensusintesis laporan, memutuskan, bertanggung jawab pada operator |
+| `orchestrator` (agent utama) | Agent utama yang menjalankan task | Memimpin, membagi pekerjaan, mensusintesis laporan, memutuskan, bertanggung jawab pada operator |
+| `architecture-advisor` | Subagent | Memberi perspektif arsitektur/struktur: desain, penempatan kode, kepatuhan pola proyek |
 | `code-reviewer` | Subagent | Menilai kualitas kode, konsistensi, pola, style; mencari bug & pelanggaran scope |
 | `qa-engineer` | Subagent | Menilai kesesuaian spesifikasi, skenario edge, test coverage, kriteria "selesai" |
 | `security-reviewer` | Subagent | Menilai auth, authorization, validasi, secrets, data sensitif, injection, dll. |
