@@ -175,4 +175,23 @@ jobs:
                "$XDG_CONFIG_HOME_B/opencode/skills/operator-memory/memory.md" \
             || { echo "FAIL: restored memory does not match backup"; exit 1; }
 
+          # Verify git identity applied by restore (fresh clone of a repo does
+          # NOT carry local user.name/user.email; without it backup.sh fails
+          # with "Author identity unknown").
+          git -C "$HOME_B/operator-persona" config user.name >/dev/null \
+            || { echo "FAIL: restore did not set git user.name"; exit 1; }
+          git -C "$HOME_B/operator-persona" config user.email >/dev/null \
+            || { echo "FAIL: restore did not set git user.email"; exit 1; }
+
+          # Verify backup works on device B right after restore
+          # (update memory, run backup, must not fail on identity)
+          printf '\n## Log\n- [test] post-restore backup on device B\n' \
+            >> "$XDG_CONFIG_HOME_B/opencode/skills/operator-memory/memory.md"
+          env HOME="$HOME_B" XDG_CONFIG_HOME="$XDG_CONFIG_HOME_B" \
+            bash "$HOME_B/operator-persona/backup.sh" 2>&1 \
+            || { echo "FAIL: backup.sh after restore failed (git identity)"; exit 1; }
+          COMMIT_B="$(git -C "$HOME_B/operator-persona" log --oneline | wc -l)"
+          test "$COMMIT_B" -ge 2 \
+            || { echo "FAIL: expected >=2 commits after post-restore backup, got $COMMIT_B"; exit 1; }
+
           echo "restore cycle: OK"
