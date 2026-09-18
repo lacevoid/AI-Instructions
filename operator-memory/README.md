@@ -9,6 +9,9 @@ file memori yang **di-sinkronkan dua arah** ke repo privat GitHub operator:
   filosofi, standar, pelajaran, hipotesis.
 - **context.md** — *di mana kita sekarang* (dinamis): state saat ini
   (checkpoint), progres, dan Log bertanggal.
+- **behavior-log.md** — *semua yang operator lakukan* (journal): catatan
+  lengkap SEMUA perilaku teramati, termasuk yang belum jadi pola; sumber mentah
+  untuk konsolidasi persona.
 
 Mekanisme bersifat **per-salinan**: operator A di salinan A punya memori,
 repo backup, dan GitHub sendiri; operator B di salinan B memulai dari kosong
@@ -25,7 +28,8 @@ operator-memory/
 └── skill/
     ├── SKILL.md                     ← protokol belajar & rekam (template)
     ├── persona.md.start             ← starter persona (template, ber-placeholder)
-    └── context.md.start             ← starter konteks (template, ber-placeholder)
+    ├── context.md.start             ← starter konteks (template, ber-placeholder)
+    └── behavior-log.md.start        ← starter journal perilaku (template, ber-placeholder)
 ```
 
 ## Cara pakai (untuk operator salinan ini)
@@ -41,7 +45,7 @@ Script akan:
 1. Minta identitas operator (nama, email, handle GitHub).
 2. Membuat repo privat GitHub `operator-persona` (via `gh`), lalu clone ke
    `${XDG_CONFIG_HOME:-$HOME/.config}/operator-persona`.
-3. Memasang skill + `persona.md` + `context.md` starter ke
+3. Memasang skill + `persona.md` + `context.md` + `behavior-log.md` starter ke
    `~/.config/opencode/skills/operator-memory/`
    (memori yang sudah ada TIDAK ditimpa; `memory.md` legacy dimigrasi ke dua
    file baru dan disimpan utuh).
@@ -51,8 +55,8 @@ Script akan:
 
 **Setelah itu restart opencode.** Agent membuka sesi berikutnya sudah mengenal
 operator: membaca `~/.config/opencode/skills/operator-memory/persona.md` dan
-`context.md`, merekam pembelajaran di checkpoint kerja, lalu menjalankan
-`operator-memory/backup.sh`.
+`context.md`, mencatat SEMUA perilaku operator ke `behavior-log.md`, merekam
+pembelajaran di checkpoint kerja, lalu menjalankan `operator-memory/backup.sh`.
 
 > Tanpa `gh` / ingin uji coba offline:
 > `./operator-memory/bootstrap-operator-memory.sh --name ... --email ... --local-only`
@@ -66,8 +70,8 @@ ada perubahan.
 
 1. **Tarik** — `git fetch` + `git merge --ff-only` branch aktif; perubahan dari
    perangkat lain masuk duluan.
-2. **Sinkron file demi file** (persona.md, context.md, SKILL.md,
-   `opencode.jsonc`) — file memori relatif ke
+2. **Sinkron file demi file** (persona.md, context.md, behavior-log.md,
+   SKILL.md, `opencode.jsonc`) — file memori relatif ke
    `~/.config/opencode/skills/operator-memory/`:
    - hanya lokal berubah → commit + push
    - hanya remote berubah → **adopsi** ke file live lokal
@@ -86,9 +90,9 @@ berkembang?"* — untuk operator (ringkasan satu layar) dan untuk agent
 - `./operator-memory/metrics.sh --json` — data terstruktur untuk agent
 
 Metrik: ukuran & bagian persona/context, entri Log, sinyal pembelajaran
-(pelajaran/hipotesis), keseimbangan persona vs context, pertumbuhan sejak
-sinkron terakhir, dan frekuensi sinkronisasi repo backup. Semua **lokal** —
-tidak ada telemetri terpusat.
+(pelajaran/hipotesis), entri behavior-log, keseimbangan persona vs context,
+pertumbuhan sejak sinkron terakhir, dan frekuensi sinkronisasi repo backup.
+Semua **lokal** — tidak ada telemetri terpusat.
 
 ## Restore di mesin baru / fresh install
 

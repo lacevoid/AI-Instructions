@@ -11,12 +11,14 @@ OPENCODE_DIR="$CFG_BASE/opencode"
 
 # File yang disinkronkan (relatif terhadap config/)
 # memory.md legacy TIDAK lagi disinkronkan — sudah dimigrasi ke persona.md
-# (siapa operator, stabil) + context.md (di mana kita, dinamis) di bootstrap.
+# (siapa operator, stabil) + context.md (di mana kita, dinamis) + behavior-log.md
+# (catatan lengkap SEMUA perilaku) di bootstrap.
 FILES=(
   "opencode.jsonc"
   "skills/operator-memory/SKILL.md"
   "skills/operator-memory/persona.md"
   "skills/operator-memory/context.md"
+  "skills/operator-memory/behavior-log.md"
 )
 
 cd "$REPO_DIR"

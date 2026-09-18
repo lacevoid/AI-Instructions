@@ -1,0 +1,31 @@
+# Behavior Log Operator
+
+> Catatan lengkap SEMUA perilaku operator yang teramati saat bekerja — tingkat
+> **journal** (mendekati transcript), sebagai lawan dari **persona.md** yang
+> merupakan inti kurasi (pola yang sudah terbukti konsisten).
+>
+> Setiap agent yang memuat skill `operator-memory` WAJIB menulis ke file ini
+> setiap kali perilaku operator teramati (mencolok atau tidak), lalu
+> menyinkronkan lewat `${XDG_CONFIG_HOME:-$HOME/.config}/operator-persona/backup.sh`.
+
+## Aturan penulisan
+
+- Tiap entri singkat: `- [YYYY-MM-DD HH:MM] konteks singkat → perilaku (tag)`
+- Tag yang dipakai: `#perintah`, `#keputusan`, `#reaksi-error`,
+  `#reaksi-laporan`, `#gaya-bahasa`, `#kebiasaan`, `#preferensi`, `#koreksi`,
+  `#humor`, `#diam`, `#lain`
+- Tulis saat teramati bila mencolok; sisanya di checkpoint alami. Jangan menunda
+  sampai lupa.
+- Jangan menyensor: perilaku "kecil" pun dicatat — konsolidasi yang memilah,
+  bukan pencatatan.
+- Konsolidasi tiap ±10 entri: pola yang konsisten dipromosikan ke **persona.md**
+  (Preferensi / Pola keputusan / Hal yang tidak disukai / dst). Entri di file ini
+  TIDAK dihapus — jadi riwayat & bukti. Operator boleh prune kapan saja.
+
+## Log
+
+(entri terbaru di atas)
+
+- [{{DATE}}] Salinan operator-memory di-instansiasi untuk {{NAME}}; behavior-log
+  dimulai dari kosong dan akan mencatat SEMUA perilaku operator ke depan.
+  (#lain)
