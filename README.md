@@ -32,6 +32,7 @@ AI-Instructions/
 ├── VISION.md            ← Visi meta: mesin adaptif tiga lapisan (artefak→pabrik→adaptif)
 ├── setup-ai-rules.sh    ← Script distribusi (HANYA untuk root proyek konsumen)
 ├── .gitignore           ← Mencegah artefak distribusi ter-commit ke repo ini
+├── .opencode/           ← SELF-HOSTING: skill anti-slop + team-authoring + agent plenger
 ├── operator-memory/     ← MESIN ADAPTIF: skill + backup dua arah + bootstrap per-salinan
 └── laravel/             ← Template set instruksi (satu folder per framework/teknologi)
     ├── ai-instructions.md            ← Konstitusi (entry point)
@@ -70,7 +71,15 @@ AI-Instructions/
    > development hidup sebagai protokol internal authoring (skill `team-authoring` +
    > subagent di `.opencode/agent/`); filter anti-AI-slop hidup sebagai skill self-hosting
    > (`.opencode/skills/antislop*`) yang digunakan agent penulis dan ditegakkan gate
-   > `scripts/antislop-check.sh` (bagian dari health-check).
+   > `scripts/antislop-check.sh` (bagian dari health-check). Konsumen yang membutuhkan
+   > filter anti-slop di proyeknya menyalin sistem vendor `.opencode/skills/antislop*`
+   > dari repo ini (upstream MIT `miqdadbadjuber/anti-slop`) ke `.opencode/skills/`
+   > proyeknya — panduan pemakaian ada di modul `10-quality-gates.md` set yang didistribusikan.
+   >
+   > **Integrasi anti-slop**: filter anti-slop di-vendor dan diintegrasikan ke repo ini pada
+   > posisi commit `3f6f333` (commit anti-slop terakhir, termerge di `0f08e63`);
+   > sumber upstream: [miqdadbadjuber/anti-slop](https://github.com/miqdadbadjuber/anti-slop)
+   > (MIT, © 2026 Miqdad Badjuber).
 
 3. **opencode dipasang sebagai default AI untuk pekerjaan**: selain `AGENTS.md`
    (dibaca otomatis oleh opencode), script menulis `opencode.json` di root proyek
