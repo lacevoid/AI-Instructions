@@ -66,11 +66,13 @@ say ""
 say "== Referensi silang antar file instruksi =="
 
 # Collect every backtick-coded path token from repo-root and framework markdown files.
+# Vendor skills hidup di <Framework>/opencode/ (mirror .opencode/ root) — konten
+# pihak ketiga, bukan anchor instruksi → dilewati seperti .opencode/.
 mapfile -t md_files < <(find . -maxdepth 1 -name '*.md')
 for f in "${framework_dirs[@]}"; do
   while IFS= read -r m; do
     md_files+=("$m")
-  done < <(find "$f" -name '*.md')
+  done < <(find "$f" -name '*.md' -not -path '*/opencode/*')
 done
 
 TOKENS_TMP="$(mktemp)"
@@ -89,6 +91,8 @@ for token in "${refs[@]}"; do
   [[ "$token" =~ $TOKEN_PATTERN ]] || continue
   [[ "$token" =~ http(s)?:// ]] && continue
   [[ "$token" == 'MASTER_BUILD_SPECIFICATION.md' ]] && continue
+  # DESIGN.md = arah visual milik proyek konsumen (konsep antislop), bukan anchor repo.
+  [[ "$token" == 'DESIGN.md' ]] && continue
   [[ $token =~ $SKIP_OR_EXTERNAL ]] && continue
 
   resolved=""
