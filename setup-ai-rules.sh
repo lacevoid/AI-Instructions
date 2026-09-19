@@ -85,12 +85,13 @@ to_lower() {
     echo "$1" | tr '[:upper:]' '[:lower:]'
 }
 
-# Warna output
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+# Warna output — ANSI-C quoting agar memakai karakter ESC asli (jalan untuk
+# echo -e DAN printf yang menginterpolasi variabel warna).
+GREEN=$'\033[0;32m'
+YELLOW=$'\033[1;33m'
+BLUE=$'\033[0;34m'
+RED=$'\033[0;31m'
+NC=$'\033[0m' # No Color
 
 # ============================================================================
 # Fungsi: Tampilkan header
@@ -332,6 +333,17 @@ SCAFFOLD
 Buat modul bernomor di direktori ini (contoh: `01-governance.md`, `02-agent-workflow.md`)
 dan referensikan dari `ai-instructions.md` di atas.
 SCAFFOLD_MODULE
+    cat > "${target}/ainstruct-detect.txt" <<'SCAFFOLD_DETECT'
+# ainstruct-detect.txt — sinyal pendeteksi template ini (dibaca oleh `ainstruct init`).
+# Format tiap baris: <bobot>|<tipe>|<argumen>|<label>
+#   tipe 'file': argumen = path relatif; cocok bila file ada (contoh: 5|file|artisan|CLI)
+#   tipe 'dir' : argumen = path relatif; cocok bila direktori ada.
+#   tipe 'grep': argumen = <path>:<pola regex>; cocok bila file ada & memuat pola.
+# Bobot 1–5; keyakinan: skor >=6 CONFIRMED, >=4 STRONG, >=2 WEAK, sisanya UNKNOWN.
+# Hapus komentar lalu isi sinyal nyata template Anda, contoh:
+# 5|file|artisan|CLI artisan milik Laravel
+# 4|grep|composer.json:vendor/framework|Dependency composer vendor/framework
+SCAFFOLD_DETECT
 
     echo -e "${GREEN}✅ Template custom dibuat: ${target}${NC}"
     echo -e "${YELLOW}💡 Edit file di direktori tsb. Untuk salin dari template lain: 'template clone <nama> <sumber>'.${NC}"
@@ -520,6 +532,201 @@ template_cmd() {
 }
 
 # ============================================================================
+# init — deteksi stack proyek (pwd) & scaffold template yang cocok
+# ============================================================================
+# Setiap template (built-in + custom; custom shadow built-in) dapat disertai
+# file 'ainstruct-detect.txt'. Format tiap baris (non-komentar):
+#   <bobot>|<tipe>|<argumen>|<label>
+#   tipe 'file' : argumen = path relatif; cocok bila file ada.
+#   tipe 'dir'  : argumen = path relatif; cocok bila direktori ada.
+#   tipe 'grep' : argumen = <path>:<pola regex>; cocok bila file ada & memuat pola.
+# Skor = jumlah bobot sinyal yang cocok; keyakinan berdasarkan skor:
+#   >=6 CONFIRMED, >=4 STRONG, >=2 WEAK, sisanya UNKNOWN.
+# 'init' TIDAK pernah menebak: tanpa sinyal yang cocok -> gagal (exit 1) dan
+# meminta template eksplisit ('init --template <name>' / 'ainstruct <name>').
+# ============================================================================
+init_confidence() {
+    local score="$1"
+    if [ "$score" -ge 6 ]; then printf '%s' 'CONFIRMED'
+    elif [ "$score" -ge 4 ]; then printf '%s' 'STRONG'
+    elif [ "$score" -ge 2 ]; then printf '%s' 'WEAK'
+    else printf '%s' 'UNKNOWN'; fi
+}
+
+init_detect_template() {
+    local tdir="$1" proj="$2"
+    local detect_file="${tdir}/ainstruct-detect.txt"
+    local score=0
+    local -a labels=()
+    local line weight type arg label file pat
+    if [ ! -f "$detect_file" ]; then
+        printf '0\n'
+        return 0
+    fi
+    while IFS= read -r line || [ -n "$line" ]; do
+        case "$line" in
+            ''|\#*) continue ;;
+        esac
+        IFS='|' read -r weight type arg label <<< "$line"
+        case "$type" in
+            file)
+                if [ -f "${proj}/${arg}" ]; then
+                    score=$((score + weight)); labels+=("$label")
+                fi
+                ;;
+            dir)
+                if [ -d "${proj}/${arg}" ]; then
+                    score=$((score + weight)); labels+=("$label")
+                fi
+                ;;
+            grep)
+                file="${proj}/${arg%%:*}"
+                pat="${arg#*:}"
+                if [ -f "$file" ] && grep -qE "$pat" "$file" 2>/dev/null; then
+                    score=$((score + weight)); labels+=("$label")
+                fi
+                ;;
+        esac
+    done < "$detect_file"
+    printf '%s' "$score"
+    local l
+    for l in "${labels[@]}"; do printf '|%s' "$l"; done
+    printf '\n'
+}
+
+init_cmd() {
+    local force=0 dry_run=0 forced=""
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --force) force=1; shift ;;
+            --dry-run) dry_run=1; shift ;;
+            --template)
+                if [ -z "${2:-}" ]; then
+                    echo -e "${RED}❌ '--template' butuh nama template${NC}" >&2
+                    exit 1
+                fi
+                forced="$2"; shift 2 ;;
+            *)
+                echo -e "${RED}❌ arg tak dikenal: $1${NC}" >&2
+                usage
+                exit 1 ;;
+        esac
+    done
+
+    # Mode eksplisit: lewati deteksi, pakai template yang dipaksa.
+    if [ -n "$forced" ]; then
+        if [ -z "$(find_template_dir "$forced")" ]; then
+            echo -e "${RED}❌ Template tidak ditemukan: '${forced}'${NC}" >&2
+            exit 1
+        fi
+        if [ "$dry_run" -eq 1 ]; then
+            echo -e "${YELLOW}🔍 init --dry-run: memakai template yang dipaksa '${forced}' (tanpa deteksi).${NC}"
+            echo -e "${YELLOW}   Tidak ada perubahan — jalankan tanpa --dry-run untuk mendistribusikan.${NC}"
+            exit 0
+        fi
+        FRAMEWORK="$forced"
+        echo -e "${YELLOW}📦 init: template dipilih eksplisit: ${FRAMEWORK}${NC}"
+        return 0
+    fi
+
+    # Kumpulkan kandidat template (custom shadow built-in, case-insensitive).
+    local -a tnames=() tdirs=()
+    local dir name i dup
+    if [ -d "${CONSUMER_TEMPLATES_DIR}" ]; then
+        for dir in "${CONSUMER_TEMPLATES_DIR}"/*/; do
+            if [ -d "$dir" ] && [ -f "$dir/ai-instructions.md" ]; then
+                tnames+=("$(basename "$dir")"); tdirs+=("${dir%/}")
+            fi
+        done
+    fi
+    for dir in "${SCRIPT_DIR}"/*/; do
+        if [ -d "$dir" ] && [ -f "$dir/ai-instructions.md" ]; then
+            name="$(basename "$dir")"
+            dup=0
+            for i in "${tnames[@]}"; do
+                if [ "$(to_lower "$i")" = "$(to_lower "$name")" ]; then dup=1; break; fi
+            done
+            if [ "$dup" -eq 0 ]; then
+                tnames+=("$name"); tdirs+=("${dir%/}")
+            fi
+        fi
+    done
+
+    if [ "${#tdirs[@]}" -eq 0 ]; then
+        echo -e "${RED}❌ Tidak ada template tersedia (built-in maupun custom).${NC}" >&2
+        exit 1
+    fi
+
+    echo -e "${YELLOW}🔍 init: mendeteksi stack proyek di ${TARGET_DIR}${NC}"
+    echo ""
+
+    local idx=0 s conf best_index=-1 best_score=-1
+    local -a results=() scores=() confs=()
+    local result rest
+    for idx in "${!tdirs[@]}"; do
+        result="$(init_detect_template "${tdirs[$idx]}" "$TARGET_DIR")"
+        results+=("$result")
+        s="${result%%|*}"
+        scores+=("$s")
+        conf="$(init_confidence "$s")"
+        confs+=("$conf")
+        if [ "$s" -gt "$best_score" ]; then
+            best_score="$s"; best_index="$idx"
+        fi
+    done
+
+    printf '  %-18s %-10s %6s  %s\n' 'TEMPLATE' 'KEYAKINAN' 'SKOR' 'SINYAL COCOK'
+    printf '  %s\n' '------------------------------------------------------------------'
+    local conf_color cend cname chosen_name chosen_conf
+    for idx in "${!tdirs[@]}"; do
+        result="${results[$idx]}"
+        s="${result%%|*}"
+        conf="${confs[$idx]}"
+        case "$result" in
+            *\|*) rest="${result#*|}" ;;
+            *) rest="" ;;
+        esac
+        case "$conf" in
+            CONFIRMED) conf_color="$GREEN" ;;
+            STRONG)    conf_color="$BLUE" ;;
+            WEAK)      conf_color="$YELLOW" ;;
+            UNKNOWN)   conf_color="$RED" ;;
+        esac
+        if [ "$idx" -eq "$best_index" ] && [ "$best_score" -gt 0 ]; then
+            printf '  %s%-18s%s %s%-10s%s %6s  %s%s%s ★ terpilih\n' \
+                "$GREEN" "${tnames[$idx]}" "$NC" "$conf_color" "$conf" "$NC" "$s" \
+                "$conf_color" "${rest//\|/, }" "$NC"
+        else
+            printf '  %-18s %s%-10s%s %6s  %s\n' \
+                "${tnames[$idx]}" "$conf_color" "$conf" "$NC" "$s" "${rest//\|/, }"
+        fi
+    done
+    echo ""
+
+    if [ "$best_score" -le 0 ]; then
+        echo -e "${RED}❌ Tidak ada template yang cocok dengan proyek ini (semua sinyal kosong).${NC}"
+        echo -e "   'init' tidak menebak. Pilih template secara eksplisit:"
+        echo -e "     ainstruct init --template <nama>"
+        echo -e "     ainstruct <nama>"
+        exit 1
+    fi
+
+    chosen_name="${tnames[$best_index]}"
+    chosen_conf="${confs[$best_index]}"
+    echo -e "${GREEN}✅ Terbaik: '${chosen_name}' [${chosen_conf}, skor ${best_score}]${NC}"
+
+    if [ "$dry_run" -eq 1 ]; then
+        echo -e "${YELLOW}   Dry-run: tidak ada perubahan. Untuk mendistribusikan:${NC}"
+        echo -e "     ainstruct init --template ${chosen_name}"
+        exit 0
+    fi
+
+    FRAMEWORK="$chosen_name"
+    echo ""
+    return 0
+}
+
+# ============================================================================
 # Fungsi: Distribute file dengan header komentar
 # ============================================================================
 distribute() {
@@ -636,6 +843,8 @@ Usage: $0 [<framework>]           Distribusikan instruksi ke proyek konsumen (pw
        $0 reset [<framework>]     Reset instruksi ke default template
                                   (hapus ai-instructions/master + distribusi ulang)
        $0 wipe [--force]          Hapus SEMUA artefak instruksi dari pwd
+       $0 init [options]         Deteksi stack proyek di pwd lalu scaffold
+                                  template yang cocok (lihat 'init --help' di bawah)
        $0 template <cmd>          Kelola template AI Instructions (lihat 'template help')
        $0 help                    Tampilkan bantuan ini
 
@@ -651,14 +860,23 @@ Commands:
                .continuerules, .aider.conf.yml, opencode.json, .opencode/,
                ai-instructions/ (termasuk master/).
                Tanpa --force, diminta konfirmasi.
+  init         Deteksi stack proyek (baca 'ainstruct-detect.txt' tiap template)
+               lalu distribusikan template dengan skor tertinggi. Opsi:
+               --dry-run (hanya laporan, tanpa perubahan), --template <nama>
+               (lewati deteksi, paksa template), --force (tanpa konfirmasi,
+               untuk automation/CI). Tanpa sinyal cocok -> GAGAL (tidak menebak).
   template     Kelola template milik konsumen (custom): list, create, clone, update,
                delete, path. Built-in TERPROTEKSI — customisasi lewat clone.
 
 Options:
   --force      Lewati konfirmasi pada perintah wipe (untuk automation/CI).
+  init --dry-run  Laporan deteksi tanpa mengubah proyek.
 
 Examples:
   ./setup-ai-rules.sh laravel          Distribusikan framework laravel
+  ./setup-ai-rules.sh init             Deteksi stack proyek & scaffold yang cocok
+  ./setup-ai-rules.sh init --dry-run   Laporan deteksi (tanpa perubahan)
+  ./setup-ai-rules.sh init --template laravel --force   Paksa template tanpa deteksi
   ./setup-ai-rules.sh template list    Daftar template (built-in & custom)
   ./setup-ai-rules.sh template clone mylaravel laravel   # customisasi built-in
   ./setup-ai-rules.sh reset laravel    Kembalikan ke default template lalu distribusikan
@@ -855,6 +1073,10 @@ case "$COMMAND" in
         shift
         template_cmd "$@"
         exit 0
+        ;;
+    init)
+        shift
+        init_cmd "$@"
         ;;
     help|-h|--help)
         usage

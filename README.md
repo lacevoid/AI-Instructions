@@ -119,7 +119,7 @@ Keduanya dijalankan dari root proyek konsumen — **bukan** dari repo authoring 
 
 Repo ini menyediakan tiga adaptor agar `setup-ai-rules.sh` bisa dipakai langsung di
 **proyek konsumen** (arah `pwd`) tanpa menyalin repo secara manual. Semua adapter
-menjalankan fungsi yang sama: `distribute`, `reset`, `wipe`, `template`.
+menjalankan fungsi yang sama: `distribute`, `reset`, `wipe`, `init`, `template`.
 
 ### 1. curl | sh (tanpa instalasi)
 
@@ -155,6 +155,29 @@ npx @lace/ainstruct wipe --force
 
 Paket `@lace/ainstruct` (scope `@lace` bila tersedia) membungkus `bin/ainstruct`
 yang sama dengan paket Composer.
+
+## Init: Deteksi Stack & Scaffold Otomatis
+
+`ainstruct init` mendeteksi teknologi proyek di direktori saat ini lalu memilih dan
+mendistribusikan template yang paling cocok — tanpa perlu tahu nama template lebih dulu.
+Deteksi berbasis **sinyal** dari `ainstruct-detect.txt` milik setiap template
+(built-in maupun custom; custom menang atas built-in bila nama sama):
+
+```bash
+ainstruct init                 # deteksi → konfirmasi → distribusi template terbaik
+ainstruct init --dry-run       # hanya laporan deteksi, tanpa mengubah apa pun
+ainstruct init --template laravel --force   # paksa template, tanpa deteksi/konfirmasi
+```
+
+- **Ukuran keyakinan** mengikuti filosofi "deteksi, jangan tebak": tiap sinyal punya
+  bobot 1–5; skor < 6 = CONFIRMED, 4–5 = STRONG, 2–3 = WEAK, 0–1 = UNKNOWN.
+- **Tidak pernah menebak**: bila tidak ada template yang cocok, perintah gagal (exit 1)
+  dan mengarahkan ke `init --template <nama>` / `ainstruct <nama>`.
+- **`ainstruct-detect.txt`** adalah berkas opsional per template, format baris
+  `<bobot>|<tipe>|<argumen>|<label>` — tipe `file`, `dir`, atau `grep`
+  (`<path>:<pola regex>`). Template `laravel/` sudah memuat detektornya (Laravel +
+  Inertia/Vue 3 + TypeScript); `template create` membuat starter kosong yang bisa diisi.
+- Opsi `--force` dibutuhkan di lingkungan non-interaktif/CI untuk melewati konfirmasi.
 
 ## Template Manager: Template Milik Konsumen
 
