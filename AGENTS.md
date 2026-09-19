@@ -112,6 +112,12 @@ pekerjaan dokumentasi instruksi; rincian penuh ada di modul yang dirujuk):
    (health-check, markdownlint, shellcheck, distribution smoke test) sebelum push; hasil yang
    hanya "tampak" beres di lokal tidak dianggap lulus. Rujukan:
    `laravel/ai-instructions/21-state-delivery-environment.md`.
+8. **Anti-slop (self-hosting)** — filter anti-AI-slop di-vendor ke repo ini (`.opencode/skills/`)
+   dan template `antislop/`. Saat menulis/mengaudit UI, copy/teks, layout responsive, atau
+   komentar kode — termasuk dokumen instruksi — muat skill yang relevan
+   (`.opencode/skills/antislop/SKILL.md` inti + skill per concern) dan jalankan
+   Delivery Gate-nya sebelum mengklaim "selesai". Aturan lengkap hidup di skill,
+   bukan di-rewrite di sini.
 
 ### Enforcement (di repo ini)
 

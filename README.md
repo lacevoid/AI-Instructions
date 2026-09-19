@@ -33,6 +33,7 @@ AI-Instructions/
 ├── setup-ai-rules.sh    ← Script distribusi (HANYA untuk root proyek konsumen)
 ├── .gitignore           ← Mencegah artefak distribusi ter-commit ke repo ini
 ├── team-dev/            ← Template tim development opencode (.opencode/ agent + skill)
+├── antislop/            ← Template filter anti-AI-slop (6 skill opencode, MIT upstream)
 ├── operator-memory/     ← MESIN ADAPTIF: skill + backup dua arah + bootstrap per-salinan
 └── laravel/             ← Template set instruksi (satu folder per framework/teknologi)
     ├── ai-instructions.md            ← Konstitusi (entry point)
@@ -75,6 +76,22 @@ AI-Instructions/
    # di root proyek konsumen
    ./setup-ai-rules.sh team-dev
    ```
+
+   Template **`antislop`** mendistribusikan **filter anti-AI-slop**
+   (6 skill opencode: `antislop` inti + `-ui`, `-copywriting`, `-human`,
+   `-layoutmobile`, `-code`) ke `.opencode/skills/` proyek konsumen, plus konstitusi
+   tipis yang menunjuk ke skill-skill tersebut. Bukan template framework — isinya
+   skill asli (format Agent Skills) dari upstream `miqdadbadjuber/anti-slop` (MIT),
+   tidak di-rewrite menjadi modul instruksi:
+
+   ```bash
+   # di root proyek konsumen
+   ./setup-ai-rules.sh antislop
+   ```
+
+   Versi yang sama juga di-vendor ke `.opencode/skills/` repo authoring ini, sehingga
+   agent penulis (termasuk plenger) ikut mematuhi filter anti-slop saat menulis
+   UI/copy/kode (self-hosting).
 
 3. **opencode dipasang sebagai default AI untuk pekerjaan**: selain `AGENTS.md`
    (dibaca otomatis oleh opencode), script menulis `opencode.json` di root proyek
@@ -286,5 +303,6 @@ Setiap set WAJIB memuat KLAUSA 1–5 (detail penuh di `ARCHITECT-GUIDE.md` bagia
 |-----|--------|---------|
 | `laravel/` | Aktif | Berakar pada LingSID; konstitusi + modul 01–21 + invariant proyek di `12-project-specific/lingusid.md` + bank snippet kanonik; memuat protokol MASTER_BUILD_SPECIFICATION. Self-instruction arsitek (`AGENTS.md` §5) mengadopsi aturan kualitas universal dari set ini. |
 | `team-dev/` | Aktif | Template **tim development multi-agent** untuk konsumen: konstitusi + modul 01–21 + protokol diskusi peran (`03-team-protocol.md`) + role subagent opencode (`architecture-advisor`, `code-reviewer`, `qa-engineer`, `security-reviewer`) dan skill `team` yang didistribusikan ke `.opencode/` proyek konsumen. |
+| `antislop/` | Aktif | Template **filter anti-AI-slop** untuk konsumen: konstitusi tipis + 6 skill opencode (`antislop`, `-ui`, `-copywriting`, `-human`, `-layoutmobile`, `-code`) yang didistribusikan ke `.opencode/skills/`. Vendor MIT upstream `miqdadbadjuber/anti-slop` (v3.2.9), tidak di-rewrite; sekaligus di-vendor ke `.opencode/skills/` repo ini untuk dipakai agent authoring (self-hosting). |
 | `operator-memory/` | Aktif | **MESIN ADAPTIF (lapisan 3)**: skill `operator-memory` + memori live (`~/.config/opencode/...`) + script backup dua arah, restore, dan bootstrap (`operator-memory/`) — setiap salinan repo me-bootstrap operatornya masing-masing ke repo privat GitHub. |
 | `java/`, `react/` | Direncanakan | Didukung script (coming soon), folder belum dibuat |

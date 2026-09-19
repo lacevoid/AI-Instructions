@@ -24,6 +24,21 @@ opencode.json
 !.opencode/skills/
 !.opencode/skills/team-authoring/
 !.opencode/skills/team-authoring/SKILL.md
+!.opencode/skills/LICENSE
+!.opencode/skills/antislop/
+!.opencode/skills/antislop/SKILL.md
+!.opencode/skills/antislop-code/
+!.opencode/skills/antislop-code/SKILL.md
+!.opencode/skills/antislop-copywriting/
+!.opencode/skills/antislop-copywriting/SKILL.md
+!.opencode/skills/antislop-human/
+!.opencode/skills/antislop-human/SKILL.md
+!.opencode/skills/antislop-human/contrast-check.py
+!.opencode/skills/antislop-human/contrast-mcp.py
+!.opencode/skills/antislop-layoutmobile/
+!.opencode/skills/antislop-layoutmobile/SKILL.md
+!.opencode/skills/antislop-ui/
+!.opencode/skills/antislop-ui/SKILL.md
 
 # Tooling paket (composer / npm) — jangan di-commit.
 /vendor/
