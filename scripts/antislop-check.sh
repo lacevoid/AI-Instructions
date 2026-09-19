@@ -13,8 +13,6 @@
 # pembahasan pola, bukan output authoring:
 #   - `.opencode/`            — skill anti-slop untuk agent repo ini (self-use)
 #   - `<Framework>/opencode/` — skill anti-slop dalam template (vendor)
-#   - `antislop/`             — folder template anti-slop itu sendiri (konstitusinya
-#                               menyebut contoh pola terlarang seperti "Next-Gen")
 #
 # Usage: scripts/antislop-check.sh [--quiet]
 # Exit code 0 = bersih; non-zero = pola AI-slop ditemukan.
@@ -67,10 +65,10 @@ PATTERNS=(
   '99\.9%'
 )
 
-# Seluruh .md ter-track, kecuali vendor & folder antislop (lihat header).
+# Seluruh .md ter-track, kecuali konten vendor (lihat header).
 mapfile -t md_files < <(
   git ls-files '*.md' 2>/dev/null \
-    | grep -vE '(^|/)\.opencode/|(^|/)opencode/|^antislop/' || true
+    | grep -vE '(^|/)\.opencode/|(^|/)opencode/' || true
 )
 
 for f in "${md_files[@]}"; do

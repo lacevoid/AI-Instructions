@@ -169,7 +169,7 @@ done < <(printf '%s\n' CLAUDE.md GEMINI.md .cursorrules .windsurfrules .continue
 say ""
 say "== Anti-AI-slop gate (dokumen authoring) =="
 
-# Gate pola AI-slop: konten vendor & folder antislop dikecualikan di dalam script.
+# Gate pola AI-slop: konten vendor (`.opencode/`, `<Framework>/opencode/`) dikecualikan di dalam script.
 if bash scripts/antislop-check.sh; then
   ok "anti-slop"
 else

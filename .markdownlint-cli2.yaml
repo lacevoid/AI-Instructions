@@ -13,7 +13,6 @@ config:
 ignores:
   - ".opencode/node_modules/"
   - ".opencode/skills/antislop*/**"
-  - "antislop/opencode/**"
 
 globs:
   - "**/*.md"
