@@ -9,6 +9,8 @@
 #      git-tracked (a tracked file is not affected by .gitignore ignores and
 #      reaches PRs).
 #   3. No generated distribution artifacts are present in the repo root.
+#   4. Anti-AI-slop gate (scripts/antislop-check.sh) — dokumen authoring bebas
+#      pola marketing/AI-slop (buzzword, klaim tanpa bukti, frase generik).
 #
 # Frameworks are auto-discovered: any non-hidden top-level directory that
 # contains an ai-instructions.md marker file (mirrors setup-ai-rules.sh).
@@ -163,6 +165,16 @@ while IFS= read -r artifact; do
     ok "tidak ada $artifact"
   fi
 done < <(printf '%s\n' CLAUDE.md GEMINI.md .cursorrules .windsurfrules .continuerules .clinerules .cursor .aider.conf.yml .github/copilot-instructions.md opencode.json .opencode)
+
+say ""
+say "== Anti-AI-slop gate (dokumen authoring) =="
+
+# Gate pola AI-slop: konten vendor & folder antislop dikecualikan di dalam script.
+if bash scripts/antislop-check.sh; then
+  ok "anti-slop"
+else
+  fail "anti-slop: pola AI-slop ditemukan (lihat output antislop-check)"
+fi
 
 say ""
 if [[ $FAILED -gt 0 ]]; then

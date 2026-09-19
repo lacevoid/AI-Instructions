@@ -112,12 +112,18 @@ pekerjaan dokumentasi instruksi; rincian penuh ada di modul yang dirujuk):
    (health-check, markdownlint, shellcheck, distribution smoke test) sebelum push; hasil yang
    hanya "tampak" beres di lokal tidak dianggap lulus. Rujukan:
    `laravel/ai-instructions/21-state-delivery-environment.md`.
-8. **Anti-slop (self-hosting)** — filter anti-AI-slop di-vendor ke repo ini (`.opencode/skills/`)
-   dan template `antislop/`. Saat menulis/mengaudit UI, copy/teks, layout responsive, atau
-   komentar kode — termasuk dokumen instruksi — muat skill yang relevan
-   (`.opencode/skills/antislop/SKILL.md` inti + skill per concern) dan jalankan
-   Delivery Gate-nya sebelum mengklaim "selesai". Aturan lengkap hidup di skill,
-   bukan di-rewrite di sini.
+8. **Anti-slop (self-hosting, gate WAJIB)** — filter anti-AI-slop di-vendor ke repo ini
+   (`.opencode/skills/` — 6 skill) dan template `antislop/`. Kewajiban:
+   - WAJIB memuat skill yang relevan (`.opencode/skills/antislop/SKILL.md` inti + skill
+     per concern) SEBELUM menulis/mengaudit UI, copy/teks, layout responsive, atau
+     komentar kode — termasuk dokumen instruksi.
+   - WAJIB menjalankan Delivery Gate antislop SEBELUM mengklaim "selesai". Output yang
+     mengandung pola AI-slop (buzzword marketing, klaim tanpa bukti, tautologi generik,
+     emoji kosong) = BELUM SELESAI, bukan kosmetik.
+   - Gate `scripts/antislop-check.sh` berjalan sebagai bagian dari health-check;
+     pola yang terdeteksi WAJIB dibereskan dengan bukti, bukan di-allowlist diam-diam
+     (hanya konten vendor & folder `antislop/` yang dikecualikan di dalam script).
+   Aturan lengkap hidup di skill, bukan di-rewrite di sini.
 
 ### Enforcement (di repo ini)
 
