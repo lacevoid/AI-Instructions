@@ -1,6 +1,6 @@
 {
     "name": "lace/ainstruct",
-    "license": "Apache-2.0",
+    "license": "MIT",
     "description": "AI Instructions CLI — distribute per-framework AI instruction sets (AGENTS.md, CLAUDE.md, GEMINI.md, Cursor, Windsurf, Cline, Continue, Aider) into a consumer project from the current directory.",
     "type": "library",
     "keywords": [
