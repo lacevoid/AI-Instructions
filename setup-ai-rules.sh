@@ -677,7 +677,7 @@ init_cmd() {
 
     printf '  %-18s %-10s %6s  %s\n' 'TEMPLATE' 'KEYAKINAN' 'SKOR' 'SINYAL COCOK'
     printf '  %s\n' '------------------------------------------------------------------'
-    local conf_color cend cname chosen_name chosen_conf
+    local conf_color chosen_name chosen_conf
     for idx in "${!tdirs[@]}"; do
         result="${results[$idx]}"
         s="${result%%|*}"
