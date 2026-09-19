@@ -57,6 +57,16 @@ jobs:
               || { echo "FAIL: context.md.start missing placeholder {{$placeholder}}"; exit 1; }
           done
           echo "context.md.start placeholders: OK"
+      - name: Verify behavior-log.md.start exists and has placeholders
+        run: |
+          test -f operator-memory/skill/behavior-log.md.start \
+            || { echo "FAIL: behavior-log.md.start not found"; exit 1; }
+          # behavior-log.md.start = starter journal perilaku → identitas + tanggal.
+          for placeholder in NAME BACKUP_REPO DATE; do
+            grep -q "{{$placeholder}}" operator-memory/skill/behavior-log.md.start \
+              || { echo "FAIL: behavior-log.md.start missing placeholder {{$placeholder}}"; exit 1; }
+          done
+          echo "behavior-log.md.start placeholders: OK"
       - name: Verify legacy memory.md.start is gone
         run: |
           test ! -f operator-memory/skill/memory.md.start \
@@ -99,6 +109,12 @@ jobs:
           test ! -f "$XDG_CONFIG_HOME/opencode/skills/operator-memory/memory.md" \
             || { echo "FAIL: memory.md legacy tidak seharusnya ada di fresh install"; exit 1; }
 
+          # Verify behavior-log.md created (journal SEMUA perilaku)
+          test -f "$XDG_CONFIG_HOME/opencode/skills/operator-memory/behavior-log.md" \
+            || { echo "FAIL: behavior-log.md not created"; exit 1; }
+          grep -q '{{' "$XDG_CONFIG_HOME/opencode/skills/operator-memory/behavior-log.md" \
+            && { echo "FAIL: behavior-log.md still has raw placeholder"; exit 1; }
+
           # Verify repo backup initialized
           test -d "$XDG_CONFIG_HOME/operator-persona/.git" \
             || { echo "FAIL: backup repo not initialized"; exit 1; }
@@ -128,6 +144,8 @@ jobs:
             || { echo "FAIL: backup repo missing persona.md"; exit 1; }
           test -f "$XDG_CONFIG_HOME/operator-persona/config/skills/operator-memory/context.md" \
             || { echo "FAIL: backup repo missing context.md"; exit 1; }
+          test -f "$XDG_CONFIG_HOME/operator-persona/config/skills/operator-memory/behavior-log.md" \
+            || { echo "FAIL: backup repo missing behavior-log.md"; exit 1; }
           test -f "$XDG_CONFIG_HOME/operator-persona/metrics.sh" \
             || { echo "FAIL: backup repo missing metrics.sh"; exit 1; }
 
@@ -202,6 +220,8 @@ jobs:
             || { echo "FAIL: restore did not create persona.md"; exit 1; }
           test -f "$XDG_CONFIG_HOME_B/opencode/skills/operator-memory/context.md" \
             || { echo "FAIL: restore did not create context.md"; exit 1; }
+          test -f "$XDG_CONFIG_HOME_B/opencode/skills/operator-memory/behavior-log.md" \
+            || { echo "FAIL: restore did not create behavior-log.md"; exit 1; }
 
           # Verify restored memory matches backup
           diff "$REPO_A/config/skills/operator-memory/persona.md" \
@@ -210,6 +230,9 @@ jobs:
           diff "$REPO_A/config/skills/operator-memory/context.md" \
                "$XDG_CONFIG_HOME_B/opencode/skills/operator-memory/context.md" \
             || { echo "FAIL: restored context does not match backup"; exit 1; }
+          diff "$REPO_A/config/skills/operator-memory/behavior-log.md" \
+               "$XDG_CONFIG_HOME_B/opencode/skills/operator-memory/behavior-log.md" \
+            || { echo "FAIL: restored behavior-log does not match backup"; exit 1; }
 
           # Verify git identity applied by restore (fresh clone of a repo does
           # NOT carry local user.name/user.email; without it backup.sh fails

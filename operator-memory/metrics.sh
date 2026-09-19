@@ -2,10 +2,12 @@
 # operator-memory — metrics.sh (metrik adaptasi memori per salinan)
 #
 # Menjawab: "seberapa cepat memori salinan ini berkembang?"
-#   * persona.md (stabil)   — apakah potret operator bertumbuh (preferensi,
-#                             pola, pelajaran, hipotesis).
-#   * context.md (dinamis)  — apakah konteks kerja direkam (checkpoint, log).
-#   * backup repo           — seberapa rajin sinkronisasi dua arah dijalankan.
+#   * persona.md (stabil)      — apakah potret operator bertumbuh (preferensi,
+#                                pola, pelajaran, hipotesis).
+#   * context.md (dinamis)     — apakah konteks kerja direkam (checkpoint, log).
+#   * behavior-log.md (journal) — apakah SEMUA perilaku operator dicatat
+#                                 (entri perilaku teramati).
+#   * backup repo              — seberapa rajin sinkronisasi dua arah dijalankan.
 #
 # Metrik bersifat LOKAL (per salinan) — hanya membaca file live operator ini.
 # Tidak mengirim data ke mana pun; tidak ada telemetri terpusat.
@@ -63,6 +65,7 @@ done
 
 PERSONA_FILE="$LIVE_DIR/persona.md"
 CONTEXT_FILE="$LIVE_DIR/context.md"
+BEHAVIOR_FILE="$LIVE_DIR/behavior-log.md"
 
 # --- Utilitas ---
 num() { printf '%s' "$1" | tr -cd '0-9'; }
@@ -104,6 +107,9 @@ CONTEXT_LINES="$(lines_of "$CONTEXT_FILE")"
 CONTEXT_SECTIONS="$(sections_of "$CONTEXT_FILE")"
 LOG_ENTRIES="$(log_entries "$CONTEXT_FILE")"
 LAST_LOG="$(last_log_date "$CONTEXT_FILE")"
+BEHAVIOR_LINES="$(lines_of "$BEHAVIOR_FILE")"
+BEHAVIOR_ENTRIES="$(log_entries "$BEHAVIOR_FILE")"
+BEHAVIOR_LAST="$(last_log_date "$BEHAVIOR_FILE")"
 TOTAL_LINES=$((PERSONA_LINES + CONTEXT_LINES))
 
 PERSONA_DELTA="$(delta_vs_repo "$PERSONA_FILE" "skills/operator-memory/persona.md")"
@@ -169,6 +175,7 @@ if [[ "$JSON" -eq 1 ]]; then
   "generated_at": "$(date -u '+%Y-%m-%d %H:%M UTC')",
   "persona": {"file": "$PERSONA_FILE", "lines": $PERSONA_LINES, "sections": $PERSONA_SECTIONS, "lessons": $PERSONA_LESSONS, "hypotheses": $PERSONA_HYPOTHESES, "status": "$status_persona"},
   "context": {"file": "$CONTEXT_FILE", "lines": $CONTEXT_LINES, "sections": $CONTEXT_SECTIONS, "log_entries": $LOG_ENTRIES, "last_log_date": "$LAST_LOG", "status": "$status_context"},
+  "behavior": {"file": "$BEHAVIOR_FILE", "lines": $BEHAVIOR_LINES, "entries": $BEHAVIOR_ENTRIES, "last_entry_date": "$BEHAVIOR_LAST"},
   "backup": {"repo": "$REPO_DIR", "commits": $GIT_COMMITS, "last_commit_date": "$GIT_LAST_COMMIT", "last_sync_age_days": ${GIT_LAST_AGE_DAYS:-null}, "status": "$status_sync"},
   "balance": {"persona_pct": $PERSONA_PCT, "context_pct": $((100 - PERSONA_PCT)), "status": "$status_balance"},
   "growth": {"persona_delta_lines": $PERSONA_DELTA, "context_delta_lines": $CONTEXT_DELTA},
@@ -191,6 +198,7 @@ echo "operator-memory — metrik adaptasi (per salinan)"
 echo "────────────────────────────────────────────────"
 echo "persona.md  : $PERSONA_LINES baris | $PERSONA_SECTIONS bagian | $PERSONA_LESSONS pelajaran | $PERSONA_HYPOTHESES hipotesis"
 echo "context.md  : $CONTEXT_LINES baris | $CONTEXT_SECTIONS bagian | $LOG_ENTRIES entri log | terakhir $LAST_LOG"
+echo "behavior-log: $BEHAVIOR_LINES baris | $BEHAVIOR_ENTRIES entri perilaku | terakhir $BEHAVIOR_LAST"
 echo "keseimbangan: persona ${PERSONA_PCT}% | context $((100 - PERSONA_PCT))%  [$status_balance]"
 echo "pertumbuhan : +${PERSONA_DELTA} baris persona | +${CONTEXT_DELTA} baris context (vs repo backup)"
 if [[ -n "$REPO_DIR" && -d "$REPO_DIR/.git" ]]; then
