@@ -37,6 +37,12 @@ operator.
       eksplisit.
 - [ ] Perubahan ter-reproduksi: command yang diklaim dijalankan benar-benar
       dijalankan.
+- [ ] Anti-AI-slop: output UI/copy/prosa bebas pola AI-slop — muat skill
+      `.opencode/skills/antislop/SKILL.md` (+ skill concern: `antislop-copywriting`,
+      `antislop-ui`, `antislop-code`) SEBELUM menulis; Delivery Gate dijalankan
+      sebelum output final. Bila filter tidak terpasang, pasang via template
+      `antislop` atau terapkan aturan Empty AI Vocabulary secara manual dan catat
+      ketiadaannya di decision log.
 
 ## 3. Proses verifikasi akhir
 

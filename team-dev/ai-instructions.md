@@ -57,8 +57,8 @@ relevan sebelum menulis kode.
 | `ai-instructions/07-security.md` | Auth, authorization, validation, secrets | UNIVERSAL + PROJECT |
 | `ai-instructions/08-git.md` | Branching, commits, version control | UNIVERSAL + PROJECT |
 | `ai-instructions/09-tools.md` | Linter, formatter, runtime, static analysis | UNIVERSAL + PROJECT |
-| `ai-instructions/10-quality-gates.md` | Quality gates, senior self-review, verifikasi akhir | GLOBAL |
-| `ai-instructions/11-forbidden-behavior.md` | Larangan eksplisit (single source of truth) | GLOBAL |
+| `ai-instructions/10-quality-gates.md` | Quality gates, senior self-review, verifikasi akhir, gate anti-AI-slop | GLOBAL |
+| `ai-instructions/11-forbidden-behavior.md` | Larangan eksplisit (single source of truth; termasuk output AI-slop) | GLOBAL |
 | `ai-instructions/12-project-specific/project-invariants.md` | Invarian proyek: isi setelah menganalisis proyek target | PROJECT-SPECIFIC |
 | `ai-instructions/12-project-specific/canonical-snippets.md` | Bank snippet kanonik verbatim proyek target | PROJECT-SPECIFIC |
 | `ai-instructions/README.md` | Ringkasan file map & cara pakai | DOKUMENTASI |
@@ -242,6 +242,9 @@ Pekerjaan dianggap selesai hanya jika:
       auth/secrets) memberikan laporan sebelum "done" (`03-team-protocol.md`).
 - [ ] Keputusan & asumsi tercatat dalam decision log; hal yang TIDAK diverifikasi
       dinyatakan eksplisit.
+- [ ] Output UI/copy/prosa bebas pola AI-slop — filter anti-slop
+      (`.opencode/skills/antislop/SKILL.md` + skill concern) dimuat sebelum
+      menulis; ketiadaan filter dicatat eksplisit (`10-quality-gates.md`).
 
 Gates tambahan: lihat `10-quality-gates.md` dan modul project-specific.
 

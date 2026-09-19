@@ -18,8 +18,8 @@ berdiskusi saat mengerjakan proyek.
 | `07-security.md` | Keamanan GLOBAL (area veto) |
 | `08-git.md` | Branching, commit, klausa wajib |
 | `09-tools.md` | Tooling proyek & penggunaannya |
-| `10-quality-gates.md` | Definisi "selesai" + senior self-review |
-| `11-forbidden-behavior.md` | Larangan eksplisit |
+| `10-quality-gates.md` | Definisi "selesai" + senior self-review + **gate anti-AI-slop** |
+| `11-forbidden-behavior.md` | Larangan eksplisit (**termasuk output AI-slop**) |
 | `12-project-specific/` | Invarian + bank snippet kanonik (WAJIB diisi konsumen) |
 
 ## Cara pakai (konsumen)
