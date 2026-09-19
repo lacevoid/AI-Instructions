@@ -10,6 +10,7 @@
 #   curl -fsSL https://raw.githubusercontent.com/lacevoid/AI-Instructions/main/install.sh \
 #       | sh -s -- laravel            # distribusikan framework laravel
 #   curl -fsSL <...>/install.sh | sh -s -- reset laravel
+#   curl -fsSL <...>/install.sh | sh -s -- init --dry-run   # deteksi stack tanpa perubahan
 #   curl -fsSL <...>/install.sh | sh -s -- wipe --force
 #
 # Variabel lingkungan:

@@ -1,0 +1,16 @@
+# ainstruct-detect.txt — sinyal pendeteksi stack untuk template laravel/.
+# Dibaca oleh `ainstruct init`. Format tiap baris: <bobot>|<tipe>|<argumen>|<label>
+#   tipe 'file': argumen = path relatif; cocok bila file ada.
+#   tipe 'dir' : argumen = path relatif; cocok bila direktori ada.
+#   tipe 'grep': argumen = <path>:<pola regex>; cocok bila file ada & memuat pola.
+# Skor = jumlah bobot sinyal yang cocok; keyakinan: >=6 CONFIRMED, >=4 STRONG,
+# >=2 WEAK, sisanya UNKNOWN. Set ini terdeteksi dari stack Laravel + (opsional)
+# Inertia/Vue 3 + TypeScript — cermin stack referensi proyek LingSID.
+5|file|artisan|CLI artisan milik Laravel
+4|grep|composer.json:laravel/framework|Dependency composer 'laravel/framework'
+3|file|routes/web.php|Berkas routes/web.php khas Laravel
+3|grep|composer.json:inertiajs/inertia-laravel|Dependency composer Inertia adapter
+3|grep|package.json:@inertiajs/vue3|Dependency npm '@inertiajs/vue3' (Inertia/Vue)
+2|grep|package.json:"vue"|Dependency npm Vue
+2|grep|package.json:"typescript"|Dependency npm TypeScript
+2|file|tsconfig.json|Konfigurasi TypeScript
