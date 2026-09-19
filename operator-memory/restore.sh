@@ -24,6 +24,10 @@ cp "$REPO_DIR/config/opencode.jsonc"                  "$CFG_BASE/opencode/"
 cp "$REPO_DIR/config/skills/operator-memory/SKILL.md" "$CFG_BASE/opencode/skills/operator-memory/"
 cp "$REPO_DIR/config/skills/operator-memory/persona.md" "$CFG_BASE/opencode/skills/operator-memory/"
 cp "$REPO_DIR/config/skills/operator-memory/context.md" "$CFG_BASE/opencode/skills/operator-memory/"
+if [ -f "$REPO_DIR/config/skills/operator-memory/behavior-log.md" ]; then
+    cp "$REPO_DIR/config/skills/operator-memory/behavior-log.md" "$CFG_BASE/opencode/skills/operator-memory/"
+    echo "[restore] behavior-log.md ikut dipulihkan."
+fi
 # Legacy memory.md dari backup lama (bila masih ada) ikut dipulihkan agar
 # tidak ada data yang hilang; file baru (persona/context) adalah otoritasnya.
 if [ -f "$REPO_DIR/config/skills/operator-memory/memory.md" ]; then

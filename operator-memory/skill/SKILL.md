@@ -7,14 +7,19 @@ description: Use when working on any task, discussing design decisions, receivin
 
 Skill ini menyimpan **"potret diri" operator** (di **persona.md**) dan
 **konteks pekerjaan terkini** (di **context.md**) yang terus diperbarui
-seiring percakapan dan pekerjaan. **SEMUA agent** (orchestrator, subagent, tim
-authoring, tim dev, dan agent lainnya) **WAJIB membaca kedua file** sebelum
-bekerja dan menyesuaikan perilaku berdasarkan isinya.
+seiring percakapan dan pekerjaan, plus **behavior-log.md** — catatan lengkap
+SEMUA perilaku operator yang teramati (journal mentah di balik setiap pola).
+**SEMUA agent** (orchestrator, subagent, tim authoring, tim dev, dan agent
+lainnya) **WAJIB membaca persona.md + context.md** sebelum bekerja dan
+menyesuaikan perilaku berdasarkan isinya.
 
 - **persona.md** — *siapa operator* (stabil): identitas, gaya, preferensi,
   pola keputusan, filosofi, standar kualitas, pelajaran, hipotesis.
 - **context.md** — *di mana kita sekarang* (dinamis): state saat ini
   (checkpoint), progres, dan Log entri bertanggal.
+- **behavior-log.md** — *semua yang operator lakukan* (journal): entri
+  bertanggal per perilaku teramati, termasuk yang belum jadi pola; sumber
+  mentah untuk konsolidasi persona.
 
 Tujuan: lama-kelamaan, perilaku agent **menyerupai operator** — gaya bicara,
 pola keputusan, prioritas — sehingga seolah operator ikut berdiskusi dan
@@ -31,8 +36,10 @@ repo backup diinstansiasi lewat `operator-memory/bootstrap-operator-memory.sh`
 ```
 ${XDG_CONFIG_HOME:-$HOME/.config}/opencode/skills/operator-memory/persona.md   ← persona live (global)
 ${XDG_CONFIG_HOME:-$HOME/.config}/opencode/skills/operator-memory/context.md   ← konteks live (global)
+${XDG_CONFIG_HOME:-$HOME/.config}/opencode/skills/operator-memory/behavior-log.md  ← behavior-log live (global)
 ${XDG_CONFIG_HOME:-$HOME/.config}/operator-persona/config/skills/operator-memory/persona.md  ← salinan repo backup
 ${XDG_CONFIG_HOME:-$HOME/.config}/operator-persona/config/skills/operator-memory/context.md  ← salinan repo backup
+${XDG_CONFIG_HOME:-$HOME/.config}/operator-persona/config/skills/operator-memory/behavior-log.md  ← salinan repo backup
 ```
 
 Kedua file live otomatis di-sinkronkan ke repo privat
@@ -54,7 +61,9 @@ dan terapkan:
 - State saat ini, progres, dan Log (context) — lanjutkan dari titik terakhir
 
 Baca file utuh — bukan hanya bagian tertentu — karena konteks bisa muncul dari
-bagian mana saja.
+bagian mana saja. Bila butuh dasar lebih dalam di balik pola (mis. "kenapa
+operator dianggap begini"), baca **behavior-log.md** — detail perilaku
+mentahnya ada di sana.
 
 ### 2. Rekam otomatis (tanpa izin dulu)
 
@@ -70,6 +79,8 @@ besar — lakukan langkah berikut:
      standar, koreksi & pelajaran, hipotesis.
    - **context.md** untuk hal dinamis: state saat ini, progres pekerjaan,
      dan entri baru di **Log** (bertanggal).
+   - **behavior-log.md** untuk SEMUA perilaku teramati: journal mentah,
+     termasuk yang belum jadi pola (lihat 2b).
 4. **Laporkan** secara ringkas ke operator apa yang baru saja direkam (tanpa
    menunggu persetujuan untuk hal yang sudah jelas)
 5. **Sinkronkan ke GitHub** — jalankan **backup.sh** (lihat bagian 6). Skrip
@@ -77,6 +88,27 @@ besar — lakukan langkah berikut:
    (perangkat lain yang menghasilkan data), gabungkan dengan file live, lalu
    commit + push. Tidak memerlukan tool/scheduler eksternal — cukup jalankan
    saat bekerja.
+
+### 2b. Mencatat SEMUA perilaku (behavior-log.md)
+
+Memory punya **dua tingkat**:
+
+- **persona.md + context.md** = inti kurasi. Pola yang sudah terbukti konsisten
+  (untuk dibaca cepat di awal kerja). Tetap ringkas.
+- **behavior-log.md** = catatan lengkap SEMUA perilaku operator yang teramati,
+  tingkat journal (mendekati transcript). Ini sumber mentah di balik setiap pola.
+
+Wajib — setiap kali perilaku operator teramati saat bekerja (tidak hanya yang
+"layak dikategorikan"):
+
+1. Tulis ke **behavior-log.md**: `- [YYYY-MM-DD HH:MM] konteks → perilaku (tag)`.
+   Tag: `#perintah`, `#keputusan`, `#reaksi-error`, `#reaksi-laporan`,
+   `#gaya-bahasa`, `#kebiasaan`, `#preferensi`, `#koreksi`, `#humor`, `#diam`.
+2. Catat yang mencolok saat kejadian; yang biasa di checkpoint alami.
+   Jangan menyensor perilaku "kecil" — konsolidasi yang memilah, bukan pencatatan.
+3. Saat konsolidasi (tiap ±10 entri): pola yang konsisten dipromosikan ke
+   **persona.md**. Entri behavior-log TIDAK dihapus — jadi riwayat & bukti.
+4. **behavior-log.md** ikut disinkronkan ke repo backup (lihat bagian 6).
 
 ### 3. Koreksi dari operator — dua kategori
 
@@ -139,8 +171,8 @@ agent WAJIB menjalankannya):
 
 1. **Tarik (pull)** — `git fetch origin` + `git merge --ff-only` terhadap branch
    aktif. Perubahan dari perangkat lain masuk ke salinan repo lokal dulu.
-2. **Sinkron file demi file** (**persona.md**, **context.md**, **SKILL.md**,
-   `opencode.jsonc`):
+2. **Sinkron file demi file** (**persona.md**, **context.md**,
+   **behavior-log.md**, **SKILL.md**, `opencode.jsonc`):
    - Hanya lokal berubah → dorong ke repo (commit + push)
    - Hanya remote berubah → **adopsi** ke file live lokal (memori dari perangkat
      lain langsung terpakai)
@@ -220,14 +252,36 @@ Gunakan struktur berikut (bagian dinamis, berubah tiap sesi):
 - [tanggal] Entri bertanggal untuk konteks yang berkembang secara spesifik
 ```
 
+## Format behavior-log.md
+
+Catatan SEMUA perilaku operator (journal mentah, di luar inti kurasi):
+
+```markdown
+# Behavior Log Operator — {{NAME}}
+
+## Aturan penulisan
+- Tiap entri singkat: `- [YYYY-MM-DD HH:MM] konteks → perilaku (tag)`
+- Tag: #perintah, #keputusan, #reaksi-error, #reaksi-laporan, #gaya-bahasa,
+  #kebiasaan, #preferensi, #koreksi, #humor, #diam
+
+## Log
+- [tanggal] Perilaku teramati — termasuk yang belum jadi pola
+```
+
+Detail aturan & tag lengkap ada di starter `skill/behavior-log.md.start`
+atau file live `behavior-log.md` setelah bootstrap.
+
 ### Pruning & konsolidasi
 
 - **Konsolidasi** setiap ~10 entri baru: gabungkan entri serupa, buang
-  duplikasi, perbarui hipotesis
+  duplikasi, perbarui hipotesis; pola yang konsisten dipromosikan dari
+  **behavior-log.md** ke **persona.md** (entri log tidak dihapus)
 - **Operator boleh prune kapan saja**: hapus bagian yang tidak relevan
 - **persona.md** (inti permanen) tetap kecil (1-2 layar): fakta, gaya, pola utama
 - **context.md** (Log) boleh tumbuh, tapi jangan melebihi ~50 entri tanpa
   konsolidasi; usang dipindah ke state baru atau dipangkas
+- **behavior-log.md** (journal) boleh tumbuh besar; konsolidasi mempromosikan
+  pola ke persona.md, sisanya tetap jadi riwayat & bukti
 
 ## Contoh pemicu
 
@@ -237,4 +291,6 @@ Gunakan struktur berikut (bagian dinamis, berubah tiap sesi):
 - User berkata: "catat ini, aku tidak suka Y" → rekam di persona
 - Sistem error, user tanya "masih ada?" → rekam pola recovery di persona
 - User: "ingat ini" atau "rekam" → pastikan tercatat
+- User: "harus mencatat semua perilaku saya" → tulis SEMUA perilaku teramati ke
+  behavior-log.md, promosikan pola ke persona.md saat konsolidasi
 - Akhir sesi kerja → perbarui State saat ini + tambahkan entri Log di context

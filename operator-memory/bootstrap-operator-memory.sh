@@ -11,14 +11,15 @@
 #   1. Identitas operator (nama, email, handle GitHub) — argumen atau interaktif.
 #   2. Buat repo privat GitHub <handle>/<repo> (@gh) bila belum ada; clone ke
 #      ${XDG_CONFIG_HOME:-$HOME/.config}/operator-persona.
-#   3. Pasang skill + memori starter (persona.md + context.md) ke
-#      ~/.config/opencode/ (memori lama dijaga; memory.md legacy dimigrasi).
+#   3. Pasang skill + memori starter (persona.md + context.md + behavior-log.md)
+#      ke ~/.config/opencode/ (memori lama dijaga; memory.md legacy dimigrasi).
 #   4. Tautkan persona.md + context.md ke opencode.jsonc (dibuat bila belum ada).
 #   5. Sinkronkan config ke repo backup, commit + push.
 #
 # Setelah selesai: restart opencode. Agent selanjutnya membaca persona.md (siapa
-# operator) + context.md (di mana kita), memperbaruinya di checkpoint kerja,
-# dan menjalankan backup.sh (dua arah).
+# operator) + context.md (di mana kita), mencatat SEMUA perilaku operator di
+# behavior-log.md, memperbarui memori di checkpoint kerja, dan menjalankan
+# backup.sh (dua arah).
 # Restore di mesin lain: clone repo privat lalu jalankan restore.sh.
 #
 # Opsi non-interaktif / CI / pengujian:
@@ -225,6 +226,20 @@ else
   log "context starter dibuat: $SKILL_DIR/context.md"
 fi
 
+# --- Pasang behavior-log.md (catatan lengkap SEMUA perilaku) ---
+if [[ -f "$SKILL_DIR/behavior-log.md" ]]; then
+  log "behavior-log live dipertahankan: $SKILL_DIR/behavior-log.md"
+elif [[ -f "$DEST/config/skills/operator-memory/behavior-log.md" ]]; then
+  cp "$DEST/config/skills/operator-memory/behavior-log.md" "$SKILL_DIR/behavior-log.md"
+  log "behavior-log diadopsi dari repo backup (perangkat lain)."
+else
+  sed -e "s|{{NAME}}|$NAME|g" \
+      -e "s|{{BACKUP_REPO}}|$BACKUP_REPO|g" \
+      -e "s|{{DATE}}|$DATE_UTC|g" \
+      "$TOOLKIT_DIR/skill/behavior-log.md.start" > "$SKILL_DIR/behavior-log.md"
+  log "behavior-log starter dibuat: $SKILL_DIR/behavior-log.md"
+fi
+
 # --- Tautkan persona.md + context.md ke opencode.jsonc global ---
 CONFIG_FILE="$OPENCODE_DIR/opencode.jsonc"
 # Rujukan portabel bila lokasi standar (~/.config/opencode), agar restore di
@@ -283,6 +298,7 @@ log "menyalin config ke repo backup..."
 cp -f "$SKILL_DIR/SKILL.md"   "$DEST/config/skills/operator-memory/SKILL.md"
 cp -f "$SKILL_DIR/persona.md" "$DEST/config/skills/operator-memory/persona.md"
 cp -f "$SKILL_DIR/context.md" "$DEST/config/skills/operator-memory/context.md"
+cp -f "$SKILL_DIR/behavior-log.md" "$DEST/config/skills/operator-memory/behavior-log.md"
 # Legacy memory.md di repo backup dihapus dari config (sudah dimigrasi).
 rm -f "$DEST/config/skills/operator-memory/memory.md"
 cp -f "$CONFIG_FILE"          "$DEST/config/opencode.jsonc" 2>/dev/null || true
@@ -322,10 +338,11 @@ cat <<EOF
 ✅ Operator memory siap untuk: $NAME <$EMAIL>
    Skill + persona  : $SKILL_DIR/persona.md
    Skill + context  : $SKILL_DIR/context.md
+   Behavior log     : $SKILL_DIR/behavior-log.md (SEMUA perilaku operator)
    Config global    : $CONFIG_FILE
    Repo backup      : $DEST
    Sinkronisasi     : dua arah (tarik → gabung → push) via backup.sh
-   Metrik adaptasi  : $DEST/metrics.sh (statistik persona/context)
+   Metrik adaptasi  : $DEST/metrics.sh (statistik persona/context/behavior-log)
 ══════════════════════════════════════════════════════════
 Langkah berikut:
    1. RESTART opencode agar skill aktif.
