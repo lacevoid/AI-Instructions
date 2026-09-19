@@ -541,6 +541,14 @@ imperatif: MUST, SHOULD, MUST NOT, ONLY WHEN, PREFER, VERIFY.
   ```
 
 - **JANGAN memalsukan evidence** — jangan buat path file yang tidak ada.
+- **Anti-AI-slop (self-hosting, WAJIB)** — sebelum menyelesaikan output authoring,
+  muat skill `.opencode/skills/antislop/SKILL.md` (core) + skill per concern
+  (copywriting untuk teks/kop, code untuk komentar kode, dst.), lalu jalankan
+  Delivery Gate-nya. Output yang mengandung pola AI-slop — buzzword marketing
+  (daftar Empty AI Vocabulary di skill antislop-copywriting), klaim tanpa bukti,
+  tautologi generik — = **BELUM SELESAI**, bukan kosmetik. Gate
+  `scripts/antislop-check.sh` berjalan di `scripts/health-check.sh`; temuan wajib
+  dibereskan dengan bukti, bukan di-allowlist diam-diam.
 
 ---
 
@@ -564,6 +572,8 @@ Sebelum menyelesaikan, pastikan jawaban berikut semuanya YA:
 - **Klausa wajib**: Klausa 1–5 (per bagian 6) tertulis eksplisit dan output sudah
   diverifikasi terhadapnya? (klausa non-main, summary commit, git init, protokol
   MASTER_BUILD_SPECIFICATION wajib-baca/cipta-before-code).
+- **Anti-slop**: Output authoring bebas pola AI-slop (gate `scripts/antislop-check.sh`
+  lulus)? Delivery Gate antislop sudah dijalankan sebelum mengklaim "selesai"?
 - **Protokol spec**: Klausa 5 tertulis eksplisit di konstitusi + modul 01/02/10/11 +
   referensi cepat? Alur "file spec tidak ada → STOP + tanya operator mendetil → buat file
   lengkap → baru kode" terdokumentasi jelas?
