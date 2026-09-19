@@ -73,35 +73,6 @@ jobs:
             test -e "$gone" && { echo "FAIL: $gone masih ada setelah wipe"; exit 1; }
           done
 
-          # --- Template team-dev (tim opencode) ---
-          TMP2="$(mktemp -d)"
-          mkdir -p "$TMP2/team-dev"
-          cp -r "$REPO/team-dev/ai-instructions.md" "$REPO/team-dev/ai-instructions" "$REPO/team-dev/opencode" "$TMP2/team-dev/"
-          cp "$REPO/setup-ai-rules.sh" "$TMP2/"
-          ( cd "$TMP2" && ./setup-ai-rules.sh team-dev >/dev/null )
-          for expected in \
-            AGENTS.md opencode.json \
-            ai-instructions/master/ai-instructions.md \
-            ai-instructions/01-governance.md \
-            ai-instructions/03-team-protocol.md \
-            .opencode/agent/architecture-advisor.md \
-            .opencode/agent/code-reviewer.md \
-            .opencode/agent/qa-engineer.md \
-            .opencode/agent/security-reviewer.md \
-            .opencode/skills/team/SKILL.md; do
-            test -e "$TMP2/$expected" || { echo "FAIL team-dev: MISSING $expected"; exit 1; }
-          done
-          # re-run tidak menghapus file .opencode pre-existing
-          mkdir -p "$TMP2/.opencode/plugin"
-          touch "$TMP2/.opencode/plugin/keep.ts"
-          ( cd "$TMP2" && ./setup-ai-rules.sh team-dev >/dev/null )
-          test -f "$TMP2/.opencode/plugin/keep.ts" \
-            || { echo "FAIL team-dev: re-run menghapus .opencode pre-existing"; exit 1; }
-          # wipe membersihkan .opencode konsumen
-          ( cd "$TMP2" && ./setup-ai-rules.sh wipe --force >/dev/null )
-          test -e "$TMP2/opencode.json" && { echo "FAIL team-dev: opencode.json masih ada"; exit 1; }
-          test -e "$TMP2/.opencode" && { echo "FAIL team-dev: .opencode masih ada"; exit 1; }
-
           # template manager: template milik konsumen (AINSTRUCT_HOME terisolasi)
           export AINSTRUCT_HOME="$TMP/ahome"
           # list: built-in laravel terlihat

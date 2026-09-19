@@ -204,7 +204,7 @@ Pekerjaan dianggap selesai hanya jika:
 - [ ] Kontrak frontend↔backend sinkron dalam perubahan yang sama (`ai-instructions/20-frontend-and-contracts.md`).
 - [ ] Perubahan ter-reproduksi di lingkungan bersih (lockfile, migration fresh) dan, bila menyentuh alur user, diverifikasi end-to-end (`ai-instructions/21-state-delivery-environment.md`).
 - [ ] Keputusan & asumsi tercatat dalam decision log; hal yang TIDAK diverifikasi dinyatakan eksplisit (`ai-instructions/17-agent-discipline.md`).
-- [ ] Output UI/copy/prosa bebas pola AI-slop: filter anti-slop (`.opencode/skills/antislop/SKILL.md` + skill concern) dimuat SEBELUM menulis dan Delivery Gate-nya dijalankan; bila filter tidak terpasang, pasang via template `antislop` atau terapkan aturan Empty AI Vocabulary secara manual dan nyatakan ketiadaan filter di decision log (detail `ai-instructions/10-quality-gates.md`).
+- [ ] Output UI/copy/prosa bebas pola AI-slop: filter anti-slop (`.opencode/skills/antislop/SKILL.md` + skill concern) dimuat SEBELUM menulis dan Delivery Gate-nya dijalankan; bila filter tidak terpasang, ambil sistem vendor dari repo AI-Instructions (upstream miqdadbadjuber/anti-slop — MIT) atau terapkan aturan Empty AI Vocabulary secara manual dan nyatakan ketiadaan filter di decision log (detail `ai-instructions/10-quality-gates.md`).
 
 Gates tambahan project-specific: lihat `ai-instructions/10-quality-gates.md` dan module proyek.
 

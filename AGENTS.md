@@ -113,7 +113,7 @@ pekerjaan dokumentasi instruksi; rincian penuh ada di modul yang dirujuk):
    hanya "tampak" beres di lokal tidak dianggap lulus. Rujukan:
    `laravel/ai-instructions/21-state-delivery-environment.md`.
 8. **Anti-slop (self-hosting, gate WAJIB)** — filter anti-AI-slop di-vendor ke repo ini
-   (`.opencode/skills/` — 6 skill) dan template `antislop/`. Kewajiban:
+   (`.opencode/skills/` — 6 skill). Kewajiban:
    - WAJIB memuat skill yang relevan (`.opencode/skills/antislop/SKILL.md` inti + skill
      per concern) SEBELUM menulis/mengaudit UI, copy/teks, layout responsive, atau
      komentar kode — termasuk dokumen instruksi.
@@ -122,7 +122,7 @@ pekerjaan dokumentasi instruksi; rincian penuh ada di modul yang dirujuk):
      emoji kosong) = BELUM SELESAI, bukan kosmetik.
    - Gate `scripts/antislop-check.sh` berjalan sebagai bagian dari health-check;
      pola yang terdeteksi WAJIB dibereskan dengan bukti, bukan di-allowlist diam-diam
-     (hanya konten vendor & folder `antislop/` yang dikecualikan di dalam script).
+     (hanya konten vendor yang dikecualikan di dalam script).
    Aturan lengkap hidup di skill, bukan di-rewrite di sini.
 
 ### Enforcement (di repo ini)

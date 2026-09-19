@@ -9,8 +9,7 @@
 
 ```
 LAPISAN 1 — ARTEFAK (yang dikonsumsi proyek konsumen)
-├── laravel/         set instruksi berakar pada LingSID (konstitusi + modul 01–21)
-└── team-dev/        tim development multi-agent untuk proyek konsumen
+└── laravel/         set instruksi berakar pada LingSID (konstitusi + modul 01–21)
 
 LAPISAN 2 — PABRIK (yang memproduksi & menjaga lapisan 1)
 ├── AGENTS.md        self-instruction arsitek (peran, larangan, aturan git)
@@ -25,6 +24,8 @@ LAPISAN 3 — MESIN ADAPTIF (yang membuat setiap salinan menjadi milik operatorn
 
 - **Lapisan 1 + 2** membentuk *bengkel authoring klasik*: instruksi dibuat, diuji,
   lalu didistribusikan ke proyek konsumen.
+- **Kapabilitas sistem, bukan template**: tim authoring multi-agent dan filter anti-AI-slop
+  hidup di lapisan 2 (protokol internal + gate) — tidak terdistribusi sebagai set instruksi.
 - **Lapisan 3** adalah lompatan meta: setiap **salinan repo ini** membawa mekanisme
   yang sama (`operator-memory/`), dan operator salinan tersebut menjalankan
 `operator-memory/bootstrap-operator-memory.sh` untuk membuat **persona miliknya

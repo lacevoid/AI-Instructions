@@ -25,7 +25,7 @@ All the following conditions MUST be met before any task is considered complete.
 17. [ ] Frontend↔backend contract stays in sync in the same change (see `20-frontend-and-contracts.md`).
 18. [ ] Change reproducible in a clean environment (lockfiles, fresh migration) and, for any user-visible flow, verified end-to-end (see `21-state-delivery-environment.md`).
 19. [ ] Decision log present — key decisions, assumptions, and anything that was NOT verified are surfaced to the operator (see `17-agent-discipline.md`).
-20. [ ] Anti-AI-slop gate for UI copy, user-facing text, and prose output — the anti-slop filter (`.opencode/skills/antislop/SKILL.md` + the relevant concern skill: `antislop-copywriting`, `antislop-ui`, `antislop-code`) is loaded BEFORE writing, the output is free of AI-slop patterns, and the filter's Delivery Gate ran before finalizing (rules live in the filter, not rewritten here). If the filter is not installed, install the `antislop` instruction template or apply its Empty AI Vocabulary rules manually and log the filter's absence in the decision log (see below).
+20. [ ] Anti-AI-slop gate for UI copy, user-facing text, and prose output — the anti-slop filter (`.opencode/skills/antislop/SKILL.md` + the relevant concern skill: `antislop-copywriting`, `antislop-ui`, `antislop-code`) is loaded BEFORE writing, the output is free of AI-slop patterns, and the filter's Delivery Gate ran before finalizing (rules live in the filter, not rewritten here). If the filter is not installed, obtain the vendored system from the AI-Instructions repository (upstream miqdadbadjuber/anti-slop — MIT) or apply its Empty AI Vocabulary rules manually and log the filter's absence in the decision log (see below).
 
 ---
 
@@ -41,9 +41,9 @@ modules** — the rules live in the filter's own skills:
 - Run the filter's Delivery Gate before considering such output final. Output carrying
   AI-slop patterns — marketing buzzwords (the Empty AI Vocabulary list in the copywriting
   skill), un-evidenced claims, generic filler — is NOT done.
-- If the filter is not installed at `.opencode/skills/antislop/`, install it via the
-  `antislop` instruction template, or state the absence explicitly in the decision log
-  and apply the Empty AI Vocabulary rules manually. Do not silently skip the gate.
+- If the filter is not installed at `.opencode/skills/antislop/`, obtain the vendored system
+  from the AI-Instructions repository (upstream miqdadbadjuber/anti-slop — MIT), or state the absence
+  explicitly in the decision log and apply the Empty AI Vocabulary rules manually. Do not silently skip the gate.
 
 ---
 

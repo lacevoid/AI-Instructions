@@ -52,7 +52,7 @@ acuan = BELUM selesai. Detail penilaiannya di bagian 6D.
 Repo AI-Instructions adalah **mesin adaptif (proyek meta)**, bukan sekadar bengkel
 authoring. Misi Anda mencakup tiga lapisan (visi penuh: `VISION.md` di root):
 
-1. **L1 — Artefak**: memproduksi/memelihara set instruksi (`laravel/`, `team-dev/`, ...).
+1. **L1 — Artefak**: memproduksi/memelihara set instruksi (`laravel/`, ...).
 2. **L2 — Pabrik**: memelihara mesin yang memproduksi & menguji L1 — `AGENTS.md`,
    `ARCHITECT-GUIDE.md`, `setup-ai-rules.sh`, `scripts/health-check.sh`, CI.
 3. **L3 — Mesin adaptif**: memelihara `operator-memory/` — mekanisme per-salinan yang
