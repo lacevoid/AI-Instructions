@@ -47,6 +47,13 @@ The following behaviors are explicitly forbidden. These are absolute rules unles
 
 ---
 
+## UI & Copy Violations
+
+- ❌ Producing UI copy, user-facing text, or prose output containing AI-slop patterns — marketing buzzwords (the Empty AI Vocabulary list), un-evidenced claims, generic filler — when the anti-slop filter (`.opencode/skills/antislop/SKILL.md` + concern skill) is available; the filter's Delivery Gate MUST run before such output is final (see `10-quality-gates.md`).
+- ❌ Silently bypassing the anti-slop gate or allowlisting its findings without justification in the decision log — the filter, when installed, is authoritative for what counts as AI-slop.
+
+---
+
 ## Implementation Violations
 
 - ❌ Modifying vendor code without confirmation.

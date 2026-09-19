@@ -46,8 +46,8 @@ Jangan hanya membaca README. Jangan menyimpulkan dari nama file. Baca seluruh mo
 | `ai-instructions/07-security.md` | Auth, authorization, validation, secrets | UNIVERSAL + PROJECT |
 | `ai-instructions/08-git.md` | Branching, commits, version control | UNIVERSAL + PROJECT |
 | `ai-instructions/09-tools.md` | Linter, formatter, runtime, static analysis | UNIVERSAL + PROJECT |
-| `ai-instructions/10-quality-gates.md` | Quality gates, senior self-review rubric, verifikasi akhir | GLOBAL |
-| `ai-instructions/11-forbidden-behavior.md` | Larangan eksplisit (single source of truth untuk prohibitions) | GLOBAL |
+| `ai-instructions/10-quality-gates.md` | Quality gates, senior self-review rubric, verifikasi akhir, gate anti-AI-slop untuk output UI/copy/prosa | GLOBAL |
+| `ai-instructions/11-forbidden-behavior.md` | Larangan eksplisit (single source of truth untuk prohibitions; termasuk output AI-slop) | GLOBAL |
 | `ai-instructions/13-database.md` | Database rules: migration, relationships, factory, seeder, query, transaction, performance lens | UNIVERSAL + PROJECT |
 | `ai-instructions/14-frontend.md` | Frontend rules: Vue 3, TypeScript, Inertia, Tailwind, form handling | UNIVERSAL + PROJECT |
 | `ai-instructions/15-edge-cases.md` | Edge-case & boundary probes wajib sebelum "done" | GLOBAL |
@@ -204,6 +204,7 @@ Pekerjaan dianggap selesai hanya jika:
 - [ ] Kontrak frontend↔backend sinkron dalam perubahan yang sama (`ai-instructions/20-frontend-and-contracts.md`).
 - [ ] Perubahan ter-reproduksi di lingkungan bersih (lockfile, migration fresh) dan, bila menyentuh alur user, diverifikasi end-to-end (`ai-instructions/21-state-delivery-environment.md`).
 - [ ] Keputusan & asumsi tercatat dalam decision log; hal yang TIDAK diverifikasi dinyatakan eksplisit (`ai-instructions/17-agent-discipline.md`).
+- [ ] Output UI/copy/prosa bebas pola AI-slop: filter anti-slop (`.opencode/skills/antislop/SKILL.md` + skill concern) dimuat SEBELUM menulis dan Delivery Gate-nya dijalankan; bila filter tidak terpasang, pasang via template `antislop` atau terapkan aturan Empty AI Vocabulary secara manual dan nyatakan ketiadaan filter di decision log (detail `ai-instructions/10-quality-gates.md`).
 
 Gates tambahan project-specific: lihat `ai-instructions/10-quality-gates.md` dan module proyek.
 

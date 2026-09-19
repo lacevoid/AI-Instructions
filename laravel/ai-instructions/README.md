@@ -27,8 +27,8 @@ The system separates **universal rules** (apply to every project) from **project
 | `07-security.md` | Auth, authz (Spatie Permission), validation, rate limiting, sensitive data (NIK/PII), audit trails, media uploads, CSRF, key security rules. |
 | `08-git.md` | Branching from `develop`, conventional commits, prohibited operations, CI workflows. |
 | `09-tools.md` | Terminal, paths, parallelism, linting (PHPStan/Pint), JS runtime (bun), tests, external tools. |
-| `10-quality-gates.md` | Universal quality gates, senior self-review rubric, verification decision tree, final checklist, CI pipeline, when human review is required, project-specific gates pointer. |
-| `11-forbidden-behavior.md` | Explicit prohibitions (architecture, style, implementation, security, scope). **Single source of truth** — other modules cross-reference it. |
+| `10-quality-gates.md` | Universal quality gates, senior self-review rubric, verification decision tree, final checklist, CI pipeline, when human review is required, project-specific gates pointer; **anti-AI-slop gate** for UI/copy/prose output. |
+| `11-forbidden-behavior.md` | Explicit prohibitions (architecture, style, UI/copy, implementation, security, scope). **Single source of truth** — other modules cross-reference it. |
 | `13-database.md` | Database rules: migration conventions, FK/indexing, relationships, model conventions, query patterns (N+1, eager load), transactions, factories, seeders, soft deletes, performance lens (N+1/over-fetch/pagination/index). |
 | `14-frontend.md` | Frontend rules: Vue 3/TypeScript/Inertia/Tailwind stack, directory org, component structure, typing, form handling (`useForm`), routing (ziggy), styling (`cn()`), composables, frontend testing. |
 | `15-edge-cases.md` | Edge-case & boundary probes (input/type, state/lifecycle, permission/ownership, integration/scale) that MUST run before any feature is considered complete. |
@@ -45,8 +45,9 @@ The system separates **universal rules** (apply to every project) from **project
 1. Read root `ai-instructions.md` as the entry point.
 2. Read `01-governance.md` and `02-agent-workflow.md`.
 3. Apply the relevant topical modules (`03`–`11`, `13`–`21`) for the task — `13-database.md` when touching schema/data, `14-frontend.md` when touching the Inertia/Vue layer, `15-edge-cases.md` before declaring anything done, `16-debugging.md` when tracing a bug, `18-planning-and-safe-change.md` for multi-layer changes, `20-frontend-and-contracts.md` for cross-layer contract work, `21-state-delivery-environment.md` before finishing a user-visible flow.
-4. Load matching modules from `12-project-specific/` when they apply.
-5. **Read `MASTER_BUILD_SPECIFICATION.md` at the project root** (or create it via detailed operator Q&A if missing) — never write code without it.
+4. Load the anti-slop skill (`.opencode/skills/antislop/SKILL.md` + the concern skill: `antislop-copywriting` for copy, `antislop-ui` for UI, `antislop-code` for comments) before writing UI copy, user-facing text, or prose output (see `10-quality-gates.md`).
+5. Load matching modules from `12-project-specific/` when they apply.
+6. **Read `MASTER_BUILD_SPECIFICATION.md` at the project root** (or create it via detailed operator Q&A if missing) — never write code without it.
 
 ## Authoring Instruction Sets
 

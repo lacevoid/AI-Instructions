@@ -20,6 +20,10 @@ nyata di proyek target. Pelanggaran = kegagalan total / REVISI wajib.
 - Mengabaikan veto subagent (lihat `03-team-protocol.md`).
 - Menggunakan `dump()`/`dd()`/debug print pada kode ter-commit (bila berlaku
   stack proyek; sesuaikan dengan proyek).
+- Membuat output teks/copy UI/prosa dengan pola AI-slop (buzzword marketing dari
+  Empty AI Vocabulary, klaim tanpa bukti, frasa generik) padahal filter anti-slop
+  tersedia (`.opencode/skills/antislop/SKILL.md` + skill concern); Delivery
+  Gate-nya WAJIB dijalankan sebelum output final (`10-quality-gates.md`).
 
 ## 2. Larangan proses
 
