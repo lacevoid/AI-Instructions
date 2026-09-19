@@ -6,7 +6,8 @@
 >
 > Setiap agent yang memuat skill `operator-memory` WAJIB menulis ke file ini
 > setiap kali perilaku operator teramati (mencolok atau tidak), lalu
-> menyinkronkan lewat `${XDG_CONFIG_HOME:-$HOME/.config}/operator-persona/backup.sh`.
+> menyinkronkan lewat `${XDG_CONFIG_HOME:-$HOME/.config}/operator-persona/backup.sh`
+> (repo privat backup: `{{BACKUP_REPO}}`).
 
 ## Aturan penulisan
 
